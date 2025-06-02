@@ -7,43 +7,44 @@ import { useModal } from "../../hooks/useModal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import { Modal } from "../../components/ui/modal";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import StudentsTable from "../../components/tables/people/studentsTable";
 import Select from "../../components/form/Select";
 import FileInput from "../../components/form/input/FileInput";
+import axiosClient from "../../service/axios.service";
+import { useFetchWithLoader } from "../../hooks/useFetchWithLoader";
+import { LoadSpinner } from "../../components/spinner/load-spinner";
+import { Options } from "flatpickr/dist/types/options";
+import { toast } from "react-toastify";
 export interface Student {
-  firstName: string;
-  lastName: string;
+  id? :number;
+  name: string;
   phone: string;
-  password: string;
-  group_id?: string
+  group_id?: number
+  password?: string
 }
 export default function StudentsPage() {
   const { isOpen, openModal, closeModal } = useModal();
-  const handleAdding = () => {
-    // Handle save logic here
+  // const handleAdding = () => {
+  //   // Handle save logic here
 
-    console.log("handleAdding...");
+  //   console.log("handleAdding...");
 
-    closeModal();
-    setStudent(emptyStudent);
-  };
+  //   closeModal();
+  //   setStudent(emptyStudent);
+  // };
   let emptyStudent: Student = {
-    firstName: "",
-    lastName: "",
-    phone: "901234567",
-    password: "12345678",
-     
+    name: "",
+    phone: "",
+    
+
   };
 
-  
+
   let [Student, setStudent] = useState<Student>(emptyStudent);
 
-  const options = [
-    { value: "Group 1", label: "Group 1" },
-    { value: "Group 2", label: "Group 2" },
-    { value: "Group 3", label: "Group 3" },
-  ];
+  let [options, setOptions] = useState<HTMLOptionElement[]>([]);
+
   let [optionValue, setoptionValue] = useState("");
 
   const handleSelectChange = (value: string) => {
@@ -55,6 +56,56 @@ export default function StudentsPage() {
       console.log("Selected file:", file.name);
     }
   };
+
+
+  
+  let createStudent = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    try {
+      const res = await axiosClient.post('/student', { ...Student });
+      
+     
+      toast.success('Student muvaffaqiyatli yaratildi');
+      await refetch();
+
+    } catch (error) {
+      console.error('Create Student error:', error);
+      toast.error('Xatolik yuz berdi');
+
+    }finally { 
+      closeModal();
+    }
+  };
+
+
+  const fetchStudents = useCallback(() => {
+    return axiosClient.get('/student/all').then(res => res.data);
+  }, []);
+
+
+  const { data, isLoading, error, refetch } = useFetchWithLoader({
+    fetcher: fetchStudents,
+  });
+
+  const fetchGroups = useCallback(() => {
+    return axiosClient.get('/group/all').then(res => res.data);
+  }, []);
+
+  const { data: groups, isLoading: isLoadingGroups, error: errorIsGroups, refetch: refetchGroups } = useFetchWithLoader({
+    fetcher: fetchGroups,
+    onSuccess: useCallback((data: any[]) => {
+      setOptions((data as any[]).map((e, index) => {
+        return new Option(`${e.name}`, `${e.id}`)
+      }));
+      
+    }, [])
+  }
+
+
+
+  );
+
   return (
     <>
       <PageMeta
@@ -62,11 +113,15 @@ export default function StudentsPage() {
         description="Test Dashboard"
       />
       <PageBreadcrumb pageTitle="Students" />
-   
-       <div className="space-y-6 ">
-       
-       
-         <ComponentCard
+
+      <div className="space-y-6 ">
+
+        {
+          isLoading && <div className="min-h-[450px]  flex-col flex justify-center">
+            <LoadSpinner />
+          </div>
+        }
+        {data && <ComponentCard
           title="Students Table"
           action={
             <>
@@ -74,7 +129,7 @@ export default function StudentsPage() {
                 size="sm"
                 variant="primary"
                 startIcon={<PlusIcon className="size-5 fill-white" />}
-                onClick={()=>{
+                onClick={() => {
                   setStudent(emptyStudent)
                   openModal()
                 }}
@@ -84,8 +139,8 @@ export default function StudentsPage() {
             </>
           }
         >
-          <StudentsTable />
-        </ComponentCard>
+          <StudentsTable data={data} refetch={refetch} groups={options} />
+        </ComponentCard>}
       </div>
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
         <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
@@ -101,32 +156,19 @@ export default function StudentsPage() {
             <div className="px-2 overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                 <div>
-                  <Label>Firstname</Label>
+                  <Label>Fullname</Label>
                   <Input
                     type="text"
-                    value={Student.firstName}
+                    value={Student.name}
                     onChange={(e) =>
                       setStudent({
                         ...Student,
-                        firstName: e.target.value,
+                        name: e.target.value,
                       })
                     }
                   />
                 </div>
 
-                <div>
-                  <Label>Lastname</Label>
-                  <Input
-                    type="text"
-                    value={Student.lastName}
-                    onChange={(e) =>
-                      setStudent({
-                        ...Student,
-                        lastName: e.target.value,
-                      })
-                    }
-                  />
-                </div>
 
                 <div>
                   <Label>Phonenumber</Label>
@@ -142,29 +184,22 @@ export default function StudentsPage() {
                   />
                 </div>
 
-                <div>
-                  <Label>Password</Label>
-                  <Input
-                    type="text"
-                    value={Student.password}
-                    onChange={(e) =>
-                      setStudent({
-                        ...Student,
-                        password: e.target.value,
-                      })
-                    }
-                  />
-                </div>
 
-                
+
+
                 <div>
                   <Label>Group</Label>
                   <Select
-              options={options}
-              onChange={handleSelectChange}
-              className="dark:bg-dark-900"
-              defaultValue="5"
-            />
+                    options={options}
+                    placeholder="Select group"
+                    onChange={(e)=>{
+                      setStudent({
+                        ...Student,
+                        group_id :+e
+                      })
+                    }}
+                    className="dark:bg-dark-900"
+                  />
                 </div>
                 <div>
                   <Label>Image</Label>
@@ -177,10 +212,10 @@ export default function StudentsPage() {
             </div>
             <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
               <Button size="sm" variant="outline" onClick={closeModal}>
-                Close
+                Yopish
               </Button>
-              <Button size="sm" onClick={handleAdding}>
-                Saves
+              <Button size="sm" onClick={createStudent}>
+                Saqlash
               </Button>
             </div>
           </form>

@@ -1,15 +1,42 @@
-import { useState } from "react";
+import React,{ useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
+import axiosClient from "../../service/axios.service";
+import { toast } from "react-toastify";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
+  const [login, setLogin] = useState("");
+  const [password, setPassword] = useState("");
+
   const navigate = useNavigate();
+
+  let handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+
+
+    try {
+      const res = await axiosClient.post('/auth/login', { login, password });
+
+    
+      localStorage.setItem('token', res.data.access_token);
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+      
+      
+      navigate('/');
+      toast.success('Kirish muvaffaqiyatli');
+
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('Email yoki parol noto‘g‘ri');
+
+    }
+  };
   return (
     <div className="flex flex-col flex-1">
       <div className="w-full max-w-md pt-10 mx-auto">
@@ -90,7 +117,7 @@ export default function SignInForm() {
                   <Label>
                     Login <span className="text-error-500">*</span>{" "}
                   </Label>
-                  <Input placeholder="Login123" />
+                  <Input placeholder="Login"   onChange={(e)=>setLogin(e.target.value)}/>
                 </div>
                 <div>
                   <Label>
@@ -99,7 +126,8 @@ export default function SignInForm() {
                   <div className="relative">
                     <Input
                       type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
+                      placeholder="Password"
+                      onChange={(e)=>setPassword(e.target.value)}
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
@@ -128,7 +156,7 @@ export default function SignInForm() {
                   </Link>
                 </div> */}
                 <div>
-                  <Button className="w-full mt-8" size="sm" onClick={()=> navigate("/")}>
+                  <Button className="w-full mt-8" size="sm" onClick={handleSubmit} >
                     Sign in
                   </Button>
                 </div>

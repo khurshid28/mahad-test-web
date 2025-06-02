@@ -33,201 +33,219 @@ import {
   import FileInputExample from "../../form/form-elements/FileInputExample";
   import FileInput from "../../form/input/FileInput";
 import MultiSelect from "../../form/MultiSelect";
+import axiosClient from "../../../service/axios.service";
+import { toast } from "react-toastify";
   
-  interface Order {
-    id: number;
-    name: string;
-    image: string;
-    createdAt: Date;
-    status: string;
-    subject_id? : string;
+  // interface Order {
+  //   id: number;
+  //   name: string;
+  //   image: string;
+  //   createdAt: Date;
+  //   status: string;
+  //   subject_id? : string;
+  // }
+  
+
+  interface BookItemProps {
+
+    id?: number;
+    name?: string;
+    image?: string;
+    imagFile?: string;
+    createdt: string;
+    subject? : any;
+    subject_id?: number;
+  
   }
-  
   // Define the table data using the interface
-  const statictableData: Order[] = [
-    {
-      id: 1,
+  // const statictableData: Order[] = [
+  //   {
+  //     id: 1,
   
-      name: "Book 1",
-      image: "/images/product/product-01.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Book 1",
+  //     image: "/images/product/product-01.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-      subject_id : "Subject 1"
-    },
-    {
-      id: 2,
+  //     status: "Active",
+  //     subject_id : "Subject 1"
+  //   },
+  //   {
+  //     id: 2,
   
-      name: "Book 2",
-      image: "/images/product/product-02.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Book 2",
+  //     image: "/images/product/product-02.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-       subject_id : "Subject 2"
-    },
-    {
-      id: 3,
+  //     status: "Active",
+  //      subject_id : "Subject 2"
+  //   },
+  //   {
+  //     id: 3,
   
-      name: "Book 3",
-      image: "/images/product/product-03.jpg",
-      createdAt: new Date("2025-04-10"),
+  //     name: "Book 3",
+  //     image: "/images/product/product-03.jpg",
+  //     createdAt: new Date("2025-04-10"),
   
-      status: "Active",
-       subject_id : "Subject 1"
-    },
-    {
-      id: 1,
+  //     status: "Active",
+  //      subject_id : "Subject 1"
+  //   },
+  //   {
+  //     id: 1,
   
-      name: "Book 1",
-      image: "/images/product/product-01.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Book 1",
+  //     image: "/images/product/product-01.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Cancel",
-       subject_id : "Subject 3"
-    },
-    {
-      id: 2,
+  //     status: "Cancel",
+  //      subject_id : "Subject 3"
+  //   },
+  //   {
+  //     id: 2,
   
-      name: "Book 2",
-      image: "/images/product/product-02.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Book 2",
+  //     image: "/images/product/product-02.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-       subject_id : "Subject 1"
-    },
-    {
-      id: 3,
+  //     status: "Active",
+  //      subject_id : "Subject 1"
+  //   },
+  //   {
+  //     id: 3,
   
-      name: "Book 3",
-      image: "/images/product/product-03.jpg",
-      createdAt: new Date("2025-04-10"),
+  //     name: "Book 3",
+  //     image: "/images/product/product-03.jpg",
+  //     createdAt: new Date("2025-04-10"),
   
-      status: "Active",
-       subject_id : "Subject 1"
-    },
-    {
-      id: 1,
+  //     status: "Active",
+  //      subject_id : "Subject 1"
+  //   },
+  //   {
+  //     id: 1,
   
-      name: "Book 1",
-      image: "/images/product/product-01.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Book 1",
+  //     image: "/images/product/product-01.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-       subject_id : "Subject 2"
-    },
-    {
-      id: 2,
+  //     status: "Active",
+  //      subject_id : "Subject 2"
+  //   },
+  //   {
+  //     id: 2,
   
-      name: "Book 2",
-      image: "/images/product/product-02.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Book 2",
+  //     image: "/images/product/product-02.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-       subject_id : "Subject 2"
-    },
-    {
-      id: 3,
+  //     status: "Active",
+  //      subject_id : "Subject 2"
+  //   },
+  //   {
+  //     id: 3,
   
-      name: "Book 3",
-      image: "/images/product/product-03.jpg",
-      createdAt: new Date("2025-04-10"),
+  //     name: "Book 3",
+  //     image: "/images/product/product-03.jpg",
+  //     createdAt: new Date("2025-04-10"),
   
-      status: "Active",
-      subject_id : "Subject 2"    },
-    {
-      id: 1,
+  //     status: "Active",
+  //     subject_id : "Subject 2"    },
+  //   {
+  //     id: 1,
   
-      name: "Book 1",
-      image: "/images/product/product-01.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Book 1",
+  //     image: "/images/product/product-01.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-       subject_id : "Subject 2"
-    },
-    {
-      id: 2,
+  //     status: "Active",
+  //      subject_id : "Subject 2"
+  //   },
+  //   {
+  //     id: 2,
   
-      name: "Book 2",
-      image: "/images/product/product-02.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Book 2",
+  //     image: "/images/product/product-02.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-       subject_id : "Subject 1"
-    },
-    {
-      id: 3,
+  //     status: "Active",
+  //      subject_id : "Subject 1"
+  //   },
+  //   {
+  //     id: 3,
   
-      name: "Book 3",
-      image: "/images/product/product-03.jpg",
-      createdAt: new Date("2025-04-10"),
+  //     name: "Book 3",
+  //     image: "/images/product/product-03.jpg",
+  //     createdAt: new Date("2025-04-10"),
   
-      status: "Active",
-       subject_id : "Subject 2"
-    },
-    {
-      id: 1,
+  //     status: "Active",
+  //      subject_id : "Subject 2"
+  //   },
+  //   {
+  //     id: 1,
   
-      name: "Book 1",
-      image: "/images/product/product-01.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Book 1",
+  //     image: "/images/product/product-01.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-       subject_id : "Subject 2"
-    },
-    {
-      id: 2,
+  //     status: "Active",
+  //      subject_id : "Subject 2"
+  //   },
+  //   {
+  //     id: 2,
   
-      name: "Book 2",
-      image: "/images/product/product-02.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Book 2",
+  //     image: "/images/product/product-02.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-       subject_id : "Subject 2"
-    },
-    {
-      id: 3,
+  //     status: "Active",
+  //      subject_id : "Subject 2"
+  //   },
+  //   {
+  //     id: 3,
   
-      name: "Book 3",
-      image: "/images/product/product-03.jpg",
-      createdAt: new Date("2025-04-10"),
+  //     name: "Book 3",
+  //     image: "/images/product/product-03.jpg",
+  //     createdAt: new Date("2025-04-10"),
   
-      status: "Active",
-       subject_id : "Subject 1"
-    },
-    {
-      id: 1,
+  //     status: "Active",
+  //      subject_id : "Subject 1"
+  //   },
+  //   {
+  //     id: 1,
   
-      name: "Book 1",
-      image: "/images/product/product-01.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Book 1",
+  //     image: "/images/product/product-01.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-       subject_id : "Subject 2"
-    },
-    {
-      id: 2,
+  //     status: "Active",
+  //      subject_id : "Subject 2"
+  //   },
+  //   {
+  //     id: 2,
   
-      name: "Book 2",
-      image: "/images/product/product-02.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Book 2",
+  //     image: "/images/product/product-02.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-       subject_id : "Subject 2"
-    },
-    {
-      id: 3,
+  //     status: "Active",
+  //      subject_id : "Subject 2"
+  //   },
+  //   {
+  //     id: 3,
   
-      name: "Book 3",
-      image: "/images/product/product-03.jpg",
-      createdAt: new Date("2025-04-10"),
+  //     name: "Book 3",
+  //     image: "/images/product/product-03.jpg",
+  //     createdAt: new Date("2025-04-10"),
   
-      status: "Cancel",
-       subject_id : "Subject 1"
-    },
-  ];
+  //     status: "Cancel",
+  //      subject_id : "Subject 1"
+  //   },
+  // ];
   
-  export default function BooksTable() {
-    const [tableData, settableData] = useState(statictableData);
+  export default function BooksTable({ data, subjects, refetch }: {
+    data: BookItemProps[],
+    subjects: any[]
+    refetch: () => Promise<void>
+  }) {
+    const [tableData, settableData] = useState(data);
   
     const { isOpen, openModal, closeModal } = useModal();
     const handleAdding = () => {
@@ -241,12 +259,13 @@ import MultiSelect from "../../form/MultiSelect";
     let emptyBook: Book = {
       name: "",
       image: "",
-      section_id  : ""
+     
      
     };
     let [Book, setBook] = useState<Book>(emptyBook);
   
     const options = [
+
       { value: "5", label: "5" },
       { value: "10", label: "10" },
       { value: "20", label: "20" },
@@ -264,7 +283,7 @@ import MultiSelect from "../../form/MultiSelect";
   
     const startIndex = (currentPage - 1) * +optionValue;
     const endIndex = startIndex + +optionValue;
-    let currentItems: Order[] = tableData.slice(startIndex, endIndex);
+    let currentItems: BookItemProps[] = tableData.slice(startIndex, endIndex);
   
     const goToPreviousPage = () => {
       setCurrentPage((page) => Math.max(page - 1, 1));
@@ -287,6 +306,10 @@ import MultiSelect from "../../form/MultiSelect";
       const file = event.target.files?.[0];
       if (file) {
         console.log("Selected file:", file.name);
+        setBook({
+          ...Book,
+          imageFile  :file
+        })
       }
     };
     const [selectedValues, setSelectedValues] = useState<string[]>([]);
@@ -299,19 +322,17 @@ import MultiSelect from "../../form/MultiSelect";
   
 
     const Subject_options = [
-      { value: "All subjects", label: "All Subject" },
-      { value: "Subject 1", label: "Subject 1" },
-      { value: "Subject 2", label: "Subject 2"},
-      { value: "Subject 3", label: "Subject 3"},
+      new Option("All Subjects","All Subjects"),
+     ...subjects
     ];
 
-    const all_Subject_options = [
-      { value: "Subject 1", label: "Subject 1" },
-      { value: "Subject 2", label: "Subject 2"},
-      { value: "Subject 3", label: "Subject 3"},
-    ];
+    // const all_Subject_options = [
+    //   { value: "Subject 1", label: "Subject 1" },
+    //   { value: "Subject 2", label: "Subject 2"},
+    //   { value: "Subject 3", label: "Subject 3"},
+    // ];
     
-    let [subjectoptionValue, setSubjectoptionValue] = useState("All subjects");
+    let [subjectoptionValue, setSubjectoptionValue] = useState("All Subjects");
     
    
     
@@ -325,18 +346,67 @@ import MultiSelect from "../../form/MultiSelect";
       setCurrentPage(1);
       
       
-      if (subjectoptionValue == "All subjects") {
-        settableData(statictableData);
+      if (subjectoptionValue == "All Subjects") {
+        settableData(data);
         
       }else{
-        settableData(statictableData.filter((item)=>item.subject_id===subjectoptionValue));
+        settableData(data.filter((item)=> item.subject_id == +subjectoptionValue));
       }
      
 
      
     }, [optionValue, subjectoptionValue]);
 
+    useEffect(() => {
+     settableData(data);
+     setCurrentPage(1);
+    }, [data]);
 
+
+    let editBook = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+  
+      try {
+        
+        const formData = new FormData();
+        formData.append('name', Book.name ?? "");
+        formData.append('subject_id', `${Book.subject_id}`);
+        if (Book.imageFile) formData.append('image', Book.imageFile); 
+  
+  
+        const res = await axiosClient.put(`/book/${Book.id}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+  
+  
+        toast.success('Book muvaffaqiyatli yaratildi');
+        await refetch();
+  
+      } catch (error) {
+        console.error('Create Book error:', error);
+        toast.error('Xatolik yuz berdi');
+  
+      } finally {
+        closeModal();
+      }
+    };
+
+    let deleteBook= async(id:number | undefined)=>{
+   
+      try {
+        const res = await axiosClient.delete(`/book/${id}`);
+        
+        toast.success("Book muvaffaqiyatli o'chirildi");
+        await refetch();
+  
+      } catch (error) {
+        console.error('Delete Book error:', error);
+        toast.error('Xatolik yuz berdi');
+  
+      }
+    }
 
     return (
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
@@ -411,7 +481,7 @@ import MultiSelect from "../../form/MultiSelect";
                         <img
                           width={40}
                           height={40}
-                          src={order.image}
+                          src={  order.image ? import.meta.env.VITE_STATIC_PATH +  order.image : "https://w7.pngwing.com/pngs/684/622/png-transparent-logo-subject-english-miscellaneous-blue-building-thumbnail.png"}
                           alt={order.name}
                         />
                       </div>
@@ -423,25 +493,27 @@ import MultiSelect from "../../form/MultiSelect";
                     </div>
                   </TableCell>
                   <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    {Moment(order.createdAt).format("MMMM DD, yyyy")}
+                    {Moment(order.createdt).format("MMMM DD, yyyy")}
                   </TableCell>
 
                   <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    {order.subject_id}
+                    {order.subject && order.subject.name}
                   </TableCell>
   
                   <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                     <Badge
                       size="sm"
                       color={
-                        order.status === "Active"
-                          ? "success"
-                          : order.status === "Pending"
-                          ? "warning"
-                          : "error"
+                        "success"
+                        // order.status === "Active"
+                        //   ? "success"
+                        //   : order.status === "Pending"
+                        //   ? "warning"
+                        //   : "error"
                       }
                     >
-                      {order.status}
+                      Active
+                      {/* {order.status} */}
                     </Badge>
                   </TableCell>
                   <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 flex gap-2  flex-row items-center">
@@ -451,9 +523,13 @@ import MultiSelect from "../../form/MultiSelect";
                       className="text-xl fill-gray-500 dark:fill-gray-400"
                       onClick={() => {
                         setBook({
+                          id :order.id,
                           name: order.name,
-                          image: "",
+                          image: order.image,
+                          subject_id : order.subject_id,
                         });
+                      // alert(order.subject_id,)
+                        
                         openModal();
                       }}
                     >
@@ -463,7 +539,9 @@ import MultiSelect from "../../form/MultiSelect";
                     <Button
                       size="mini"
                       variant="outline"
-                      onClick={async () => {}}
+                      onClick={async () => {
+                        deleteBook(order.id);
+                      }}
                     >
                       <DeleteIcon className="text-xl fill-gray-500 dark:fill-gray-400"></DeleteIcon>
                     </Button>
@@ -487,6 +565,7 @@ import MultiSelect from "../../form/MultiSelect";
             </Button>
   
             {[...Array(maxPage)].map((_, i) => (
+
               <Button
                 size="sm"
                 variant={currentPage === i + 1 ? "primary" : "outline"}
@@ -514,7 +593,7 @@ import MultiSelect from "../../form/MultiSelect";
           <div>
             Showing {(currentPage - 1) * +optionValue + 1} to{" "}
             {Math.min(tableData.length, currentPage * +optionValue)} of{" "}
-            {tableData.length} entries
+            {data.length} entries
           </div>
         </div>
   
@@ -531,7 +610,7 @@ import MultiSelect from "../../form/MultiSelect";
             <form className="flex flex-col">
               <div className="px-2 overflow-y-auto custom-scrollbar">
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                <div>
+                {/* <div>
                   <MultiSelect
                     label="Groups"
                     options={multiOptions}
@@ -540,15 +619,22 @@ import MultiSelect from "../../form/MultiSelect";
                   <p className="sr-only">
                     Selected Values: {selectedValues.join(", ")}
                   </p>
-                </div>
+                </div> */}
 
                 <div>
-                  <Label>Subjects</Label>
+                  <Label>Subject </Label>
                   <Select
-              options={all_Subject_options}
-              className="dark:bg-dark-900"
-              defaultValue={`${Book.section_id}`}
-              onChange={()=>{}}
+                  options={subjects}
+                  className="dark:bg-dark-900"
+                  defaultValue={`${Book.subject_id ?? ""}`}
+                  
+             
+                   onChange={(e)=>{
+                setBook({
+                  ...Book,
+                  subject_id : +e
+                })
+              }}
              
             />
                 </div>
@@ -579,10 +665,10 @@ import MultiSelect from "../../form/MultiSelect";
               </div>
               <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
                 <Button size="sm" variant="outline" onClick={closeModal}>
-                  Close
+                  Yopish
                 </Button>
-                <Button size="sm" onClick={handleAdding}>
-                  Saves
+                <Button size="sm" onClick={editBook}>
+                  Saqlash
                 </Button>
               </div>
             </form>

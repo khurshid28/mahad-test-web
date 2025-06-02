@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 import SignIn from "./pages/AuthPages/SignIn";
-import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
 import UserProfiles from "./pages/UserProfiles";
 import Videos from "./pages/UiElements/Videos";
@@ -27,6 +26,10 @@ import BooksPage from "./pages/Test/Books";
 import SectionsPage from "./pages/Test/Sections";
 import ResultsPage from "./pages/Test/Results";
 import TestsPage from "./pages/Test/Tests";
+
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 export default function App() {
   return (
@@ -90,6 +93,10 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
+
+      <ToastContainer position="bottom-right"  autoClose={2000}
+  hideProgressBar={false}/>
+
     </>
   );
 }

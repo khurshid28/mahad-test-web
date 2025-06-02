@@ -8,33 +8,63 @@ import { useModal } from "../../hooks/useModal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import { Modal } from "../../components/ui/modal";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import GroupsTable from "../../components/tables/people/groupsTable";
 import FileInput from "../../components/form/input/FileInput";
+import axiosClient from "../../service/axios.service";
+import { useFetchWithLoader } from "../../hooks/useFetchWithLoader";
+import { LoadSpinner } from "../../components/spinner/load-spinner";
+import { toast } from "react-toastify";
 export interface Group {
   name?: string;
   image?: string;
 }
 export default function GroupsPage() {
+
+
+  const fetchGroups = useCallback(() => {
+    return axiosClient.get('/group/all').then(res => res.data);
+  }, []);
+
+  const { data, isLoading, error, refetch } = useFetchWithLoader({
+    fetcher: fetchGroups,
+  });
+
   const { isOpen, openModal, closeModal } = useModal();
-  const handleAdding = () => {
-    // Handle save logic here
 
-    console.log("handleAdding...");
+  let [name,setName] =useState("");
+  let [file,setFile] =useState<File | undefined>();
 
-    closeModal();
-    setGroup(emptyGroup);
+
+  let sendGroup = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    try {
+      const res = await axiosClient.post('/group', { name });
+      
+     
+      toast.success('Guruh muvaffaqiyatli yaratildi');
+      await refetch();
+
+    } catch (error) {
+      console.error('Create Group error:', error);
+      toast.error('Xatolik yuz berdi');
+
+    }finally { 
+      closeModal();
+    }
   };
-  let emptyGroup: Group = {
-    name: "",
-    image: "",
-  };
-  let [Group, setGroup] = useState<Group>(emptyGroup);
+
+
+
+
+
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       console.log("Selected file:", file.name);
+      setFile(file)
     }
   };
   return (
@@ -44,30 +74,37 @@ export default function GroupsPage() {
         description="Test Dashboard"
       />
       <PageBreadcrumb pageTitle="Groups" />
-   
-       <div className="space-y-6 ">
-       
-       
-         <ComponentCard
-          title="Groups Table"
-          action={
-            <>
-              <Button
-                size="sm"
-                variant="primary"
-                startIcon={<PlusIcon className="size-5 fill-white" />}
-                onClick={()=>{
-                  setGroup(emptyGroup)
-                  openModal()
-                }}
-              >
-                Add Group
-              </Button>
-            </>
-          }
-        >
-          <GroupsTable />
-        </ComponentCard>
+
+      <div className="space-y-6 ">
+        {
+          isLoading && <div className="min-h-[450px]  flex-col flex justify-center">
+            <LoadSpinner />
+          </div>
+        }
+
+        {
+          data && <ComponentCard
+            title="Groups Table"
+            action={
+              <>
+                <Button
+                  size="sm"
+                  variant="primary"
+                  startIcon={<PlusIcon className="size-5 fill-white" />}
+                  onClick={() => {
+                    setName("");
+                    setFile(undefined);
+                    openModal()
+                  }}
+                >
+                  Add Group
+                </Button>
+              </>
+            }
+          >
+            <GroupsTable data={data}  refetch={refetch}/>
+          </ComponentCard>
+        }
       </div>
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
         <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
@@ -79,19 +116,16 @@ export default function GroupsPage() {
               Create new Group with full details.
             </p>
           </div>
-          <form className="flex flex-col">
+          <form className="flex flex-col" onSubmit={sendGroup}>
             <div className="px-2 overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                 <div>
                   <Label>Name</Label>
                   <Input
                     type="text"
-                    value={Group.name}
+                    value={name}
                     onChange={(e) =>
-                      setGroup({
-                        ...Group,
-                        name: e.target.value,
-                      })
+                      setName(e.target.value,)
                     }
                   />
                 </div>
@@ -107,10 +141,10 @@ export default function GroupsPage() {
             </div>
             <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
               <Button size="sm" variant="outline" onClick={closeModal}>
-                Close
+                Yopish
               </Button>
-              <Button size="sm" onClick={handleAdding}>
-                Saves
+              <Button size="sm" type="submit">
+                Saqlash
               </Button>
             </div>
           </form>

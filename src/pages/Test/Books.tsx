@@ -8,15 +8,23 @@ import { useModal } from "../../hooks/useModal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import { Modal } from "../../components/ui/modal";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import BooksTable from "../../components/tables/test/booksTable";
 import FileInput from "../../components/form/input/FileInput";
 import Select from "../../components/form/Select";
 import MultiSelect from "../../components/form/MultiSelect";
+import axiosClient from "../../service/axios.service";
+import { useFetchWithLoader } from "../../hooks/useFetchWithLoader";
+import { LoadSpinner } from "../../components/spinner/load-spinner";
+import { toast } from "react-toastify";
 export interface Book {
+  id? : number;
   name?: string;
   image?: string;
-  section_id? :  string
+  // section_id?: number;
+  subject_id?: number;
+  imageFile?: File;
+  subject? :any
 }
 
 export default function BooksPage() {
@@ -29,18 +37,74 @@ export default function BooksPage() {
     closeModal();
     setBook(emptyBook);
   };
+
+  let createBook = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    try {
+      
+      const formData = new FormData();
+      formData.append('name', Book.name ?? "");
+      formData.append('subject_id', `${Book.subject_id}`);
+      if (Book.imageFile) formData.append('image', Book.imageFile); 
+
+      const res = await axiosClient.post('/book', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      toast.success('Book muvaffaqiyatli yaratildi');
+      await refetch();
+
+    } catch (error) {
+      console.error('Create Book error:', error);
+      toast.error('Xatolik yuz berdi');
+
+    } finally {
+      closeModal();
+    }
+  };
   let emptyBook: Book = {
-    name: "",
-    image: "",
+  
   };
   let [Book, setBook] = useState<Book>(emptyBook);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      console.log("Selected file:", file.name);
+     
+      setBook({
+        ...Book,
+        imageFile: file
+      })
     }
   };
+
+
+  const fetchBooks = useCallback(() => {
+    return axiosClient.get('/book/all').then(res => res.data);
+  }, []);
+
+  const { data, isLoading, error, refetch } = useFetchWithLoader({
+    fetcher: fetchBooks,
+  });
+
+
+  const fetchSubjects = useCallback(() => {
+    return axiosClient.get('/subject/all').then(res => res.data);
+  }, []);
+
+  const { data: dataSubject, isLoading: isLoadingSubject, error: errorSubject, refetch: refecthSubject } = useFetchWithLoader({
+    fetcher: fetchSubjects,
+    onSuccess: useCallback((dataSubject: any[]) => {
+      setall_Subject_options((dataSubject as any[]).map((e, index) => {
+        return new Option(`${e.name}`, `${e.id}`)
+      }));
+
+    }, [])
+  });
+
 
 
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
@@ -51,49 +115,59 @@ export default function BooksPage() {
     { value: "Group 3", text: "Group 3", selected: false },
   ];
 
-  const all_Subject_options = [
-    { value: "Subject 1", label: "Subject 1" },
-    { value: "Subject 2", label: "Subject 2"},
-    { value: "Subject 3", label: "Subject 3"},
-  ];
+  // const all_Subject_options = [
+  //   { value: "Subject 1", label: "Subject 1" },
+  //   { value: "Subject 2", label: "Subject 2"},
+  //   { value: "Subject 3", label: "Subject 3"},
+  // ];
+
+  const [all_Subject_options, setall_Subject_options] = useState<any[]>([]);
 
   return (
     <>
       <PageMeta title="Books | Test Dashboard" description="Test Dashboard" />
       <PageBreadcrumb pageTitle="Books" />
 
+
+      {
+        isLoading && <div className="min-h-[450px]  flex-col flex justify-center">
+          <LoadSpinner />
+        </div>
+      }
       <div className="space-y-6 ">
-        
-        <ComponentCard
-          title="Books Table"
-          action={
-            <div className="flex flex-row gap-4">
-              <div>
-            
-              <Button
-                size="sm"
-                variant="outline"
-                endIcon={<DownloadIcon className="size-5 fill-white" />}
-              >
-                Download
-              </Button>
-            </div>
-              <Button
-                size="sm"
-                variant="primary"
-                startIcon={<PlusIcon className="size-5 fill-white" />}
-                onClick={() => {
-                  setBook(emptyBook);
-                  openModal();
-                }}
-              >
-                Add Book
-              </Button>
-            </div>
-          }
-        >
-          <BooksTable />
-        </ComponentCard>
+
+        {
+          data && <ComponentCard
+            title="Books Table"
+            action={
+              <div className="flex flex-row gap-4">
+                <div>
+
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    endIcon={<DownloadIcon className="size-5 fill-white" />}
+                  >
+                    Download
+                  </Button>
+                </div>
+                <Button
+                  size="sm"
+                  variant="primary"
+                  startIcon={<PlusIcon className="size-5 fill-white" />}
+                  onClick={() => {
+                    setBook(emptyBook);
+                    openModal();
+                  }}
+                >
+                  Add Book
+                </Button>
+              </div>
+            }
+          >
+            <BooksTable data={data} refetch={refetch} subjects={all_Subject_options}/>
+          </ComponentCard>
+        }
       </div>
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
         <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
@@ -108,7 +182,7 @@ export default function BooksPage() {
           <form className="flex flex-col">
             <div className="px-2 overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                <div>
+                {/* <div>
                   <MultiSelect
                     label="Groups"
                     options={multiOptions}
@@ -117,16 +191,23 @@ export default function BooksPage() {
                   <p className="sr-only">
                     Selected Values: {selectedValues.join(", ")}
                   </p>
-                </div>
+                </div> */}
                 <div>
                   <Label>Subjects</Label>
                   <Select
-              options={all_Subject_options}
-              className="dark:bg-dark-900"
-              defaultValue={`${Book.section_id}`}
-              onChange={()=>{}}
-             
-            />
+                    options={all_Subject_options}
+                    className="dark:bg-dark-900"
+                    defaultValue={`${Book.subject_id}`}
+                    placeholder="Select subject"
+                    onChange={(e) => {
+                      setBook({
+                        ...Book,
+                        subject_id: +e
+
+                      })
+                    }}
+
+                  />
                 </div>
                 <div>
                   <Label>Name</Label>
@@ -153,10 +234,10 @@ export default function BooksPage() {
             </div>
             <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
               <Button size="sm" variant="outline" onClick={closeModal}>
-                Close
+                Yopish
               </Button>
-              <Button size="sm" onClick={handleAdding}>
-                Saves
+              <Button size="sm" onClick={createBook}>
+                Saqlash
               </Button>
             </div>
           </form>

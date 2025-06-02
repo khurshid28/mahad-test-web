@@ -8,12 +8,18 @@ import { useModal } from "../../hooks/useModal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import { Modal } from "../../components/ui/modal";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import SubjectsTable from "../../components/tables/test/subjectsTable";
 import FileInput from "../../components/form/input/FileInput";
+import { useFetchWithLoader } from "../../hooks/useFetchWithLoader";
+import axiosClient from "../../service/axios.service";
+import { LoadSpinner } from "../../components/spinner/load-spinner";
+import { toast } from "react-toastify";
 export interface Subject {
+  id? : number;
   name?: string;
   image?: string;
+  imageFile?: File
 }
 export default function SubjectsPage() {
   const { isOpen, openModal, closeModal } = useModal();
@@ -34,9 +40,52 @@ export default function SubjectsPage() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      console.log("Selected file:", file.name);
+      // console.log("Selected file:", file.name);
+      setSubject({
+        ...Subject,
+        imageFile: file,
+      })
     }
   };
+
+
+  const fetchSubjects = useCallback(() => {
+    return axiosClient.get('/subject/all').then(res => res.data);
+  }, []);
+
+  const { data, isLoading, error, refetch } = useFetchWithLoader({
+    fetcher: fetchSubjects,
+  });
+
+
+  let createSubject = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    try {
+      const formData = new FormData();
+      formData.append('name', Subject.name ?? "");
+      if (Subject.imageFile) formData.append('image', Subject.imageFile); 
+
+      const res = await axiosClient.post('/subject', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+
+      toast.success('Subject muvaffaqiyatli yaratildi');
+      await refetch();
+
+    } catch (error) {
+      console.error('Create Subject error:', error);
+      toast.error('Xatolik yuz berdi');
+
+    } finally {
+      closeModal();
+    }
+  };
+
+
   return (
     <>
       <PageMeta
@@ -44,30 +93,36 @@ export default function SubjectsPage() {
         description="Test Dashboard"
       />
       <PageBreadcrumb pageTitle="Subjects" />
-   
-       <div className="space-y-6 ">
-       
-       
-         <ComponentCard
-          title="Subjects Table"
-          action={
-            <>
-              <Button
-                size="sm"
-                variant="primary"
-                startIcon={<PlusIcon className="size-5 fill-white" />}
-                onClick={()=>{
-                  setSubject(emptySubject)
-                  openModal()
-                }}
-              >
-                Add Subject
-              </Button>
-            </>
-          }
-        >
-          <SubjectsTable />
-        </ComponentCard>
+
+      <div className="space-y-6 ">
+        {
+          isLoading && <div className="min-h-[450px]  flex-col flex justify-center">
+            <LoadSpinner />
+          </div>
+        }
+
+        {
+          data && <ComponentCard
+            title="Subjects Table"
+            action={
+              <>
+                <Button
+                  size="sm"
+                  variant="primary"
+                  startIcon={<PlusIcon className="size-5 fill-white" />}
+                  onClick={() => {
+                    setSubject(emptySubject);
+                    openModal();
+                  }}
+                >
+                  Add Subject
+                </Button>
+              </>
+            }
+          >
+            <SubjectsTable data={data} refetch={refetch} />
+          </ComponentCard>
+        }
       </div>
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
         <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
@@ -107,10 +162,10 @@ export default function SubjectsPage() {
             </div>
             <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
               <Button size="sm" variant="outline" onClick={closeModal}>
-                Close
+                Yopish
               </Button>
-              <Button size="sm" onClick={handleAdding}>
-                Saves
+              <Button size="sm" onClick={createSubject}>
+                Saqlash
               </Button>
             </div>
           </form>

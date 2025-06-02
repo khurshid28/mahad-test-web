@@ -28,187 +28,201 @@ import {
   import Label from "../../form/Label";
   import { Modal } from "../../ui/modal";
   import Select from "../../form/Select";
-  import { Group } from "../../../pages/People/Groups";
+  import { Subject } from "../../../pages/Test/Subjects";
   import DropzoneComponent from "../../form/form-elements/DropZone";
   import FileInputExample from "../../form/form-elements/FileInputExample";
   import FileInput from "../../form/input/FileInput";
+import axiosClient from "../../../service/axios.service";
+import { toast } from "react-toastify";
   
-  interface Order {
-    id: number;
-    name: string;
-    image: string;
-    createdAt: Date;
-    status: string;
-  }
+  // interface Order {
+  //   id: number;
+  //   name: string;
+  //   image: string;
+  //   createdAt: Date;
+  //   status: string;
+  // }
   
   // Define the table data using the interface
-  const statictableData: Order[] = [
-    {
-      id: 1,
+  // const statictableData: Order[] = [
+  //   {
+  //     id: 1,
   
-      name: "Group 1",
-      image: "/images/product/product-01.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Subject 1",
+  //     image: "/images/product/product-01.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-    },
-    {
-      id: 2,
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 2,
   
-      name: "Group 2",
-      image: "/images/product/product-02.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Subject 2",
+  //     image: "/images/product/product-02.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-    },
-    {
-      id: 3,
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 3,
   
-      name: "Group 3",
-      image: "/images/product/product-03.jpg",
-      createdAt: new Date("2025-04-10"),
+  //     name: "Subject 3",
+  //     image: "/images/product/product-03.jpg",
+  //     createdAt: new Date("2025-04-10"),
   
-      status: "Active",
-    },
-    {
-      id: 1,
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 1,
   
-      name: "Group 1",
-      image: "/images/product/product-01.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Subject 1",
+  //     image: "/images/product/product-01.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Cancel",
-    },
-    {
-      id: 2,
+  //     status: "Cancel",
+  //   },
+  //   {
+  //     id: 2,
   
-      name: "Group 2",
-      image: "/images/product/product-02.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Subject 2",
+  //     image: "/images/product/product-02.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-    },
-    {
-      id: 3,
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 3,
   
-      name: "Group 3",
-      image: "/images/product/product-03.jpg",
-      createdAt: new Date("2025-04-10"),
+  //     name: "Subject 3",
+  //     image: "/images/product/product-03.jpg",
+  //     createdAt: new Date("2025-04-10"),
   
-      status: "Active",
-    },
-    {
-      id: 1,
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 1,
   
-      name: "Group 1",
-      image: "/images/product/product-01.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Subject 1",
+  //     image: "/images/product/product-01.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-    },
-    {
-      id: 2,
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 2,
   
-      name: "Group 2",
-      image: "/images/product/product-02.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Subject 2",
+  //     image: "/images/product/product-02.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-    },
-    {
-      id: 3,
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 3,
   
-      name: "Group 3",
-      image: "/images/product/product-03.jpg",
-      createdAt: new Date("2025-04-10"),
+  //     name: "Subject 3",
+  //     image: "/images/product/product-03.jpg",
+  //     createdAt: new Date("2025-04-10"),
   
-      status: "Active",
-    },
-    {
-      id: 1,
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 1,
   
-      name: "Group 1",
-      image: "/images/product/product-01.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Subject 1",
+  //     image: "/images/product/product-01.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-    },
-    {
-      id: 2,
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 2,
   
-      name: "Group 2",
-      image: "/images/product/product-02.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Subject 2",
+  //     image: "/images/product/product-02.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-    },
-    {
-      id: 3,
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 3,
   
-      name: "Group 3",
-      image: "/images/product/product-03.jpg",
-      createdAt: new Date("2025-04-10"),
+  //     name: "Subject 3",
+  //     image: "/images/product/product-03.jpg",
+  //     createdAt: new Date("2025-04-10"),
   
-      status: "Active",
-    },
-    {
-      id: 1,
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 1,
   
-      name: "Group 1",
-      image: "/images/product/product-01.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Subject 1",
+  //     image: "/images/product/product-01.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-    },
-    {
-      id: 2,
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 2,
   
-      name: "Group 2",
-      image: "/images/product/product-02.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Subject 2",
+  //     image: "/images/product/product-02.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-    },
-    {
-      id: 3,
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 3,
   
-      name: "Group 3",
-      image: "/images/product/product-03.jpg",
-      createdAt: new Date("2025-04-10"),
+  //     name: "Subject 3",
+  //     image: "/images/product/product-03.jpg",
+  //     createdAt: new Date("2025-04-10"),
   
-      status: "Active",
-    },
-    {
-      id: 1,
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 1,
   
-      name: "Group 1",
-      image: "/images/product/product-01.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Subject 1",
+  //     image: "/images/product/product-01.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-    },
-    {
-      id: 2,
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 2,
   
-      name: "Group 2",
-      image: "/images/product/product-02.jpg",
-      createdAt: new Date("2025-03-02"),
+  //     name: "Subject 2",
+  //     image: "/images/product/product-02.jpg",
+  //     createdAt: new Date("2025-03-02"),
   
-      status: "Active",
-    },
-    {
-      id: 3,
+  //     status: "Active",
+  //   },
+  //   {
+  //     id: 3,
   
-      name: "Group 3",
-      image: "/images/product/product-03.jpg",
-      createdAt: new Date("2025-04-10"),
+  //     name: "Subject 3",
+  //     image: "/images/product/product-03.jpg",
+  //     createdAt: new Date("2025-04-10"),
   
-      status: "Cancel",
-    },
-  ];
+  //     status: "Cancel",
+  //   },
+  // ];
+
+
+  interface SubjectItemProps {
+    id: number;
+    name: string;
+    image :string;
+    createdt :string;
   
-  export default function GroupsTable() {
-    const [tableData, settableData] = useState(statictableData);
+  }
+  
+  export default function SubjectsTable({ data, refetch }: {
+    data: SubjectItemProps[],
+    refetch: () => Promise<void>
+  }) {
+    const [tableData, settableData] = useState(data);
   
     const { isOpen, openModal, closeModal } = useModal();
     const handleAdding = () => {
@@ -217,13 +231,13 @@ import {
       console.log("handleAdding...");
   
       closeModal();
-      setGroup(emptyGroup);
+      setSubject(emptySubject);
     };
-    let emptyGroup: Group = {
+    let emptySubject: Subject = {
       name: "",
       image: "",
     };
-    let [group, setGroup] = useState<Group>(emptyGroup);
+    let [Subject, setSubject] = useState<Subject>(emptySubject);
   
     const options = [
       { value: "5", label: "5" },
@@ -243,7 +257,7 @@ import {
   
     const startIndex = (currentPage - 1) * +optionValue;
     const endIndex = startIndex + +optionValue;
-    let currentItems: Order[] = statictableData.slice(startIndex, endIndex);
+    let currentItems: SubjectItemProps[] = data.slice(startIndex, endIndex);
   
     const goToPreviousPage = () => {
       setCurrentPage((page) => Math.max(page - 1, 1));
@@ -252,24 +266,71 @@ import {
     const goToNextPage = () => {
       setCurrentPage((page) => Math.min(page + 1, maxPage));
     };
-    console.log(">> data length :", statictableData.length);
+    console.log(">> data length :", data.length);
   
     useEffect(() => {
       const startIndex = (currentPage - 1) * +optionValue;
       const endIndex = startIndex + +optionValue;
-      currentItems = tableData.slice(startIndex, endIndex);
-    }, [currentPage]);
+      currentItems = data.slice(startIndex, endIndex);
+    }, [currentPage,]);
   
     useEffect(() => {
       setCurrentPage(1);
-    }, [optionValue]);
+    }, [optionValue,data]);
   
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (file) {
-        console.log("Selected file:", file.name);
+        setSubject({
+          ...Subject,
+          imageFile: file
+        })
+        
       }
     };
+
+
+    let editSubject = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+  
+      try {
+        const formData = new FormData();
+        formData.append('name', Subject.name ?? "");
+        if (Subject.imageFile) formData.append('image', Subject.imageFile); 
+  
+        const res = await axiosClient.put(`/subject/${Subject.id}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+  
+  
+        toast.success('Subject muvaffaqiyatli saqlandi');
+        await refetch();
+  
+      } catch (error) {
+        console.error('Edit Subject error:', error);
+        toast.error('Xatolik yuz berdi');
+  
+      } finally {
+        closeModal();
+      }
+    };
+
+    let deleteSubject = async(id:number)=>{
+   
+      try {
+        const res = await axiosClient.delete(`/subject/${id}`);
+        
+        toast.success("Subject muvaffaqiyatli o'chirildi");
+        await refetch();
+  
+      } catch (error) {
+        console.error('Delete Subject error:', error);
+        toast.error('Xatolik yuz berdi');
+  
+      }
+    }
     return (
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
         <div className="max-w-full overflow-x-auto">
@@ -304,7 +365,7 @@ import {
                   isHeader
                   className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Groups
+                  Subjects
                 </TableCell>
                 <TableCell
                   isHeader
@@ -338,7 +399,7 @@ import {
                         <img
                           width={40}
                           height={40}
-                          src={order.image}
+                          src={  order.image ? import.meta.env.VITE_STATIC_PATH +  order.image : "https://w7.pngwing.com/pngs/684/622/png-transparent-logo-subject-english-miscellaneous-blue-building-thumbnail.png"}
                           alt={order.name}
                         />
                       </div>
@@ -350,21 +411,25 @@ import {
                     </div>
                   </TableCell>
                   <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    {Moment(order.createdAt).format("MMMM DD, yyyy")}
+                    {Moment(order.createdt).format("MMMM DD, yyyy")}
                   </TableCell>
   
                   <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                     <Badge
                       size="sm"
                       color={
-                        order.status === "Active"
-                          ? "success"
-                          : order.status === "Pending"
-                          ? "warning"
-                          : "error"
+                        "success"
+                        // order.status === "Active"
+                        //   ? "success"
+                        //   : order.status === "Pending"
+                        //   ? "warning"
+                        //   : "error"
                       }
                     >
-                      {order.status}
+                      {/* {order.status} */}
+                      Active
+
+
                     </Badge>
                   </TableCell>
                   <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 flex gap-2  flex-row items-center">
@@ -373,9 +438,11 @@ import {
                       variant="outline"
                       className="text-xl fill-gray-500 dark:fill-gray-400"
                       onClick={() => {
-                        setGroup({
+                        setSubject({
+                          id : order.id,
                           name: order.name,
-                          image: "",
+                          image: order.image,
+                          imageFile : undefined
                         });
                         openModal();
                       }}
@@ -386,7 +453,9 @@ import {
                     <Button
                       size="mini"
                       variant="outline"
-                      onClick={async () => {}}
+                      onClick={async () => {
+                        deleteSubject(order.id);
+                      }}
                     >
                       <DeleteIcon className="text-xl fill-gray-500 dark:fill-gray-400"></DeleteIcon>
                     </Button>
@@ -436,8 +505,8 @@ import {
           </div>
           <div>
             Showing {(currentPage - 1) * +optionValue + 1} to{" "}
-            {Math.min(statictableData.length, currentPage * +optionValue)} of{" "}
-            {statictableData.length} entries
+            {Math.min(data.length, currentPage * +optionValue)} of{" "}
+            {data.length} entries
           </div>
         </div>
   
@@ -445,10 +514,10 @@ import {
           <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
             <div className="px-2 pr-14">
               <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-                Edit Group
+                Edit Subject
               </h4>
               <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-                Update Group with full details.
+                Update Subject with full details.
               </p>
             </div>
             <form className="flex flex-col">
@@ -458,10 +527,10 @@ import {
                     <Label>Name</Label>
                     <Input
                       type="text"
-                      value={group.name}
+                      value={Subject.name}
                       onChange={(e) =>
-                        setGroup({
-                          ...group,
+                        setSubject({
+                          ...Subject,
                           name: e.target.value,
                         })
                       }
@@ -479,10 +548,10 @@ import {
               </div>
               <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
                 <Button size="sm" variant="outline" onClick={closeModal}>
-                  Close
+                  Yopish
                 </Button>
-                <Button size="sm" onClick={handleAdding}>
-                  Saves
+                <Button size="sm" onClick={editSubject}>
+                  Saqlash
                 </Button>
               </div>
             </form>

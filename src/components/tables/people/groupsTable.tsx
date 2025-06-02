@@ -32,192 +32,63 @@ import { Group } from "../../../pages/People/Groups";
 import DropzoneComponent from "../../form/form-elements/DropZone";
 import FileInputExample from "../../form/form-elements/FileInputExample";
 import FileInput from "../../form/input/FileInput";
+import { useFetchWithLoader } from "../../../hooks/useFetchWithLoader";
+import axiosClient from "../../../service/axios.service";
+import { toast } from "react-toastify";
 
-interface Order {
-  id: number;
-  name: string;
-  image: string;
-  createdAt: Date;
-  status: string;
-}
+// interface Order {
+//   id: number;
+//   name: string;
+//   image: string;
+//   createdAt: Date;
+//   status: string;
+// }
+
+
 
 // Define the table data using the interface
-const statictableData: Order[] = [
-  {
-    id: 1,
 
-    name: "Group 1",
-    image: "/images/product/product-01.jpg",
-    createdAt: new Date("2025-03-02"),
 
-    status: "Active",
-  },
-  {
-    id: 2,
+interface GroupItemProps {
 
-    name: "Group 2",
-    image: "/images/product/product-02.jpg",
-    createdAt: new Date("2025-03-02"),
+  id: number;
+  name: string;
+  createdt: string;
 
-    status: "Active",
-  },
-  {
-    id: 3,
+}
+export default function GroupsTable({ data ,refetch }: {
+  data: GroupItemProps[],
+  refetch :() =>  Promise<void>
+}) {
 
-    name: "Group 3",
-    image: "/images/product/product-03.jpg",
-    createdAt: new Date("2025-04-10"),
+  const [tableData, settableData] = useState(data);
 
-    status: "Active",
-  },
-  {
-    id: 1,
 
-    name: "Group 1",
-    image: "/images/product/product-01.jpg",
-    createdAt: new Date("2025-03-02"),
 
-    status: "Cancel",
-  },
-  {
-    id: 2,
-
-    name: "Group 2",
-    image: "/images/product/product-02.jpg",
-    createdAt: new Date("2025-03-02"),
-
-    status: "Active",
-  },
-  {
-    id: 3,
-
-    name: "Group 3",
-    image: "/images/product/product-03.jpg",
-    createdAt: new Date("2025-04-10"),
-
-    status: "Active",
-  },
-  {
-    id: 1,
-
-    name: "Group 1",
-    image: "/images/product/product-01.jpg",
-    createdAt: new Date("2025-03-02"),
-
-    status: "Active",
-  },
-  {
-    id: 2,
-
-    name: "Group 2",
-    image: "/images/product/product-02.jpg",
-    createdAt: new Date("2025-03-02"),
-
-    status: "Active",
-  },
-  {
-    id: 3,
-
-    name: "Group 3",
-    image: "/images/product/product-03.jpg",
-    createdAt: new Date("2025-04-10"),
-
-    status: "Active",
-  },
-  {
-    id: 1,
-
-    name: "Group 1",
-    image: "/images/product/product-01.jpg",
-    createdAt: new Date("2025-03-02"),
-
-    status: "Active",
-  },
-  {
-    id: 2,
-
-    name: "Group 2",
-    image: "/images/product/product-02.jpg",
-    createdAt: new Date("2025-03-02"),
-
-    status: "Active",
-  },
-  {
-    id: 3,
-
-    name: "Group 3",
-    image: "/images/product/product-03.jpg",
-    createdAt: new Date("2025-04-10"),
-
-    status: "Active",
-  },
-  {
-    id: 1,
-
-    name: "Group 1",
-    image: "/images/product/product-01.jpg",
-    createdAt: new Date("2025-03-02"),
-
-    status: "Active",
-  },
-  {
-    id: 2,
-
-    name: "Group 2",
-    image: "/images/product/product-02.jpg",
-    createdAt: new Date("2025-03-02"),
-
-    status: "Active",
-  },
-  {
-    id: 3,
-
-    name: "Group 3",
-    image: "/images/product/product-03.jpg",
-    createdAt: new Date("2025-04-10"),
-
-    status: "Active",
-  },
-  {
-    id: 1,
-
-    name: "Group 1",
-    image: "/images/product/product-01.jpg",
-    createdAt: new Date("2025-03-02"),
-
-    status: "Active",
-  },
-  {
-    id: 2,
-
-    name: "Group 2",
-    image: "/images/product/product-02.jpg",
-    createdAt: new Date("2025-03-02"),
-
-    status: "Active",
-  },
-  {
-    id: 3,
-
-    name: "Group 3",
-    image: "/images/product/product-03.jpg",
-    createdAt: new Date("2025-04-10"),
-
-    status: "Cancel",
-  },
-];
-
-export default function GroupsTable() {
-  const [tableData, settableData] = useState(statictableData);
 
   const { isOpen, openModal, closeModal } = useModal();
-  const handleAdding = () => {
-    // Handle save logic here
+  let [name,setName] =useState("");
+  let [id,setId] =useState<number | undefined>();
+  let [file,setFile] =useState<File | undefined>();
 
-    console.log("handleAdding...");
 
-    closeModal();
-    setGroup(emptyGroup);
+  let editGroup = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    try {
+      const res = await axiosClient.put(`/group/${id}`, { name });
+      
+     
+      toast.success('Guruh muvaffaqiyatli yaratildi');
+      await refetch();
+
+    } catch (error) {
+      console.error('Create Group error:', error);
+      toast.error('Xatolik yuz berdi');
+
+    }finally { 
+      closeModal();
+    }
   };
   let emptyGroup: Group = {
     name: "",
@@ -239,11 +110,20 @@ export default function GroupsTable() {
   // Pationation
 
   const [currentPage, setCurrentPage] = useState(1);
+  useEffect(() => {
+
+    console.log("changed page ");
+    settableData(data);
+    setCurrentPage(1);
+
+    return () => {
+    }
+  }, [data])
   const maxPage = Math.ceil(tableData.length / +optionValue);
 
   const startIndex = (currentPage - 1) * +optionValue;
   const endIndex = startIndex + +optionValue;
-  let currentItems: Order[] = tableData.slice(startIndex, endIndex);
+  let currentItems: GroupItemProps[] = tableData.slice(startIndex, endIndex);
 
   const goToPreviousPage = () => {
     setCurrentPage((page) => Math.max(page - 1, 1));
@@ -252,12 +132,12 @@ export default function GroupsTable() {
   const goToNextPage = () => {
     setCurrentPage((page) => Math.min(page + 1, maxPage));
   };
-  console.log(">> data length :", tableData.length);
 
   useEffect(() => {
     const startIndex = (currentPage - 1) * +optionValue;
     const endIndex = startIndex + +optionValue;
     currentItems = tableData.slice(startIndex, endIndex);
+
   }, [currentPage]);
 
   useEffect(() => {
@@ -268,8 +148,26 @@ export default function GroupsTable() {
     const file = event.target.files?.[0];
     if (file) {
       console.log("Selected file:", file.name);
+      setFile(file)
     }
   };
+
+
+
+  let deleteGroup = async(id:number)=>{
+   
+    try {
+      const res = await axiosClient.delete(`/group/${id}`);
+      
+      toast.success("Guruh muvaffaqiyatli o'chirildi");
+      await refetch();
+
+    } catch (error) {
+      console.error('Delete Group error:', error);
+      toast.error('Xatolik yuz berdi');
+
+    }
+  }
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
       <div className="max-w-full overflow-x-auto">
@@ -334,14 +232,14 @@ export default function GroupsTable() {
               <TableRow key={index}>
                 <TableCell className="px-5 py-4 sm:px-6 text-start">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 overflow-hidden rounded-sm ">
+                    {/* <div className="w-10 h-10 overflow-hidden rounded-sm ">
                       <img
                         width={40}
                         height={40}
                         src={order.image}
                         alt={order.name}
                       />
-                    </div>
+                    </div> */}
                     <div>
                       <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
                         {order.name}
@@ -350,21 +248,24 @@ export default function GroupsTable() {
                   </div>
                 </TableCell>
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                  {Moment(order.createdAt).format("MMMM DD, yyyy")}
+                  {Moment(Date.parse(`${order.createdt}`)).format("MMMM DD, yyyy")}
                 </TableCell>
 
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                   <Badge
                     size="sm"
                     color={
-                      order.status === "Active"
-                        ? "success"
-                        : order.status === "Pending"
-                        ? "warning"
-                        : "error"
+                      "success"
+                      // order.status === "Active"
+                      //   ? "success"
+                      //   : order.status === "Pending"
+                      //     ? "warning"
+                      //     : "error"
                     }
                   >
-                    {order.status}
+                    {/* {order.status} */}
+
+                    {"Active"}
                   </Badge>
                 </TableCell>
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 flex gap-2  flex-row items-center">
@@ -377,6 +278,8 @@ export default function GroupsTable() {
                         name: order.name,
                         image: "",
                       });
+                      setName(order.name);
+                      setId(order.id);
                       openModal();
                     }}
                   >
@@ -386,7 +289,7 @@ export default function GroupsTable() {
                   <Button
                     size="mini"
                     variant="outline"
-                    onClick={async () => {}}
+                    onClick={()=> deleteGroup(order.id)}
                   >
                     <DeleteIcon className="text-xl fill-gray-500 dark:fill-gray-400"></DeleteIcon>
                   </Button>
@@ -436,8 +339,8 @@ export default function GroupsTable() {
         </div>
         <div>
           Showing {(currentPage - 1) * +optionValue + 1} to{" "}
-          {Math.min(statictableData.length, currentPage * +optionValue)} of{" "}
-          {statictableData.length} entries
+          {Math.min(data.length, currentPage * +optionValue)} of{" "}
+          {data.length} entries
         </div>
       </div>
 
@@ -458,12 +361,9 @@ export default function GroupsTable() {
                   <Label>Name</Label>
                   <Input
                     type="text"
-                    value={group.name}
+                    value={name}
                     onChange={(e) =>
-                      setGroup({
-                        ...group,
-                        name: e.target.value,
-                      })
+                     setName(e.target.value)
                     }
                   />
                 </div>
@@ -479,10 +379,10 @@ export default function GroupsTable() {
             </div>
             <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
               <Button size="sm" variant="outline" onClick={closeModal}>
-                Close
+                Yopish
               </Button>
-              <Button size="sm" onClick={handleAdding}>
-                Saves
+              <Button size="sm" onClick={editGroup}>
+                Saqlash
               </Button>
             </div>
           </form>

@@ -19,14 +19,14 @@ export default function AuthLayout({
             <div className="flex flex-col items-center max-w-xs">
               <Link to="/" className="block mb-4">
                 <img
-                  width={231}
+                  width={140}
                   height={48}
-                  src="/images/logo/auth-logo.svg"
+                  src="/images/logo/logo-icon.svg"
                   alt="Logo"
                 />
               </Link>
               <p className="text-center text-gray-400 dark:text-white/60">
-                Welcome Mahad-Test platform
+                Welcome Test platform
               </p>
             </div>
           </div>
