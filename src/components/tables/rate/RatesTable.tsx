@@ -12,136 +12,171 @@ import Button from "../../ui/button/Button";
 import { ArrowRightIcon, DownloadIcon } from "../../../icons";
 import Select from "../../form/Select";
 
-interface Order {
-  id: number;
-  user: {
-    image: string;
-    name: string;
-    phone: string;
-  };
-  group: string;
-  result_count: number;
-  status: string;
-  rate: number;
-}
+import bookImage from "../../../../public/images/product/book.png"
+
+// interface Order {
+//   id: number;
+//   user: {
+//     image: string;
+//     name: string;
+//     phone: string;
+//   };
+//   group: string;
+//   result_count: number;
+//   status: string;
+//   rate: number;
+// }
 
 // Define the table data using the interface
-const statictableData: Order[] = [
-  {
-    id: 1,
-    user: {
-      image: "/images/user/user-17.jpg",
-      name: "Xurshid Ismoilov",
-      phone: "+998(95)064-28-27",
-    },
-    group: "Group 1",
-    result_count: 12,
-    rate: 93.2,
-    status: "Active",
+// const statictableData: Order[] = [
+//   {
+//     id: 1,
+//     user: {
+//       image: "/images/user/user-17.jpg",
+//       name: "Xurshid Ismoilov",
+//       phone: "+998(95)064-28-27",
+//     },
+//     group: "Group 1",
+//     result_count: 12,
+//     rate: 93.2,
+//     status: "Active",
+//   },
+//   {
+//     id: 2,
+//     user: {
+//       image: "/images/user/user-18.jpg",
+//       name: "Kaiya George",
+//       phone: "+998(95)064-28-27",
+//     },
+//     group: "Group 2",
+//     result_count: 8,
+//     rate: 84.7,
+//     status: "Pending",
+//   },
+//   {
+//     id: 3,
+//     user: {
+//       image: "/images/user/user-17.jpg",
+//       name: "Zain Geidt",
+//       phone: "+998(95)064-28-27",
+//     },
+//     group: "Group 2",
+//     result_count: 8,
+//     rate: 84.2,
+//     status: "Active",
+//   },
+//   {
+//     id: 4,
+//     user: {
+//       image: "/images/user/user-20.jpg",
+//       name: "Abram Schleifer",
+//       phone: "+998(95)064-28-27",
+//     },
+//     result_count: 2,
+//     group: "Group 2",
+//     rate: 78.0,
+//     status: "Active",
+//   },
+//   {
+//     id: 5,
+//     user: {
+//       image: "/images/user/user-21.jpg",
+//       name: "Carla George",
+//       phone: "+998(95)064-28-27",
+//     },
+//     group: "Group 1",
+//     result_count: 4,
+//     rate: 75.7,
+//     status: "Active",
+//   },
+//   {
+//     id: 5,
+//     user: {
+//       image: "/images/user/user-21.jpg",
+//       name: "Carla George",
+//       phone: "+998(95)064-28-27",
+//     },
+//     group: "Group 1",
+//     result_count: 4,
+//     rate: 75.7,
+//     status: "Active",
+//   },
+//   {
+//     id: 5,
+//     user: {
+//       image: "/images/user/user-21.jpg",
+//       name: "Carla George",
+//       phone: "+998(95)064-28-27",
+//     },
+//     group: "Group 1",
+//     result_count: 4,
+//     rate: 75.7,
+//     status: "Active",
+//   },
+//   {
+//     id: 5,
+//     user: {
+//       image: "/images/user/user-21.jpg",
+//       name: "Carla George",
+//       phone: "+998(95)064-28-27",
+//     },
+//     group: "Group 3",
+//     result_count: 2,
+//     rate: 60,
+//     status: "Active",
+//   },
+//   {
+//     id: 5,
+//     user: {
+//       image: "/images/user/user-21.jpg",
+//       name: "Carla George",
+//       phone: "+998(95)064-28-27",
+//     },
+//     group: "Group 3",
+//     result_count: 1,
+//     rate: 55.0,
+//     status: "Active",
+//   },
+// ];
+
+
+export interface RateItemProps {
+
+  id: number;
+  name: string;
+  image: string;
+  phone: string;
+  password: string;
+  createdt: string;
+  showPassword?: boolean
+  group_id?: number;
+  results? : {
+      solved? : number;
+      type? :string;
+      test? :{
+        _count?: {
+          test_items?: number,
+          results?: number,
+        },
+      }
+  }[],
+  group? : {
+    id: number;
+    name: string;
   },
-  {
-    id: 2,
-    user: {
-      image: "/images/user/user-18.jpg",
-      name: "Kaiya George",
-      phone: "+998(95)064-28-27",
-    },
-    group: "Group 2",
-    result_count: 8,
-    rate: 84.7,
-    status: "Pending",
-  },
-  {
-    id: 3,
-    user: {
-      image: "/images/user/user-17.jpg",
-      name: "Zain Geidt",
-      phone: "+998(95)064-28-27",
-    },
-    group: "Group 2",
-    result_count: 8,
-    rate: 84.2,
-    status: "Active",
-  },
-  {
-    id: 4,
-    user: {
-      image: "/images/user/user-20.jpg",
-      name: "Abram Schleifer",
-      phone: "+998(95)064-28-27",
-    },
-    result_count: 2,
-    group: "Group 2",
-    rate: 78.0,
-    status: "Active",
-  },
-  {
-    id: 5,
-    user: {
-      image: "/images/user/user-21.jpg",
-      name: "Carla George",
-      phone: "+998(95)064-28-27",
-    },
-    group: "Group 1",
-    result_count: 4,
-    rate: 75.7,
-    status: "Active",
-  },
-  {
-    id: 5,
-    user: {
-      image: "/images/user/user-21.jpg",
-      name: "Carla George",
-      phone: "+998(95)064-28-27",
-    },
-    group: "Group 1",
-    result_count: 4,
-    rate: 75.7,
-    status: "Active",
-  },
-  {
-    id: 5,
-    user: {
-      image: "/images/user/user-21.jpg",
-      name: "Carla George",
-      phone: "+998(95)064-28-27",
-    },
-    group: "Group 1",
-    result_count: 4,
-    rate: 75.7,
-    status: "Active",
-  },
-  {
-    id: 5,
-    user: {
-      image: "/images/user/user-21.jpg",
-      name: "Carla George",
-      phone: "+998(95)064-28-27",
-    },
-    group: "Group 3",
-    result_count: 2,
-    rate: 60,
-    status: "Active",
-  },
-  {
-    id: 5,
-    user: {
-      image: "/images/user/user-21.jpg",
-      name: "Carla George",
-      phone: "+998(95)064-28-27",
-    },
-    group: "Group 3",
-    result_count: 1,
-    rate: 55.0,
-    status: "Active",
-  },
-];
+  rate? : number;
+
+}
 
 
 
-export default function RatesTable() {
+export default function RatesTable({ data, groups, refetch }: {
+  data: RateItemProps[],
+  groups: any[]
+  refetch: () => Promise<void>
+}) {
 
-  const [tableData, setTableData] = useState(statictableData);
+  const [tableData, setTableData] = useState(data);
   const options = [
     { value: "5", label: "5" },
     { value: "10", label: "10" },
@@ -151,9 +186,7 @@ export default function RatesTable() {
 
   const group_options = [
     { value: "All group", label: "All group" },
-    { value: "Group 1", label: "Group 1" },
-    { value: "Group 2", label: "Group 2"},
-    { value: "Group 3", label: "Group 3"},
+   ...groups
   ];
   let [optionValue, setoptionValue] = useState("5");
   let [groupoptionValue, setGroupoptionValue] = useState("All group");
@@ -175,7 +208,7 @@ export default function RatesTable() {
   
   const startIndex = (currentPage - 1) * +optionValue;
   const endIndex = startIndex + +optionValue;
-  let currentItems: Order[] = tableData.slice(startIndex, endIndex);
+  let currentItems: RateItemProps[] = tableData.slice(startIndex, endIndex);
   
   const goToPreviousPage = () => {
     setCurrentPage((page) => Math.max(page - 1, 1));
@@ -195,12 +228,16 @@ export default function RatesTable() {
   useEffect(() => {
     setCurrentPage(1);
     if (groupoptionValue == "All group") {
-      setTableData(statictableData)
+      setTableData(data)
       
     }else{
-      setTableData(statictableData.filter((item)=>item.group==groupoptionValue));
+      setTableData(data.filter((item)=>item.group?.id== +groupoptionValue));
     }
   }, [optionValue,groupoptionValue]);
+  useEffect(() => {
+    setCurrentPage(1);
+    setTableData(data);
+  }, [data]);
 
 
   return (
@@ -253,12 +290,12 @@ export default function RatesTable() {
                 Group Name
               </TableCell>
 
-              <TableCell
+              {/* <TableCell
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
                 Status
-              </TableCell>
+              </TableCell> */}
               <TableCell
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
@@ -278,43 +315,44 @@ export default function RatesTable() {
                       <img
                         width={40}
                         height={40}
-                        src={order.user.image}
-                        alt={order.user.name}
+                        src={order?.image ?? bookImage}
+                        alt={order?.name}
                       />
                     </div>
                     <div>
                       <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                        {order.user.name}
+                      {order?.name}
                       </span>
                       <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
-                        {order.user.phone}
+                      {order?.phone}
                       </span>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400">
-                  {order.result_count}
+                  {order.results?.length ?? 0}
                 </TableCell>
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                  {order.group}
+                  {order.group?.name}
                 </TableCell>
 
-                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                {/* <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                   <Badge
                     size="sm"
                     color={
-                      order.status === "Active"
-                        ? "success"
-                        : order.status === "Pending"
-                        ? "warning"
-                        : "error"
+                      "success"
+                      // order.status === "Active"
+                      //   ? "success"
+                      //   : order.status === "Pending"
+                      //   ? "warning"
+                      //   : "error"
                     }
                   >
                     {order.status}
                   </Badge>
-                </TableCell>
+                </TableCell> */}
                 <TableCell className="px-4 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {order.rate} %
+                  {Number((order.rate ?? 0).toFixed(2))} %
                 </TableCell>
               </TableRow>
             ))}

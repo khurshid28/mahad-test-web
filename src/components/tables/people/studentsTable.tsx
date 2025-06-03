@@ -570,7 +570,6 @@ export default function StudentsTable({ data, groups, refetch }: {
 
     settableData(
       tableData.map((e) => {
-
         if (e.id == id) {
           if (e.showPassword != undefined) {
             e.showPassword = !e.showPassword;
