@@ -33,7 +33,7 @@ export default function SignInForm() {
 
     } catch (error) {
       console.error('Login error:', error);
-      toast.error('Email yoki parol noto‘g‘ri');
+      toast.error('Login yoki parol noto‘g‘ri');
 
     }
   };
