@@ -6,6 +6,8 @@ import {
     TableRow,
   } from "../../ui/table";
   
+
+  import bookImage from "../../../../public/images/product/book.png"
   import Moment from "moment";
   
   import Badge from "../../ui/badge/Badge";
@@ -481,7 +483,7 @@ import { toast } from "react-toastify";
                         <img
                           width={40}
                           height={40}
-                          src={  order.image ? import.meta.env.VITE_STATIC_PATH +  order.image : "https://w7.pngwing.com/pngs/684/622/png-transparent-logo-subject-english-miscellaneous-blue-building-thumbnail.png"}
+                          src={  order.image ? import.meta.env.VITE_STATIC_PATH +  order.image : bookImage}
                           alt={order.name}
                         />
                       </div>
@@ -626,13 +628,13 @@ import { toast } from "react-toastify";
                   <Select
                   options={subjects}
                   className="dark:bg-dark-900"
-                  defaultValue={`${Book.subject_id ?? ""}`}
+                  defaultValue={Book.subject_id?  `${Book.subject_id ?? ""}` : undefined}
                   
              
                    onChange={(e)=>{
                 setBook({
                   ...Book,
-                  subject_id : +e
+                  subject_id : +e,
                 })
               }}
              

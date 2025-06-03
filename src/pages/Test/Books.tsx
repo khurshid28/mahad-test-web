@@ -107,13 +107,13 @@ export default function BooksPage() {
 
 
 
-  const [selectedValues, setSelectedValues] = useState<string[]>([]);
+  // const [selectedValues, setSelectedValues] = useState<string[]>([]);
 
-  const multiOptions = [
-    { value: "Group 1", text: "Group 1", selected: false },
-    { value: "Group 2", text: "Group 2", selected: false },
-    { value: "Group 3", text: "Group 3", selected: false },
-  ];
+  // const multiOptions = [
+  //   { value: "Group 1", text: "Group 1", selected: false },
+  //   { value: "Group 2", text: "Group 2", selected: false },
+  //   { value: "Group 3", text: "Group 3", selected: false },
+  // ];
 
   // const all_Subject_options = [
   //   { value: "Subject 1", label: "Subject 1" },
@@ -197,9 +197,11 @@ export default function BooksPage() {
                   <Select
                     options={all_Subject_options}
                     className="dark:bg-dark-900"
-                    defaultValue={`${Book.subject_id}`}
+                    defaultValue={Book.subject_id ?  `${Book.subject_id}` : undefined}
                     placeholder="Select subject"
                     onChange={(e) => {
+                     
+                      
                       setBook({
                         ...Book,
                         subject_id: +e

@@ -33,6 +33,8 @@ import DropzoneComponent from "../../form/form-elements/DropZone";
 import FileInputExample from "../../form/form-elements/FileInputExample";
 import FileInput from "../../form/input/FileInput";
 import MultiSelect from "../../form/MultiSelect";
+import axiosClient from "../../../service/axios.service";
+import { toast } from "react-toastify";
 
 interface Order {
     id: number;
@@ -44,6 +46,17 @@ interface Order {
 }
 
 // Define the table data using the interface
+
+
+interface SectionItemProps {
+    id?: number;
+    name?: string;
+    createdt: string;
+    book? : any;
+    book_id?: number;
+  }
+
+
 const statictableData: Order[] = [
     {
         id: 1,
@@ -227,8 +240,14 @@ const statictableData: Order[] = [
     },
 ];
 
-export default function SectionsTable() {
-    const [tableData, settableData] = useState(statictableData);
+export default function SectionsTable(
+    { data, books, refetch }: {
+        data: SectionItemProps[],
+        books: any[]
+        refetch: () => Promise<void>
+      }
+) {
+    const [tableData, settableData] = useState<SectionItemProps[]>(data);
 
     const { isOpen, openModal, closeModal } = useModal();
     const handleAdding = () => {
@@ -242,7 +261,7 @@ export default function SectionsTable() {
     let emptySection: Section = {
         name: "",
         image: "",
-        section_id: ""
+    
 
     };
     let [Section, setSection] = useState<Section>(emptySection);
@@ -265,7 +284,7 @@ export default function SectionsTable() {
 
     const startIndex = (currentPage - 1) * +optionValue;
     const endIndex = startIndex + +optionValue;
-    let currentItems: Order[] = tableData.slice(startIndex, endIndex);
+    let currentItems: SectionItemProps[] = tableData.slice(startIndex, endIndex);
 
     const goToPreviousPage = () => {
         setCurrentPage((page) => Math.max(page - 1, 1));
@@ -296,16 +315,10 @@ export default function SectionsTable() {
 
     const Book_options = [
         { value: "All Books", label: "All Book" },
-        { value: "Book 1", label: "Book 1" },
-        { value: "Book 2", label: "Book 2" },
-        { value: "Book 3", label: "Book 3" },
+       ...books
     ];
 
-    const all_Book_options = [
-        { value: "Book 1", label: "Book 1" },
-        { value: "Book 2", label: "Book 2" },
-        { value: "Book 3", label: "Book 3" },
-    ];
+
 
     let [BookoptionValue, setBookoptionValue] = useState("All Books");
 
@@ -315,23 +328,63 @@ export default function SectionsTable() {
         setBookoptionValue(value);
     };
 
+    let deleteSection= async(id:number | undefined)=>{
+        try {
+          const res = await axiosClient.delete(`/section/${id}`);
+          
+          toast.success("Section muvaffaqiyatli o'chirildi");
+          await refetch();
+    
+        } catch (error) {
+          console.error('Delete Section error:', error);
+          toast.error('Xatolik yuz berdi');
+        }
+      }
+  
+
+
+      let editSection = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+    
+        try {
+          
+       
+    
+    
+          const res = await axiosClient.put(`/section/${Section.id}`, {
+            "name" : Section.name ?? "" ,
+            "book_id" : `${Section.book_id}`
+          },);
+    
+    
+          toast.success('Section muvaffaqiyatli yaratildi');
+          await refetch();
+    
+        } catch (error) {
+          console.error('Create Section error:', error);
+          toast.error('Xatolik yuz berdi');
+    
+        } finally {
+          closeModal();
+        }
+      };
 
     useEffect(() => {
         setCurrentPage(1);
-
-
         if (BookoptionValue == "All Books") {
-            settableData(statictableData);
-
+            settableData(data);
         } else {
-            settableData(statictableData.filter((item) => item.Book_id === BookoptionValue));
+            settableData(data.filter((item) => item.book_id === +BookoptionValue));
         }
-
-
-
     }, [optionValue, BookoptionValue]);
 
-
+  useEffect(() => {
+    
+  setCurrentPage(1);
+  settableData(data)
+   
+  }, [data])
+  
 
     return (
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
@@ -402,14 +455,14 @@ export default function SectionsTable() {
                             <TableRow key={index}>
                                 <TableCell className="px-5 py-4 sm:px-6 text-start">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 overflow-hidden rounded-sm ">
+                                        {/* <div className="w-10 h-10 overflow-hidden rounded-sm ">
                                             <img
                                                 width={40}
                                                 height={40}
                                                 src={order.image}
                                                 alt={order.name}
                                             />
-                                        </div>
+                                        </div> */}
                                         <div>
                                             <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
                                                 {order.name}
@@ -418,25 +471,28 @@ export default function SectionsTable() {
                                     </div>
                                 </TableCell>
                                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                                    {Moment(order.createdAt).format("MMMM DD, yyyy")}
+                                    {Moment(order.createdt).format("MMMM DD, yyyy")}
                                 </TableCell>
 
                                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                                    {order.Book_id}
+                                    {order.book && order.book.name}
                                 </TableCell>
 
                                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                                     <Badge
                                         size="sm"
                                         color={
-                                            order.status === "Active"
-                                                ? "success"
-                                                : order.status === "Pending"
-                                                    ? "warning"
-                                                    : "error"
+                                            "success"
+                                            // order.status === "Active"
+                                            //     ? "success"
+                                            //     : order.status === "Pending"
+                                            //         ? "warning"
+                                            //         : "error"
                                         }
                                     >
-                                        {order.status}
+                                        {/* {order.status} */}
+                                        Active
+
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 flex gap-2  flex-row items-center">
@@ -447,7 +503,8 @@ export default function SectionsTable() {
                                         onClick={() => {
                                             setSection({
                                                 name: order.name,
-                                                image: "",
+                                                book_id : order.book_id,
+                                                id : order.id,
                                             });
                                             openModal();
                                         }}
@@ -458,7 +515,7 @@ export default function SectionsTable() {
                                     <Button
                                         size="mini"
                                         variant="outline"
-                                        onClick={async () => { }}
+                                        onClick={async () => { deleteSection(order.id) }}
                                     >
                                         <DeleteIcon className="text-xl fill-gray-500 dark:fill-gray-400"></DeleteIcon>
                                     </Button>
@@ -508,8 +565,8 @@ export default function SectionsTable() {
                 </div>
                 <div>
                     Showing {(currentPage - 1) * +optionValue + 1} to{" "}
-                    {Math.min(tableData.length, currentPage * +optionValue)} of{" "}
-                    {tableData.length} entries
+                    {Math.min(data.length, currentPage * +optionValue)} of{" "}
+                    {data.length} entries
                 </div>
             </div>
 
@@ -531,10 +588,15 @@ export default function SectionsTable() {
                                 <div>
                                     <Label>Book</Label>
                                     <Select
-                                        options={all_Book_options}
+                                        options={books}
                                         className="dark:bg-dark-900"
-                                        defaultValue={`${Section.section_id}`}
-                                        onChange={() => { }}
+                                        defaultValue={Section.book_id ?  `${Section.book_id}` : undefined}
+                                        onChange={(e) => {
+                                            setSection({
+                                                ...Section,
+                                                book_id : +e
+                                            })
+                                         }}
 
                                     />
                                 </div>
@@ -553,22 +615,22 @@ export default function SectionsTable() {
                                     />
                                 </div>
 
-                                <div>
+                                {/* <div>
                                     <Label>Image</Label>
                                     <FileInput
                                         onChange={handleFileChange}
                                         className="custom-class"
                                     />
-                                </div>
+                                </div> */}
 
                             </div>
                         </div>
                         <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
                             <Button size="sm" variant="outline" onClick={closeModal}>
-                                Close
+                                Yopish
                             </Button>
-                            <Button size="sm" onClick={handleAdding}>
-                                Saves
+                            <Button size="sm" onClick={editSection}>
+                                Saqlash
                             </Button>
                         </div>
                     </form>

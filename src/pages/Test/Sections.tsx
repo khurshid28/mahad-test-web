@@ -8,30 +8,27 @@ import { useModal } from "../../hooks/useModal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import { Modal } from "../../components/ui/modal";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import FileInput from "../../components/form/input/FileInput";
 import Select from "../../components/form/Select";
 import MultiSelect from "../../components/form/MultiSelect";
 import SectionsTable from "../../components/tables/test/sectionsTable";
+import axiosClient from "../../service/axios.service";
+import { useFetchWithLoader } from "../../hooks/useFetchWithLoader";
+import { LoadSpinner } from "../../components/spinner/load-spinner";
+import { toast } from "react-toastify";
 export interface Section {
+    id?: number;
     name?: string;
     image?: string;
-    section_id?: string
+    book_id?: number
 }
 
 export default function SectionsPage() {
     const { isOpen, openModal, closeModal } = useModal();
-    const handleAdding = () => {
-        // Handle save logic here
-
-        console.log("handleAdding...");
-
-        closeModal();
-        setSection(emptySection);
-    };
+   
     let emptySection: Section = {
-        name: "",
-        image: "",
+       
     };
     let [Section, setSection] = useState<Section>(emptySection);
 
@@ -46,11 +43,62 @@ export default function SectionsPage() {
 
 
 
-    const all_Book_options = [
-        { value: "Book 1", label: "Book 1" },
-        { value: "Book 2", label: "Book 2" },
-        { value: "Book 3", label: "Book 3" },
-    ];
+
+    const [all_Book_options, set_all_Book_options] = useState<HTMLOptionElement[]>([]);
+
+
+
+    const fetchSections = useCallback(() => {
+        return axiosClient.get('/section/all').then(res => res.data);
+    }, []);
+
+    const { data, isLoading, error, refetch } = useFetchWithLoader({
+        fetcher: fetchSections,
+    });
+
+
+    const fetchBooks = useCallback(() => {
+        return axiosClient.get('/book/all').then(res => res.data);
+    }, []);
+
+    const { data: books_data } = useFetchWithLoader({
+        fetcher: fetchBooks,
+        onSuccess: useCallback((dataSubject: any[]) => {
+            set_all_Book_options((dataSubject as any[]).map((e, index) => {
+                return new Option(`${e.name}`, `${e.id}`)
+            }));
+
+        }, []),
+    });
+
+
+    let createSection = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+    
+        try {
+          
+          const formData = new FormData();
+          formData.append('name', Section.name ?? "");
+          formData.append('book_id', `${Section.book_id}`);
+          
+    
+          const res = await axiosClient.post('/section', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+    
+          toast.success('Section muvaffaqiyatli yaratildi');
+          await refetch();
+    
+        } catch (error) {
+          console.error('Create Section error:', error);
+          toast.error('Xatolik yuz berdi');
+    
+        } finally {
+          closeModal();
+        }
+      };
 
     return (
         <>
@@ -58,37 +106,44 @@ export default function SectionsPage() {
             <PageBreadcrumb pageTitle="Sections" />
 
             <div className="space-y-6 ">
+                {
+                    isLoading && <div className="min-h-[450px]  flex-col flex justify-center">
+                        <LoadSpinner />
+                    </div>
+                }
 
-                <ComponentCard
-                    title="Sections Table"
-                    action={
-                        <div className="flex flex-row gap-4">
-                            <div>
+                {
+                    data && <ComponentCard
+                        title="Sections Table"
+                        action={
+                            <div className="flex flex-row gap-4">
+                                <div>
 
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        endIcon={<DownloadIcon className="size-5 fill-white" />}
+                                    >
+                                        Download
+                                    </Button>
+                                </div>
                                 <Button
                                     size="sm"
-                                    variant="outline"
-                                    endIcon={<DownloadIcon className="size-5 fill-white" />}
+                                    variant="primary"
+                                    startIcon={<PlusIcon className="size-5 fill-white" />}
+                                    onClick={() => {
+                                        setSection(emptySection);
+                                        openModal();
+                                    }}
                                 >
-                                    Download
+                                    Add Section
                                 </Button>
                             </div>
-                            <Button
-                                size="sm"
-                                variant="primary"
-                                startIcon={<PlusIcon className="size-5 fill-white" />}
-                                onClick={() => {
-                                    setSection(emptySection);
-                                    openModal();
-                                }}
-                            >
-                                Add Section
-                            </Button>
-                        </div>
-                    }
-                >
-                    <SectionsTable />
-                </ComponentCard>
+                        }
+                    >
+                        <SectionsTable data={data} refetch={refetch} books={all_Book_options} />
+                    </ComponentCard>
+                }
             </div>
             <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
                 <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
@@ -109,8 +164,14 @@ export default function SectionsPage() {
                                     <Select
                                         options={all_Book_options}
                                         className="dark:bg-dark-900"
-                                        defaultValue={`${Section.section_id}`}
-                                        onChange={() => { }}
+                                        placeholder="Select Book"
+                                        defaultValue={Section.book_id ?  `${Section.book_id}` : undefined}
+                                        onChange={(e) => {
+                                            setSection({
+                                                ...Section,
+                                                book_id : +e
+                                            })
+                                         }}
 
                                     />
                                 </div>
@@ -128,21 +189,21 @@ export default function SectionsPage() {
                                     />
                                 </div>
 
-                                <div>
+                                {/* <div>
                                     <Label>Image</Label>
                                     <FileInput
                                         onChange={handleFileChange}
                                         className="custom-class"
                                     />
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                         <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
                             <Button size="sm" variant="outline" onClick={closeModal}>
-                                Close
+                                Yopish
                             </Button>
-                            <Button size="sm" onClick={handleAdding}>
-                                Saves
+                            <Button size="sm" onClick={createSection}>
+                                Saqlash
                             </Button>
                         </div>
                     </form>

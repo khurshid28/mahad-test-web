@@ -952,7 +952,7 @@ export default function StudentsTable({ data, groups, refetch }: {
                       })
                     }}
                     className="dark:bg-dark-900"
-                    defaultValue={`${Student.group_id}`}
+                    defaultValue={ Student.group_id ? `${Student.group_id}` : undefined}
 
                   />
                 </div>

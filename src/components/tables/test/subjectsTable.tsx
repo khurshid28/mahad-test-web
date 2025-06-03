@@ -10,6 +10,7 @@ import {
   
   import Badge from "../../ui/badge/Badge";
   import Button from "../../ui/button/Button";
+  import bookImage from "../../../../public/images/product/book.png"
   import {
     ArrowRightIcon,
     CloseIcon,
@@ -399,7 +400,7 @@ import { toast } from "react-toastify";
                         <img
                           width={40}
                           height={40}
-                          src={  order.image ? import.meta.env.VITE_STATIC_PATH +  order.image : "https://w7.pngwing.com/pngs/684/622/png-transparent-logo-subject-english-miscellaneous-blue-building-thumbnail.png"}
+                          src={  order.image ? import.meta.env.VITE_STATIC_PATH +  order.image : bookImage}
                           alt={order.name}
                         />
                       </div>
