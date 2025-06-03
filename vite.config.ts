@@ -5,8 +5,13 @@ import svgr from "vite-plugin-svgr";
 // https://vite.dev/config/
 export default defineConfig({
   server: {
-    port: 2222, 
-    host: true, 
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3333',
+        changeOrigin: true,
+        secure: false
+      }
+    }
   },
   plugins: [
     react(),

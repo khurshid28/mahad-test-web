@@ -4,10 +4,9 @@ import axios, {
   InternalAxiosRequestConfig,
 } from "axios";
 
-const baseURL = import.meta.env.VITE_BASE_URL ?? "https://api.example.com";
 
 const axiosClient: AxiosInstance = axios.create({
-  baseURL,
+  baseURL: '/api/v1',
   headers: {
     "Content-Type": "application/json",
   },
