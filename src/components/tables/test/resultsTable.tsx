@@ -380,7 +380,7 @@ export default function ResultsTable(
                   {order.test?._count?.results ?? ""}/{order.test?._count?.test_items ?? ""}
                 </TableCell>
                 <TableCell className="px-4 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {Math.floor(Number(((order.test?._count?.results ?? 0) * 100 / (order.test?._count?.test_items ?? 1)).toFixed(2)))} %
+                  {Number(((order.test?._count?.results ?? 0) * 100 / (order.test?._count?.test_items ?? 1)).toFixed(2))} %
                 </TableCell>
               </TableRow>
             ))}
