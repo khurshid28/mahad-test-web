@@ -1,4 +1,4 @@
-import React,{ useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
@@ -18,16 +18,17 @@ export default function SignInForm() {
   let handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-
-
     try {
       const res = await axiosClient.post('/auth/login', { login, password });
 
-    
+      if (!(res.data.user && res.data.user.role == "ADMIN")) {
+        throw new Error("Login yoki parol noto‘g‘ri : " + JSON.stringify(res.data.user),);
+      }
+
       localStorage.setItem('token', res.data.access_token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
-      
-      
+
+
       navigate('/');
       toast.success('Kirish muvaffaqiyatli');
 
@@ -55,7 +56,7 @@ export default function SignInForm() {
               Sign In
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-             Welcome!
+              Welcome!
             </p>
           </div>
           <div>
@@ -117,7 +118,7 @@ export default function SignInForm() {
                   <Label>
                     Login <span className="text-error-500">*</span>{" "}
                   </Label>
-                  <Input placeholder="Login"   onChange={(e)=>setLogin(e.target.value)}/>
+                  <Input placeholder="Login" onChange={(e) => setLogin(e.target.value)} />
                 </div>
                 <div>
                   <Label>
@@ -127,7 +128,7 @@ export default function SignInForm() {
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder="Password"
-                      onChange={(e)=>setPassword(e.target.value)}
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
