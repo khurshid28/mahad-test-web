@@ -544,6 +544,10 @@ interface StudentItemProps {
   createdt: string;
   showPassword?: boolean
   group_id?: number;
+  group? : {
+    id: number;
+    name: string;
+  }
 
 }
 
@@ -598,9 +602,9 @@ export default function StudentsTable({ data, groups, refetch }: {
   const handleSelectChange = (value: string) => {
     setoptionValue(value);
   };
-  const handleSelectGroupChange = (value: string) => {
+  // const handleSelectGroupChange = (value: string) => {
 
-  };
+  // };
 
   // Pationation
 
@@ -678,6 +682,8 @@ export default function StudentsTable({ data, groups, refetch }: {
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+
+     
       <div className="max-w-full overflow-x-auto">
         <div className="px-5 py-3  flex flex-row justify-between items-center border-b border-gray-100 dark:border-white/[0.05]">
           <div className="flex flex-row items-center gap-2 text-theme-sm font-medium text-gray-500 text-start  dark:text-gray-400">
@@ -711,6 +717,13 @@ export default function StudentsTable({ data, groups, refetch }: {
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
                 Students
+              </TableCell>
+
+              <TableCell
+                isHeader
+                className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+              >
+                Group
               </TableCell>
               <TableCell
                 isHeader
@@ -762,6 +775,9 @@ export default function StudentsTable({ data, groups, refetch }: {
                       </span>
                     </div>
                   </div>
+                </TableCell>
+                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                  {order.group?.name}
                 </TableCell>
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                   {Moment(order.createdt).format("MMMM DD, yyyy")}

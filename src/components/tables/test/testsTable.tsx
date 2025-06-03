@@ -34,220 +34,25 @@ import FileInputExample from "../../form/form-elements/FileInputExample";
 import FileInput from "../../form/input/FileInput";
 import MultiSelect from "../../form/MultiSelect";
 
-interface Order {
+import bookImage from "../../../../public/images/product/book.png"
+
+interface TestProps {
     id: number;
     name: string;
-    image: string;
-    createdAt: Date;
-    status: string;
-    book?: string;
-    section: string;
+    createdt: Date;
+
+    section: any;
+    section_id?: number;
+    _count?: any
 }
 
-// Define the table data using the interface
-const statictableData: Order[] = [
-    {
-        id: 1,
 
-        name: "Test 1",
-        image: "/images/product/product-01.jpg",
-        createdAt: new Date("2025-03-02"),
-
-        status: "Active",
-        book: "Book 1",
-        section: "Section 1"
-    },
-    {
-        id: 2,
-
-        name: "Test 2",
-        image: "/images/product/product-02.jpg",
-        createdAt: new Date("2025-03-02"),
-
-        status: "Active",
-        book: "Book 2",
-        section: "Section 2"
-    },
-    {
-        id: 3,
-
-        name: "Test 3",
-        image: "/images/product/product-03.jpg",
-        createdAt: new Date("2025-04-10"),
-
-        status: "Active",
-        book: "Book 1",
-        section: "Section 2"
-    },
-    {
-        id: 1,
-
-        name: "Test 1",
-        image: "/images/product/product-01.jpg",
-        createdAt: new Date("2025-03-02"),
-
-        status: "Cancel",
-        book: "Book 3",
-        section: "Section 1"
-    },
-    {
-        id: 2,
-
-        name: "Test 2",
-        image: "/images/product/product-02.jpg",
-        createdAt: new Date("2025-03-02"),
-
-        status: "Active",
-        book: "Book 2",
-        section: "Section 3"
-    },
-    {
-        id: 3,
-
-        name: "Test 3",
-        image: "/images/product/product-03.jpg",
-        createdAt: new Date("2025-04-10"),
-
-        status: "Active",
-        book: "Book 1",
-        section: "Section 2"
-    },
-    {
-        id: 1,
-
-        name: "Test 1",
-        image: "/images/product/product-01.jpg",
-        createdAt: new Date("2025-03-02"),
-
-        status: "Active",
-        book: "Book 2",
-        section: "Section 3"
-    },
-    {
-        id: 2,
-
-        name: "Test 2",
-        image: "/images/product/product-02.jpg",
-        createdAt: new Date("2025-03-02"),
-
-        status: "Active",
-        book: "Book 2",
-        section: "Section 1"
-    },
-    {
-        id: 3,
-
-        name: "Test 3",
-        image: "/images/product/product-03.jpg",
-        createdAt: new Date("2025-04-10"),
-
-        status: "Active",
-        book: "Book 2",
-        section: "Section 1"
-    },
-    {
-        id: 1,
-
-        name: "Test 1",
-        image: "/images/product/product-01.jpg",
-        createdAt: new Date("2025-03-02"),
-
-        status: "Active",
-        book: "Book 2",
-        section: "Section 1"
-    },
-    {
-        id: 2,
-
-        name: "Test 2",
-        image: "/images/product/product-02.jpg",
-        createdAt: new Date("2025-03-02"),
-
-        status: "Active",
-        book: "Book 1",
-        section: "Section 1"
-    },
-    {
-        id: 3,
-
-        name: "Test 3",
-        image: "/images/product/product-03.jpg",
-        createdAt: new Date("2025-04-10"),
-
-        status: "Active",
-        book: "Book 2",
-        section: "Section 1"
-    },
-    {
-        id: 1,
-
-        name: "Test 1",
-        image: "/images/product/product-01.jpg",
-        createdAt: new Date("2025-03-02"),
-
-        status: "Active",
-        book: "Book 2",
-        section: "Section 1"
-    },
-    {
-        id: 2,
-
-        name: "Test 2",
-        image: "/images/product/product-02.jpg",
-        createdAt: new Date("2025-03-02"),
-
-        status: "Active",
-        book: "Book 2",
-        section: "Section 1"
-    },
-    {
-        id: 3,
-
-        name: "Test 3",
-        image: "/images/product/product-03.jpg",
-        createdAt: new Date("2025-04-10"),
-
-        status: "Active",
-        book: "Book 1",
-        section: "Section 1"
-    },
-    {
-        id: 1,
-
-        name: "Test 1",
-        image: "/images/product/product-01.jpg",
-        createdAt: new Date("2025-03-02"),
-
-        status: "Active",
-        book: "Book 2",
-        section: "Section 1"
-    },
-    {
-        id: 2,
-
-        name: "Test 2",
-        image: "/images/product/product-02.jpg",
-        createdAt: new Date("2025-03-02"),
-
-        status: "Active",
-        book: "Book 2",
-        section: "Section 1"
-    },
-    {
-        id: 3,
-
-        name: "Test 3",
-        image: "/images/product/product-03.jpg",
-        createdAt: new Date("2025-04-10"),
-
-        status: "Cancel",
-        book: "Book 1",
-        section: "Section 1"
-    },
-];
-
-export default function TestsTable() {
-    const [tableData, settableData] = useState(statictableData);
+export default function TestsTable({ data, books, refetch }: {
+    data: TestProps[],
+    books: any[]
+    refetch: () => Promise<void>
+}) {
+    const [tableData, settableData] = useState(data);
 
     const { isOpen, openModal, closeModal } = useModal();
     const handleAdding = () => {
@@ -259,8 +64,7 @@ export default function TestsTable() {
         setTest(emptyTest);
     };
     let emptyTest: Test = {
-        name: "",
-        image: "",
+
 
     };
     let [Test, setTest] = useState<Test>(emptyTest);
@@ -283,7 +87,7 @@ export default function TestsTable() {
 
     const startIndex = (currentPage - 1) * +optionValue;
     const endIndex = startIndex + +optionValue;
-    let currentItems: Order[] = tableData.slice(startIndex, endIndex);
+    let currentItems: TestProps[] = tableData.slice(startIndex, endIndex);
 
     const goToPreviousPage = () => {
         setCurrentPage((page) => Math.max(page - 1, 1));
@@ -314,16 +118,14 @@ export default function TestsTable() {
 
     const Book_options = [
         { value: "All Books", label: "All Book" },
-        { value: "Book 1", label: "Book 1" },
-        { value: "Book 2", label: "Book 2" },
-        { value: "Book 3", label: "Book 3" },
+        ...books
     ];
 
-    const all_Book_options = [
-        { value: "Book 1", label: "Book 1" },
-        { value: "Book 2", label: "Book 2" },
-        { value: "Book 3", label: "Book 3" },
-    ];
+    // const all_Book_options = [
+    //     { value: "Book 1", label: "Book 1" },
+    //     { value: "Book 2", label: "Book 2" },
+    //     { value: "Book 3", label: "Book 3" },
+    // ];
 
     let [BookoptionValue, setBookoptionValue] = useState("All Books");
 
@@ -339,10 +141,10 @@ export default function TestsTable() {
 
 
         if (BookoptionValue == "All Books") {
-            settableData(statictableData);
+            settableData(data);
 
         } else {
-            settableData(statictableData.filter((item) => item.book === BookoptionValue));
+            settableData(data.filter((item) => item.section.book_id === +BookoptionValue));
         }
 
 
@@ -389,7 +191,7 @@ export default function TestsTable() {
                                 isHeader
                                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                             >
-                                Tests
+                                Section
                             </TableCell>
                             <TableCell
                                 isHeader
@@ -397,12 +199,14 @@ export default function TestsTable() {
                             >
                                 Added
                             </TableCell>
+
                             <TableCell
                                 isHeader
-                                className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
+                                className="px-5 py-3 text-center  font-medium text-gray-500 text-theme-xs dark:text-gray-400"
                             >
-                                Book Name
+                                Question
                             </TableCell>
+
 
                             <TableCell
                                 isHeader
@@ -423,50 +227,49 @@ export default function TestsTable() {
                     <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                         {currentItems.map((order, index) => (
                             <TableRow key={index}>
-                                <TableCell className="px-5 py-4 sm:px-6 text-start">
-                                    <div className="flex items-center gap-3">
-                                        {/* <div className="w-10 h-10 overflow-hidden rounded-sm ">
-                                            <img
-                                                width={40}
-                                                height={40}
-                                                src={order.image}
-                                                alt={order.name}
-                                            />
-                                        </div> */}
-                                        <div>
-                                            <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                                                {order.name}
-                                            </span>
-                                        </div>
+                                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 flex flex-row gap-2">
+                                    <div className="w-10 h-10 overflow-hidden rounded-sm ">
+                                        <img
+                                            width={40}
+                                            height={40}
+                                            src={order.section && order.section.book && order.section.book.image ? import.meta.env.VITE_STATIC_PATH + order.section.book.image : bookImage}
+                                            alt={order.name}
+                                        />
                                     </div>
-                                </TableCell>
-                                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                                    {Moment(order.createdAt).format("MMMM DD, yyyy")}
-                                </TableCell>
-
-                                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                                     <div>
                                         <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                                            {order.book}
+                                            {order.section && order.section.book && order.section.book.name}
                                         </span>
                                         <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
-                                            {order.section}
+                                            {order.section && order.section.name}
                                         </span>
                                     </div>
                                 </TableCell>
+                                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                                    {Moment(order.createdt).format("MMMM DD, yyyy")}
+                                </TableCell>
+                                <div>
+                                    <span className="block text-center font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                                        {order._count && order._count.test_items}
+                                    </span>
+                                </div>
+
+
 
                                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                                     <Badge
                                         size="sm"
                                         color={
-                                            order.status === "Active"
-                                                ? "success"
-                                                : order.status === "Pending"
-                                                    ? "warning"
-                                                    : "error"
+                                            "success"
+                                            // order.status === "Active"
+                                            //     ? "success"
+                                            //     : order.status === "Pending"
+                                            //         ? "warning"
+                                            //         : "error"
                                         }
                                     >
-                                        {order.status}
+                                        {/* {order.status} */}
+                                        Active
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 flex gap-2  flex-row items-center">
@@ -476,8 +279,7 @@ export default function TestsTable() {
                                         className="text-xl fill-gray-500 dark:fill-gray-400"
                                         onClick={() => {
                                             setTest({
-                                                name: order.name,
-                                                image: "",
+                                                ...order
                                             });
                                             openModal();
                                         }}
@@ -569,10 +371,15 @@ export default function TestsTable() {
                                 <div>
                                     <Label>Book</Label>
                                     <Select
-                                        options={all_Book_options}
+                                        options={books}
                                         className="dark:bg-dark-900"
                                         defaultValue={`${Test.section}`}
-                                        onChange={() => { }}
+                                        onChange={(e) => {
+                                            setTest({
+                                                ...Test,
+                                                book_id: +e
+                                            })
+                                        }}
 
                                     />
                                 </div>

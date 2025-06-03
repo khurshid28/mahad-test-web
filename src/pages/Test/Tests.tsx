@@ -8,15 +8,20 @@ import { useModal } from "../../hooks/useModal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import { Modal } from "../../components/ui/modal";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import FileInput from "../../components/form/input/FileInput";
 import Select from "../../components/form/Select";
 import TestsTable from "../../components/tables/test/testsTable";
+import axiosClient from "../../service/axios.service";
+import { useFetchWithLoader } from "../../hooks/useFetchWithLoader";
+import { LoadSpinner } from "../../components/spinner/load-spinner";
 export interface Test {
+    id? : number;
     name?: string;
-    image?: string;
-    section?: string;
+    section?: any;
+    section_id?: number;
     book?: string
+    book_id?: number;
 }
 
 export default function TestsPage() {
@@ -30,8 +35,7 @@ export default function TestsPage() {
         setTest(emptyTest);
     };
     let emptyTest: Test = {
-        name: "",
-        image: "",
+      
     };
     let [Test, setTest] = useState<Test>(emptyTest);
 
@@ -43,14 +47,43 @@ export default function TestsPage() {
     };
 
 
+    const [all_Book_options, set_all_Book_options] = useState<HTMLOptionElement[]>([]);
+
+    
+    const fetchTests = useCallback(() => {
+        return axiosClient.get('/test/all').then(res => res.data);
+    }, []);
+
+    const { data, isLoading, error, refetch } = useFetchWithLoader({
+        fetcher: fetchTests,
+    });
+
+    const fetchBooks = useCallback(() => {
+        return axiosClient.get('/book/all').then(res => res.data);
+    }, []);
+
+    const { data: books_data } = useFetchWithLoader({
+        fetcher: fetchBooks,
+        onSuccess: useCallback((dataSubject: any[]) => {
+            set_all_Book_options((dataSubject as any[]).map((e, index) => {
+                return new Option(`${e.name}`, `${e.id}`)
+            }));
+
+        }, []),
+    });
 
 
 
-    const all_Book_options = [
-        { value: "Book 1", label: "Book 1" },
-        { value: "Book 2", label: "Book 2" },
-        { value: "Book 3", label: "Book 3" },
-    ];
+
+    
+
+
+
+    // const all_Book_options = [
+    //     { value: "Book 1", label: "Book 1" },
+    //     { value: "Book 2", label: "Book 2" },
+    //     { value: "Book 3", label: "Book 3" },
+    // ];
 
     const all_sections_options = [
         { value: "Section 1", label: "Section 1" },
@@ -65,36 +98,44 @@ export default function TestsPage() {
 
             <div className="space-y-6 ">
 
-                <ComponentCard
-                    title="Tests Table"
-                    action={
-                        <div className="flex flex-row gap-4">
-                            <div>
+            {
+                    isLoading && <div className="min-h-[450px]  flex-col flex justify-center">
+                        <LoadSpinner />
+                    </div>
+                }
 
-                                <Button
-                                    size="sm"
-                                    variant="outline"
-                                    endIcon={<DownloadIcon className="size-5 fill-white" />}
-                                >
-                                    Download
-                                </Button>
-                            </div>
-                            <Button
-                                size="sm"
-                                variant="primary"
-                                startIcon={<PlusIcon className="size-5 fill-white" />}
-                                onClick={() => {
-                                    setTest(emptyTest);
-                                    openModal();
-                                }}
-                            >
-                                Add Test
-                            </Button>
-                        </div>
-                    }
-                >
-                    <TestsTable />
-                </ComponentCard>
+           {
+            data &&      <ComponentCard
+            title="Tests Table"
+            action={
+                <div className="flex flex-row gap-4">
+                    <div>
+
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            endIcon={<DownloadIcon className="size-5 fill-white" />}
+                        >
+                            Download
+                        </Button>
+                    </div>
+                    <Button
+                        size="sm"
+                        variant="primary"
+                        startIcon={<PlusIcon className="size-5 fill-white" />}
+                        onClick={() => {
+                            setTest(emptyTest);
+                            openModal();
+                        }}
+                    >
+                        Add Test
+                    </Button>
+                </div>
+            }
+        >
+            <TestsTable data={data} refetch={refetch} books={all_Book_options}/>
+        </ComponentCard>
+           }
             </div>
             <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
                 <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
