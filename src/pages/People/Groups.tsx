@@ -73,7 +73,7 @@ export default function GroupsPage() {
         title="Groups | Test Dashboard"
         description="Test Dashboard"
       />
-      <PageBreadcrumb pageTitle="Groups" />
+      <PageBreadcrumb pageTitle="Guruhlar" />
 
       <div className="space-y-6 ">
         {
@@ -84,7 +84,7 @@ export default function GroupsPage() {
 
         {
           data && <ComponentCard
-            title="Groups Table"
+            title="Guruhlar jadvali"
             action={
               <>
                 <Button
@@ -97,7 +97,7 @@ export default function GroupsPage() {
                     openModal()
                   }}
                 >
-                  Add Group
+                  Qo'shish
                 </Button>
               </>
             }
@@ -110,7 +110,7 @@ export default function GroupsPage() {
         <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
           <div className="px-2 pr-14">
             <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Add Group
+              Guruh qo'shish
             </h4>
             <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
               Create new Group with full details.

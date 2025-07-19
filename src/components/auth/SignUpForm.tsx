@@ -129,7 +129,7 @@ export default function SignUpForm() {
                   </Label>
                   <div className="relative">
                     <Input
-                      placeholder="Enter your password"
+                      placeholder="Parolni kiriting"
                       type={showPassword ? "text" : "password"}
                     />
                     <span
@@ -178,7 +178,7 @@ export default function SignUpForm() {
                   to="/signin"
                   className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
                 >
-                  Sign In
+                  Kirish
                 </Link>
               </p>
             </div>

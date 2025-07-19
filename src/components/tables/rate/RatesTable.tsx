@@ -185,11 +185,11 @@ export default function RatesTable({ data, groups, refetch }: {
 
 
   const group_options = [
-    { value: "All group", label: "All group" },
+    { value: "Hamma guruh", label: "Hamma guruh" },
    ...groups
   ];
   let [optionValue, setoptionValue] = useState("5");
-  let [groupoptionValue, setGroupoptionValue] = useState("All group");
+  let [groupoptionValue, setGroupoptionValue] = useState("Hamma guruh");
   
  
   
@@ -227,7 +227,7 @@ export default function RatesTable({ data, groups, refetch }: {
   
   useEffect(() => {
     setCurrentPage(1);
-    if (groupoptionValue == "All group") {
+    if (groupoptionValue == "Hamma guruh") {
       setTableData(data)
       
     }else{
@@ -247,15 +247,13 @@ export default function RatesTable({ data, groups, refetch }: {
 
       <div className="px-5 py-3  flex flex-row justify-between items-center border-b border-gray-100 dark:border-white/[0.05]">
           <div className="flex flex-row items-center gap-2 text-theme-sm font-medium text-gray-500 text-start  dark:text-gray-400">
-            <span>Show</span>
-
-            <Select
+          <Select
               options={options}
               onChange={handleSelectChange}
               className="dark:bg-dark-900"
               defaultValue="5"
             />
-            <span>entries</span>
+            <span>Ko'rsatish</span>
           </div>
           <div className="flex flex-row items-center gap-2 text-theme-sm font-medium text-gray-500 text-start  dark:text-gray-400">
             
@@ -275,19 +273,19 @@ export default function RatesTable({ data, groups, refetch }: {
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Students
+                Studentlar
               </TableCell>
               <TableCell
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400 "
               >
-                Finished
+                Tugatilgan
               </TableCell>
               <TableCell
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Group Name
+                Guruh nomi
               </TableCell>
 
               {/* <TableCell
@@ -300,7 +298,7 @@ export default function RatesTable({ data, groups, refetch }: {
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Rate
+                Reyting
               </TableCell>
             </TableRow>
           </TableHeader>
@@ -397,9 +395,9 @@ export default function RatesTable({ data, groups, refetch }: {
           </Button>
         </div>
         <div>
-          Showing {(currentPage - 1) * +optionValue + 1} to{" "}
-          {Math.min(tableData.length, currentPage * +optionValue)} of{" "}
-          {tableData.length} entries
+        {(currentPage - 1) * +optionValue + 1} dan  {" "}
+          {Math.min(tableData.length, currentPage * +optionValue)}  gacha, {" "}
+          {tableData.length}  
         </div>
       </div>
     </div>

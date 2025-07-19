@@ -614,15 +614,13 @@ export default function TeachersTable() {
       <div className="max-w-full overflow-x-auto">
         <div className="px-5 py-3  flex flex-row justify-between items-center border-b border-gray-100 dark:border-white/[0.05]">
           <div className="flex flex-row items-center gap-2 text-theme-sm font-medium text-gray-500 text-start  dark:text-gray-400">
-            <span>Show</span>
-
-            <Select
+          <Select
               options={options}
               onChange={handleSelectChange}
               className="dark:bg-dark-900"
               defaultValue="5"
             />
-            <span>entries</span>
+            <span>Ko'rsatish</span>
           </div>
           <div>
             {" "}
@@ -631,7 +629,7 @@ export default function TeachersTable() {
               variant="outline"
               endIcon={<DownloadIcon className="size-5 fill-white" />}
             >
-              Download
+              Yuklab olish
             </Button>
           </div>
         </div>
@@ -811,7 +809,9 @@ export default function TeachersTable() {
             <ArrowRightIcon className=" fill-gray-500  dark:fill-gray-400 scale-200" />
           </Button>
         </div>
-        <div>Showing {((currentPage - 1) * +optionValue)  + 1} to {Math.min(statictableData.length, currentPage  * +optionValue)} of {statictableData.length} entries</div>
+        {(currentPage - 1) * +optionValue + 1} dan  {" "}
+          {Math.min(tableData.length, currentPage * +optionValue)}  gacha, {" "}
+          {tableData.length}  
       </div>
 
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">

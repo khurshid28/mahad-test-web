@@ -324,7 +324,7 @@ import { toast } from "react-toastify";
   
 
     const Subject_options = [
-      new Option("All Subjects","All Subjects"),
+      new Option("Hamma Fanlar","Hamma Fanlar"),
      ...subjects
     ];
 
@@ -334,7 +334,7 @@ import { toast } from "react-toastify";
     //   { value: "Subject 3", label: "Subject 3"},
     // ];
     
-    let [subjectoptionValue, setSubjectoptionValue] = useState("All Subjects");
+    let [subjectoptionValue, setSubjectoptionValue] = useState("Hamma Fanlar");
     
    
     
@@ -348,7 +348,7 @@ import { toast } from "react-toastify";
       setCurrentPage(1);
       
       
-      if (subjectoptionValue == "All Subjects") {
+      if (subjectoptionValue == "Hamma Fanlar") {
         settableData(data);
         
       }else{
@@ -415,15 +415,13 @@ import { toast } from "react-toastify";
         <div className="max-w-full overflow-x-auto">
           <div className="px-5 py-3  flex flex-row justify-between items-center border-b border-gray-100 dark:border-white/[0.05]">
             <div className="flex flex-row items-center gap-2 text-theme-sm font-medium text-gray-500 text-start  dark:text-gray-400">
-              <span>Show</span>
-  
-              <Select
-                options={options}
-                onChange={handleSelectChange}
-                className="dark:bg-dark-900"
-                defaultValue="5"
-              />
-              <span>entries</span>
+            <Select
+              options={options}
+              onChange={handleSelectChange}
+              className="dark:bg-dark-900"
+              defaultValue="5"
+            />
+            <span>Ko'rsatish</span>
             </div>
             <div className="flex flex-row items-center gap-2 text-theme-sm font-medium text-gray-500 text-start  dark:text-gray-400">
             
@@ -443,19 +441,19 @@ import { toast } from "react-toastify";
                   isHeader
                   className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Books
+                  Kitoblar
                 </TableCell>
                 <TableCell
                   isHeader
                   className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Added
+                  Sana
                 </TableCell>
                 <TableCell
                   isHeader
                   className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                 >
-                  Subject Name
+                  Fan
                 </TableCell>
   
                 <TableCell
@@ -593,9 +591,9 @@ import { toast } from "react-toastify";
             </Button>
           </div>
           <div>
-            Showing {(currentPage - 1) * +optionValue + 1} to{" "}
-            {Math.min(tableData.length, currentPage * +optionValue)} of{" "}
-            {data.length} entries
+          {(currentPage - 1) * +optionValue + 1} dan  {" "}
+          {Math.min(tableData.length, currentPage * +optionValue)}  gacha, {" "}
+          {tableData.length}  
           </div>
         </div>
   
@@ -603,7 +601,7 @@ import { toast } from "react-toastify";
           <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
             <div className="px-2 pr-14">
               <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Edit Book
+              Kitobni o'zgartirish
               </h4>
               <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
                 Update Book with full details.

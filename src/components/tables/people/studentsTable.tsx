@@ -686,15 +686,13 @@ export default function StudentsTable({ data, groups, refetch }: {
       <div className="max-w-full overflow-x-auto">
         <div className="px-5 py-3  flex flex-row justify-between items-center border-b border-gray-100 dark:border-white/[0.05]">
           <div className="flex flex-row items-center gap-2 text-theme-sm font-medium text-gray-500 text-start  dark:text-gray-400">
-            <span>Show</span>
-
-            <Select
+          <Select
               options={options}
               onChange={handleSelectChange}
               className="dark:bg-dark-900"
               defaultValue="5"
             />
-            <span>entries</span>
+            <span>Ko'rsatish</span>
           </div>
           <div>
             {" "}
@@ -703,7 +701,7 @@ export default function StudentsTable({ data, groups, refetch }: {
               variant="outline"
               endIcon={<DownloadIcon className="size-5 fill-white" />}
             >
-              Download
+              Yuklab olish
             </Button>
           </div>
         </div>
@@ -715,26 +713,26 @@ export default function StudentsTable({ data, groups, refetch }: {
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Students
+                Studentlar
               </TableCell>
 
               <TableCell
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Group
+                Guruh
               </TableCell>
               <TableCell
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Added
+                Sana
               </TableCell>
               <TableCell
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Password
+                Parol
               </TableCell>
               <TableCell
                 isHeader
@@ -896,14 +894,20 @@ export default function StudentsTable({ data, groups, refetch }: {
             <ArrowRightIcon className=" fill-gray-500  dark:fill-gray-400 scale-200" />
           </Button>
         </div>
-        <div>Showing {((currentPage - 1) * +optionValue) + 1} to {Math.min(data.length, currentPage * +optionValue)} of {data.length} entries</div>
+        <div>
+
+
+        {(currentPage - 1) * +optionValue + 1} dan  {" "}
+          {Math.min(tableData.length, currentPage * +optionValue)}  gacha, {" "}
+          {tableData.length}  
+        </div>
       </div>
 
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
         <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
           <div className="px-2 pr-14">
             <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Edit Student
+               Studentni o'zgartirish
             </h4>
             <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
               Update Student with full details.

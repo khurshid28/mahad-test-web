@@ -112,7 +112,7 @@ export default function StudentsPage() {
         title="Students | Test Dashboard"
         description="Test Dashboard"
       />
-      <PageBreadcrumb pageTitle="Students" />
+      <PageBreadcrumb pageTitle="Studentlar" />
 
       <div className="space-y-6 ">
 
@@ -122,7 +122,7 @@ export default function StudentsPage() {
           </div>
         }
         {data && <ComponentCard
-          title="Students Table"
+          title="Studentlar jadvali"
           action={
             <>
               <Button
@@ -134,7 +134,7 @@ export default function StudentsPage() {
                   openModal()
                 }}
               >
-                Add Student
+                Qo'shish
               </Button>
             </>
           }
@@ -146,7 +146,7 @@ export default function StudentsPage() {
         <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
           <div className="px-2 pr-14">
             <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Add Student
+              Student qo'shish
             </h4>
             <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
               Create new Student with full details.

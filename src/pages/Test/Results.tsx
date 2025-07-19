@@ -39,7 +39,7 @@ const [all_group_options, set_all_group_options] = useState<HTMLOptionElement[]>
         title="Test Dashboard"
         description="Test Dashboard"
       />
-      <PageBreadcrumb pageTitle="Results" />
+      <PageBreadcrumb pageTitle="Natijalar" />
       <div className="space-y-6">
 
         {
@@ -48,7 +48,7 @@ const [all_group_options, set_all_group_options] = useState<HTMLOptionElement[]>
           </div>
         }
         {
-          data && <ComponentCard title="Results Table">
+          data && <ComponentCard title="Natijalar jadvali">
             <ResultsTable data={data} refetch={refetch} groups={all_group_options}/>
           </ComponentCard>
         }

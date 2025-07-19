@@ -53,10 +53,10 @@ export default function SignInForm() {
         <div>
           <div className="mb-5 sm:mb-8">
             <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-              Sign In
+              Kirish
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Welcome!
+              Xush Kelibsiz!
             </p>
           </div>
           <div>
@@ -86,7 +86,7 @@ export default function SignInForm() {
                     fill="#EB4335"
                   />
                 </svg>
-                Sign in with Google
+                Kirish with Google
               </button>
               <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
                 <svg
@@ -99,7 +99,7 @@ export default function SignInForm() {
                 >
                   <path d="M15.6705 1.875H18.4272L12.4047 8.75833L19.4897 18.125H13.9422L9.59717 12.4442L4.62554 18.125H1.86721L8.30887 10.7625L1.51221 1.875H7.20054L11.128 7.0675L15.6705 1.875ZM14.703 16.475H16.2305L6.37054 3.43833H4.73137L14.703 16.475Z" />
                 </svg>
-                Sign in with X
+                Kirish with X
               </button>
             </div> */}
             {/* <div className="relative py-3 sm:py-5">
@@ -122,12 +122,12 @@ export default function SignInForm() {
                 </div>
                 <div>
                   <Label>
-                    Password <span className="text-error-500">*</span>{" "}
+                    Parol  <span className="text-error-500">*</span>{" "}
                   </Label>
                   <div className="relative">
                     <Input
                       type={showPassword ? "text" : "password"}
-                      placeholder="Password"
+                      placeholder="Parolni kiriting"
                       onChange={(e) => setPassword(e.target.value)}
                     />
                     <span
@@ -158,7 +158,7 @@ export default function SignInForm() {
                 </div> */}
                 <div>
                   <Button className="w-full mt-8" size="sm" onClick={handleSubmit} >
-                    Sign in
+                    Kirish
                   </Button>
                 </div>
               </div>

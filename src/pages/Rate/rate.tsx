@@ -67,7 +67,7 @@ export default function RatePage() {
         title="Test Dashboard"
         description="Test Dashboard"
       />
-      <PageBreadcrumb pageTitle="Rates" />
+      <PageBreadcrumb pageTitle="Reyting" />
       <div className="space-y-6">
 
         {
@@ -76,7 +76,7 @@ export default function RatePage() {
           </div>
         }
         {
-          data && <ComponentCard title="Rates Table">
+          data && <ComponentCard title="Reyting jadvali">
             <RatesTable data={sortedData(data)} refetch={refetch} groups={group_options} />
           </ComponentCard>
         }

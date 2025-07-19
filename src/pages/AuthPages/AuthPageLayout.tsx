@@ -26,7 +26,7 @@ export default function AuthLayout({
                 />
               </Link>
               <p className="text-center text-gray-400 dark:text-white/60">
-                Welcome Test platform
+                 Test platformga Xush Kelibsiz! 
               </p>
             </div>
           </div>

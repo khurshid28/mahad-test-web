@@ -82,7 +82,7 @@ export default function UserDropdown() {
                   fill=""
                 />
               </svg>
-              Edit profile
+              Profil o'zgartirish
             </DropdownItem>
           </li>
           {/* <li>
@@ -158,7 +158,7 @@ export default function UserDropdown() {
               fill=""
             />
           </svg>
-          Sign out
+          Chiqish
         </Link>
       </Dropdown>
     </div>

@@ -94,7 +94,7 @@ export default function TestsPage() {
     return (
         <>
             <PageMeta title="Tests | Test Dashboard" description="Test Dashboard" />
-            <PageBreadcrumb pageTitle="Tests" />
+            <PageBreadcrumb pageTitle="Testlar" />
 
             <div className="space-y-6 ">
 
@@ -106,7 +106,7 @@ export default function TestsPage() {
 
            {
             data &&      <ComponentCard
-            title="Tests Table"
+            title="Testlar jadvali"
             action={
                 <div className="flex flex-row gap-4">
                     <div>
@@ -116,7 +116,7 @@ export default function TestsPage() {
                             variant="outline"
                             endIcon={<DownloadIcon className="size-5 fill-white" />}
                         >
-                            Download
+                            Yuklab olish
                         </Button>
                     </div>
                     <Button
@@ -128,7 +128,7 @@ export default function TestsPage() {
                             openModal();
                         }}
                     >
-                        Add Test
+                        Qo'shish
                     </Button>
                 </div>
             }
@@ -141,7 +141,7 @@ export default function TestsPage() {
                 <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
                     <div className="px-2 pr-14">
                         <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-                            Add Test
+                            Qo'shish
                         </h4>
                         <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
                             Create new Test with full details.

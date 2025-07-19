@@ -35,7 +35,7 @@ const navItems: NavItem[] = [
   },
   {
     icon: <ShootingStarIcon />,
-    name: "Rate",
+    name: "Reyting",
     path: "/rate",
   },
   // {
@@ -49,12 +49,12 @@ const navItems: NavItem[] = [
   //   path: "/profile",
   // },
   {
-    name: "People",
+    name: "Adminstator",
     icon: <UserCircleIcon />,
     subItems: [
-      { name: "Teachers", path: "/teachers", pro: false },
-      { name: "Groups", path: "/groups", pro: false },
-      { name: "Students", path: "/students", pro: false }
+      { name: "O'qituvchilar", path: "/teachers", pro: false },
+      { name: "Guruhlar", path: "/groups", pro: false },
+      { name: "Studentlar", path: "/students", pro: false }
     
     ],
   },
@@ -63,11 +63,11 @@ const navItems: NavItem[] = [
     name: "Test",
     icon: <ListIcon />,
     subItems: [
-      { name: "Subjects", path: "/subjects", pro: false },
-      { name: "Books", path: "/books", pro: false },
-      { name: "Sections", path: "/sections", pro: false },
-      { name: "Tests", path: "/tests", pro: false },
-      { name: "Results", path: "/results", pro: false }
+      { name: "Fanlar", path: "/subjects", pro: false },
+      { name: "Kitoblar", path: "/books", pro: false },
+      { name: "Bo'limlar", path: "/sections", pro: false },
+      { name: "Testlar", path: "/tests", pro: false },
+      { name: "Natijalar", path: "/results", pro: false }
     
     ],
   },
@@ -117,7 +117,7 @@ const navItems: NavItem[] = [
 //   //   icon: <PlugInIcon />,
 //   //   name: "Authentication",
 //   //   subItems: [
-//   //     { name: "Sign In", path: "/signin", pro: false },
+//   //     { name: "Kirish", path: "/signin", pro: false },
 //   //     { name: "Sign Up", path: "/signup", pro: false },
 //   //   ],
 //   // },
