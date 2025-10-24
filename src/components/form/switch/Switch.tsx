@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface SwitchProps {
   label: string;
   defaultChecked?: boolean;
+  checked?: boolean; // allow controlled usage
   disabled?: boolean;
   onChange?: (checked: boolean) => void;
   color?: "blue" | "gray"; // Added prop to toggle color theme
@@ -11,16 +12,27 @@ interface SwitchProps {
 const Switch: React.FC<SwitchProps> = ({
   label,
   defaultChecked = false,
+  checked,
   disabled = false,
   onChange,
   color = "blue", // Default to blue color
 }) => {
   const [isChecked, setIsChecked] = useState(defaultChecked);
 
+  // keep internal state in sync when used as controlled component
+  useEffect(() => {
+    if (typeof checked === "boolean") {
+      setIsChecked(checked);
+    }
+  }, [checked]);
+
   const handleToggle = () => {
     if (disabled) return;
-    const newCheckedState = !isChecked;
-    setIsChecked(newCheckedState);
+    const newCheckedState = typeof checked === "boolean" ? !checked : !isChecked;
+    // update internal state for uncontrolled mode
+    if (typeof checked !== "boolean") {
+      setIsChecked(newCheckedState);
+    }
     if (onChange) {
       onChange(newCheckedState);
     }

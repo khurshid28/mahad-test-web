@@ -6,6 +6,7 @@ import { BoxIcon, PlusIcon } from "../../icons";
 import Button from "../../components/ui/button/Button";
 import { useModal } from "../../hooks/useModal";
 import Label from "../../components/form/Label";
+import Switch from "../../components/form/switch/Switch";
 import Input from "../../components/form/input/InputField";
 import { Modal } from "../../components/ui/modal";
 import { useCallback, useState } from "react";
@@ -18,6 +19,9 @@ import { toast } from "react-toastify";
 export interface Group {
   name?: string;
   image?: string;
+  hasTime?: boolean;
+  timeMinutes?: number;
+  fullTime?: number;
 }
 export default function GroupsPage() {
 
@@ -34,15 +38,23 @@ export default function GroupsPage() {
 
   let [name,setName] =useState("");
   let [file,setFile] =useState<File | undefined>();
+  let [hasTime, setHasTime] = useState<boolean>(false);
+  let [timeMinutes, setTimeMinutes] = useState<number>(0);
+  let [fullTime, setFullTime] = useState<number>(0);
 
 
   let sendGroup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
-      const res = await axiosClient.post('/group', { name });
-      
-     
+      const payload = {
+        name,
+        hasTime,
+        timeMinutes: hasTime ? timeMinutes : 0,
+        fullTime: hasTime ? fullTime : 0,
+      };
+      const res = await axiosClient.post('/group', payload);
+
       toast.success('Guruh muvaffaqiyatli yaratildi');
       await refetch();
 
@@ -94,6 +106,9 @@ export default function GroupsPage() {
                   onClick={() => {
                     setName("");
                     setFile(undefined);
+                    setHasTime(false);
+                    setTimeMinutes(0);
+                    setFullTime(0);
                     openModal()
                   }}
                 >
@@ -139,6 +154,60 @@ export default function GroupsPage() {
                 </div>
               </div>
             </div>
+
+            <div className="px-2 mt-4">
+              <Label>Timer</Label>
+              <div className="flex flex-col gap-3 mt-2">
+                <div className="flex items-center">
+                  <Switch
+                    label="Timerni aktivlashtirish"
+                    checked={hasTime}
+                    onChange={(v) => {
+                      setHasTime(v);
+                      if (!v) {
+                        setTimeMinutes(0);
+                        setFullTime(0);
+                      }
+                    }}
+                  />
+                </div>
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-col">
+                      <Label>Har bir savol uchun vaqt (sekund)</Label>
+                      <div className="w-1/2">
+                        <Input
+                          type="number"
+                          value={timeMinutes}
+                          className="w-full"
+                          disabled={!hasTime}
+                          onChange={(e) => {
+                            const v = Number(e.target.value || 0);
+                            setTimeMinutes(v);
+                            if (v > 0) setFullTime(0);
+                          }}
+                        />
+                      </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <Label>To'liq test uchun vaqt (sekund)</Label>
+                    <div className="w-1/2">
+                      <Input
+                        type="number"
+                        value={fullTime}
+                        className="w-full"
+                        disabled={!hasTime}
+                        onChange={(e) => {
+                          const v = Number(e.target.value || 0);
+                          setFullTime(v);
+                          if (v > 0) setTimeMinutes(0);
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
               <Button size="sm" variant="outline" onClick={closeModal}>
                 Yopish

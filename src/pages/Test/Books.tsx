@@ -6,6 +6,7 @@ import { BoxIcon, DownloadIcon, PlusIcon } from "../../icons";
 import Button from "../../components/ui/button/Button";
 import { useModal } from "../../hooks/useModal";
 import Label from "../../components/form/Label";
+import Switch from "../../components/form/switch/Switch";
 import Input from "../../components/form/input/InputField";
 import { Modal } from "../../components/ui/modal";
 import { useCallback, useState } from "react";
@@ -25,6 +26,8 @@ export interface Book {
   subject_id?: number;
   imageFile?: File;
   subject? :any
+  fullBlock?: boolean;
+  stepBlock?: boolean;
 }
 
 export default function BooksPage() {
@@ -47,6 +50,9 @@ export default function BooksPage() {
       formData.append('name', Book.name ?? "");
       formData.append('subject_id', `${Book.subject_id}`);
       if (Book.imageFile) formData.append('image', Book.imageFile); 
+  // append flags
+  formData.append('fullBlock', Book.fullBlock ? '1' : '0');
+  formData.append('stepBlock', Book.stepBlock ? '1' : '0');
 
       const res = await axiosClient.post('/book', formData, {
         headers: {
@@ -66,7 +72,8 @@ export default function BooksPage() {
     }
   };
   let emptyBook: Book = {
-  
+    fullBlock: false,
+    stepBlock: false,
   };
   let [Book, setBook] = useState<Book>(emptyBook);
 
@@ -181,7 +188,7 @@ export default function BooksPage() {
           </div>
           <form className="flex flex-col">
             <div className="px-2 overflow-y-auto custom-scrollbar">
-              <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                 {/* <div>
                   <MultiSelect
                     label="Groups"
@@ -232,8 +239,42 @@ export default function BooksPage() {
                     className="custom-class"
                   />
                 </div>
+
+                
               </div>
             </div>
+
+            {/* Ruhsatlar - placed separately from other properties */}
+            <div className="px-2 mt-4">
+              <Label>Ruhsatlar</Label>
+              <div className="flex flex-col gap-3 mt-2">
+                <div className="flex items-center">
+                  <Switch
+                    label="Testni ishlashga ruhsat berish"
+                    checked={Book.fullBlock ?? false}
+                    onChange={(v) =>
+                      setBook({
+                        ...Book,
+                        fullBlock: v,
+                      })
+                    }
+                  />
+                </div>
+                <div className="flex items-center">
+                  <Switch
+                    label="Ketma-ket ishlash"
+                    checked={Book.stepBlock ?? false}
+                    onChange={(v) =>
+                      setBook({
+                        ...Book,
+                        stepBlock: v,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
               <Button size="sm" variant="outline" onClick={closeModal}>
                 Yopish
