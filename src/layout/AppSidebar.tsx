@@ -67,6 +67,7 @@ const navItems: NavItem[] = [
       { name: "Kitoblar", path: "/books", pro: false },
       { name: "Bo'limlar", path: "/sections", pro: false },
       { name: "Testlar", path: "/tests", pro: false },
+      { name: "Maxsus Test", path: "/special-tests", pro: false },
       { name: "Natijalar", path: "/results", pro: false }
     
     ],

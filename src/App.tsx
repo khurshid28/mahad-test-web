@@ -26,6 +26,7 @@ import BooksPage from "./pages/Test/Books";
 import SectionsPage from "./pages/Test/Sections";
 import ResultsPage from "./pages/Test/Results";
 import TestsPage from "./pages/Test/Tests";
+import SpecialTestsPage from "./pages/Test/SpecialTests";
 
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -54,6 +55,7 @@ export default function App() {
             <Route path="/books" element={<BooksPage />} />
             <Route path="/sections" element={<SectionsPage />} />
             <Route path="/tests" element={<TestsPage />} />
+            <Route path="/special-tests" element={<SpecialTestsPage />} />
 
             <Route path="/results" element={<ResultsPage />} />
 
