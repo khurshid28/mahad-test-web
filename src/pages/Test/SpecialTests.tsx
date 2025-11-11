@@ -150,6 +150,13 @@ const mockSpecialTests: SpecialTest[] = [
 ];
 
 export default function SpecialTestsPage() {
+  // Barcha testlarni ko‘rish modalida random tanlangan testlar va random kalitlar uchun state
+  const [previewTestItems, setPreviewTestItems] = useState<TestItem[]>([]);
+  const [previewAnswerKeys, setPreviewAnswerKeys] = useState<{[key: number]: string}>({});
+  // Modal filter state
+  const [filterSubject, setFilterSubject] = useState<number | null>(null);
+  const [filterBook, setFilterBook] = useState<number | null>(null);
+  const [filterSection, setFilterSection] = useState<number | null>(null);
   // Modal ochiq/berkitilganligini boshqarish uchun state
   const [isAllItemsModalOpen, setIsAllItemsModalOpen] = useState(false);
   // Barcha test-itemlarni saqlash uchun state
@@ -339,6 +346,9 @@ export default function SpecialTestsPage() {
         setIsFallbackModalOpen(true);
         return;
       }
+    } catch (e) {
+      console.error('Test tuzishda xatolik:', e);
+    }
   // Fallback random testni modal orqali tasdiqlash
   const handleFallbackRandom = () => {
     if (!fallbackPendingTest) return;
@@ -390,108 +400,46 @@ export default function SpecialTestsPage() {
         </div>
       </Modal>
       {/* Barcha test-itemlarni jadvalda ko‘rsatish */}
-      <ComponentCard title="Barcha test-itemlar (API dan)">
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-xs border">
-            <thead>
-              <tr className="bg-gray-100 dark:bg-gray-800">
-                <th className="p-2 border">#</th>
-                <th className="p-2 border">Savol</th>
-                <th className="p-2 border">A</th>
-                <th className="p-2 border">B</th>
-                <th className="p-2 border">C</th>
-                <th className="p-2 border">D</th>
-                <th className="p-2 border">To‘g‘ri javob</th>
-                <th className="p-2 border">Test ID</th>
-              </tr>
-            </thead>
-            <tbody>
-              {allTestItems.map((item, idx) => (
-                <tr key={item.id} className="border-b">
-                  <td className="p-2 border">{idx + 1}</td>
-                  <td className="p-2 border">{item.question}</td>
-                  <td className="p-2 border">{item.answer_A}</td>
-                  <td className="p-2 border">{item.answer_B}</td>
-                  <td className="p-2 border">{item.answer_C}</td>
-                  <td className="p-2 border">{item.answer_D}</td>
-                  <td className="p-2 border font-bold">{item.answer?.toUpperCase()}</td>
-                  <td className="p-2 border">{item.test_id}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <Modal isOpen={isAllItemsModalOpen} onClose={() => setIsAllItemsModalOpen(false)} className="max-w-5xl m-4">
+        <div className="p-6">
+          <h4 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white">Barcha test-itemlar (API dan)</h4>
+          <div className="max-h-[70vh] overflow-y-auto space-y-6">
+            {/* Faqat random tanlangan (test tuzishda tanlangan) test-itemlar */}
+            {previewTestItems.length > 0 && (
+              <>
+                {previewTestItems.map((item: TestItem, idx: number) => {
+                  const cleanQuestion = item.question?.replace(/^\s*\d+\.?\s*/, "") || "";
+                  const answerKey = previewAnswerKeys[item.id] || "A";
+                  return (
+                    <div key={item.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border dark:border-gray-700 shadow-sm">
+                      <div className="flex items-start gap-3 mb-2">
+                        <span className="shrink-0 w-8 h-8 bg-gray-200 dark:bg-gray-700 text-primary dark:text-white rounded-full flex items-center justify-center font-semibold text-sm">{idx + 1}</span>
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-800 dark:text-white mb-2">{cleanQuestion}</p>
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div><span className="font-semibold">A)</span> {item.answer_A}</div>
+                            <div><span className="font-semibold">B)</span> {item.answer_B}</div>
+                            <div><span className="font-semibold">C)</span> {item.answer_C}</div>
+                            <div><span className="font-semibold">D)</span> {item.answer_D}</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-3 text-sm text-center">
+                        <span className="inline-block bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-3 py-1 rounded-full font-semibold">Kalit: {answerKey}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+                <div className="flex justify-end gap-3 mt-6">
+                  <Button variant="outline" onClick={() => setIsAllItemsModalOpen(false)}>Bekor qilish</Button>
+                  <Button variant="outline" onClick={() => {/* testni ko‘rish */}}>Savollarni ko‘rish</Button>
+                  <Button onClick={() => {/* testni saqlash */}}>Saqlash</Button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
-      </ComponentCard>
-
-      if (generatedTest.items.length < pendingTest.testConfig.questionCount) {
-        toast.warning(
-          `Faqat ${generatedTest.items.length} ta savol topildi. ` +
-          `So'ralgan: ${pendingTest.testConfig.questionCount} ta`
-        );
-      }
-
-      const testWithGenerated = { ...pendingTest, generatedTest };
-      console.log('💾 Saqlash uchun test:', testWithGenerated);
-
-      if (editingTest) {
-        // Update existing test
-        setData(data.map(test => test.id === editingTest.id ? testWithGenerated : test));
-        toast.success('Test yangilandi');
-      } else {
-        // Create new test
-        setData([...data, testWithGenerated]);
-        toast.success('Test muvaffaqiyatli tuzildi');
-      }
-
-      setPendingTest(null);
-      closeConfirmModal();
-    } catch (error) {
-      console.error('❌ Test tuzishda xatolik:', error);
-      toast.error('Test tuzishda xatolik yuz berdi');
-      closeConfirmModal();
-    }
-  };
-
-  // Real random test tuzish funksiyasi
-  const generateRandomTest = (specialTest: SpecialTest): GeneratedTest => {
-    const { testConfig } = specialTest;
-    let availableItems: TestItem[] = [];
-
-    // 1. Bo'limlar tanlangan bo'lsa
-    if (testConfig.sectionIds && testConfig.sectionIds.length > 0) {
-      // Tanlangan bo'limlardagi testlarni topish (ichma-ich filter)
-      const sectionTests = tests.filter(t => testConfig.sectionIds!.includes(t.section_id));
-      const testIds = sectionTests.map(t => t.id);
-  availableItems = allTestItems.filter(item => item.test_id !== undefined && testIds.includes(item.test_id));
-    }
-    // 2. Kitob tanlangan bo'lsa
-    else if (testConfig.bookId) {
-      // Kitobdagi bo'limlarni topish
-      const bookSections = sections.filter(s => s.book_id === testConfig.bookId);
-      const sectionIds = bookSections.map(s => s.id);
-      const sectionTests = tests.filter(t => sectionIds.includes(t.section_id));
-      const testIds = sectionTests.map(t => t.id);
-      availableItems = allTestItems.filter(item => testIds.includes(item.test_id));
-    }
-    // 3. Faqat fan tanlangan bo'lsa
-    else {
-      // Fanga tegishli barcha kitoblarni topish
-      const subjectBooks = books.filter(b => b.subject_id === testConfig.subjectId);
-      const bookIds = subjectBooks.map(b => b.id);
-      // Kitoblarga tegishli barcha bo'limlarni topish
-      const subjectSections = sections.filter(s => bookIds.includes(s.book_id));
-      const sectionIds = subjectSections.map(s => s.id);
-      // Bo'limlarga tegishli barcha testlarni topish
-      const subjectTests = tests.filter(t => sectionIds.includes(t.section_id));
-      const testIds = subjectTests.map(t => t.id);
-      // Testlarga tegishli barcha test-itemlarni topish
-      availableItems = allTestItems.filter(item => testIds.includes(item.test_id));
-    }
-
-    // Fallback: Agar yuqoridagi zanjir bo'yicha hech narsa topilmasa, hammasini olish
-    if (availableItems.length === 0) {
-      availableItems = allTestItems;
-    }
+      </Modal>
 
     // Random tanlash
     const shuffled = [...availableItems].sort(() => Math.random() - 0.5);
@@ -1103,35 +1051,103 @@ export default function SpecialTestsPage() {
         <div className="p-6">
           <h4 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white">Barcha test-itemlar (API dan)</h4>
           <div className="max-h-[70vh] overflow-y-auto space-y-6">
-            {allTestItems
-              .slice()
-              .sort(() => Math.random() - 0.5)
-              .map((item: TestItem, idx: number) => {
-                // Savol boshidagi raqam va nuqtani olib tashlash ("1. Savol ..." -> "Savol ...")
-                const cleanQuestion = item.question?.replace(/^\s*\d+\.?\s*/, "") || "";
-                return (
-                  <div key={item.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border dark:border-gray-700 shadow-sm">
-                    <div className="flex items-start gap-3 mb-2">
-                      <span className="shrink-0 w-8 h-8 bg-gray-200 dark:bg-gray-700 text-primary dark:text-white rounded-full flex items-center justify-center font-semibold text-sm">{idx + 1}</span>
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-800 dark:text-white mb-2">{cleanQuestion}</p>
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          <div><span className="font-semibold">A)</span> {item.answer_A}</div>
-                          <div><span className="font-semibold">B)</span> {item.answer_B}</div>
-                          <div><span className="font-semibold">C)</span> {item.answer_C}</div>
-                          <div><span className="font-semibold">D)</span> {item.answer_D}</div>
+            {/* Filterlar */}
+            <div className="flex flex-wrap gap-3 mb-6">
+              <select
+                className="border rounded px-2 py-1"
+                value={filterSubject ?? ''}
+                onChange={e => setFilterSubject(e.target.value ? Number(e.target.value) : null)}
+              >
+                <option value="">Fan (barchasi)</option>
+                {subjects.map(sub => (
+                  <option key={sub.id} value={sub.id}>{sub.name}</option>
+                ))}
+              </select>
+              <select
+                className="border rounded px-2 py-1"
+                value={filterBook ?? ''}
+                onChange={e => setFilterBook(e.target.value ? Number(e.target.value) : null)}
+                disabled={!filterSubject}
+              >
+                <option value="">Kitob (barchasi)</option>
+                {books.filter(b => !filterSubject || b.subject_id === filterSubject).map(book => (
+                  <option key={book.id} value={book.id}>{book.name}</option>
+                ))}
+              </select>
+              <select
+                className="border rounded px-2 py-1"
+                value={filterSection ?? ''}
+                onChange={e => setFilterSection(e.target.value ? Number(e.target.value) : null)}
+                disabled={!filterBook}
+              >
+                <option value="">Bo'lim (barchasi)</option>
+                {sections.filter(s => !filterBook || s.book_id === filterBook).map(section => (
+                  <option key={section.id} value={section.id}>{section.name}</option>
+                ))}
+              </select>
+              <button className="ml-auto text-xs text-gray-500 underline" onClick={() => { setFilterSubject(null); setFilterBook(null); setFilterSection(null); }}>Tozalash</button>
+            </div>
+
+            {/* Filterlangan va random tanlangan test-itemlar (preview) */}
+            {previewTestItems.length > 0 && (
+              <>
+                {previewTestItems.map((item: TestItem, idx: number) => {
+                  const cleanQuestion = item.question?.replace(/^\s*\d+\.?\s*/, "") || "";
+                  const answerKey = previewAnswerKeys[item.id] || "A";
+                  return (
+                    <div key={item.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border dark:border-gray-700 shadow-sm">
+                      <div className="flex items-start gap-3 mb-2">
+                        <span className="shrink-0 w-8 h-8 bg-gray-200 dark:bg-gray-700 text-primary dark:text-white rounded-full flex items-center justify-center font-semibold text-sm">{idx + 1}</span>
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-800 dark:text-white mb-2">{cleanQuestion}</p>
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div><span className="font-semibold">A)</span> {item.answer_A}</div>
+                            <div><span className="font-semibold">B)</span> {item.answer_B}</div>
+                            <div><span className="font-semibold">C)</span> {item.answer_C}</div>
+                            <div><span className="font-semibold">D)</span> {item.answer_D}</div>
+                          </div>
                         </div>
                       </div>
+                      <div className="mt-3 text-sm text-center">
+                        <span className="inline-block bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-3 py-1 rounded-full font-semibold">Kalit: {answerKey}</span>
+                      </div>
                     </div>
-                    <div className="mt-3 text-sm text-center">
-                      <span className="inline-block bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-3 py-1 rounded-full font-semibold">Kalit: {item.answer?.toUpperCase()}</span>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+                <div className="flex justify-end gap-3 mt-6">
+                  <Button variant="outline" onClick={() => setIsAllItemsModalOpen(false)}>Bekor qilish</Button>
+                  <Button variant="outline" onClick={() => {/* testni ko‘rish */}}>Testni ko‘rish</Button>
+                  <Button onClick={() => {/* testni saqlash */}}>Saqlash</Button>
+                </div>
+              </>
+            )}
           </div>
           <div className="flex justify-end mt-4">
-            <Button variant="outline" onClick={() => setIsAllItemsModalOpen(false)}>Yopish</Button>
+            {/* Barcha savollarni ko‘rish tugmasi filter va son bo‘yicha previewni tayyorlaydi */}
+            <Button
+              variant="outline"
+              onClick={() => {
+                // Filterlangan test-itemlarni olish
+                let filtered = allTestItems.filter(item => {
+                  if (filterSection) return item.test_id && sections.find(s => s.id === filterSection && s.id === item.test_id);
+                  if (filterBook) return item.test_id && sections.find(s => s.book_id === filterBook && s.id === item.test_id);
+                  if (filterSubject) return item.test_id && books.find(b => b.subject_id === filterSubject && sections.find(s => s.book_id === b.id && s.id === item.test_id));
+                  return true;
+                });
+                // Random aralashtirish va tanlangan sonni olish (masalan, 10 ta)
+                filtered = filtered.slice().sort(() => Math.random() - 0.5).slice(0, questionCount);
+                // Har bir test uchun random kalit (A/B/C/D)
+                const keys = {};
+                filtered.forEach(item => {
+                  const variants = ["A", "B", "C", "D"];
+                  keys[item.id] = variants[Math.floor(Math.random() * 4)];
+                });
+                setPreviewTestItems(filtered);
+                setPreviewAnswerKeys(keys);
+              }}
+            >
+              Barcha savollarni ko‘rish
+            </Button>
           </div>
         </div>
       </Modal>
