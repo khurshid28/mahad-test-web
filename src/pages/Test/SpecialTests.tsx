@@ -1,3 +1,7 @@
+
+
+
+
 import * as FileSaver from "file-saver";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
@@ -15,7 +19,7 @@ import axiosClient from "../../service/axios.service";
 import Badge from "../../components/ui/badge/Badge";
 import Moment from "moment";
 import { EditIcon, DeleteIcon, TimeIcon, UserCircleIcon } from "../../icons";
-import { FaFilePdf, FaFileWord } from "react-icons/fa6";
+import { FiEye, FiDownload } from "react-icons/fi";
 import { Document, Packer, Paragraph, HeadingLevel } from "docx";
 
 interface Group {
@@ -56,15 +60,15 @@ interface Test {
 
 interface TestItem {
   id: number;
-  number: number;
-  question: string;
-  a: string;
-  b: string;
-  c: string;
-  d: string;
-  answer: string; // 'a', 'b', 'c', or 'd'
-  test_id: number;
-  createdt: string;
+  number?: number;
+  question?: string;
+  answer_A?: string;
+  answer_B?: string;
+  answer_C?: string;
+  answer_D?: string;
+  answer?: string; // 'A', 'B', 'C', 'D' yoki null
+  test_id?: number;
+  createdt?: string;
 }
 
 interface GeneratedTest {
@@ -146,6 +150,14 @@ const mockSpecialTests: SpecialTest[] = [
 ];
 
 export default function SpecialTestsPage() {
+  // Modal ochiq/berkitilganligini boshqarish uchun state
+  const [isAllItemsModalOpen, setIsAllItemsModalOpen] = useState(false);
+  // Barcha test-itemlarni saqlash uchun state
+  const [allTestItems, setAllTestItems] = useState<TestItem[]>([]);
+  // Modal state for fallback random
+  const [isFallbackModalOpen, setIsFallbackModalOpen] = useState(false);
+  const [fallbackPendingTest, setFallbackPendingTest] = useState<SpecialTest | null>(null);
+  const [fallbackMissingSections, setFallbackMissingSections] = useState<string[]>([]);
   const [data, setData] = useState<SpecialTest[]>(mockSpecialTests);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -154,7 +166,6 @@ export default function SpecialTestsPage() {
   const [books, setBooks] = useState<Book[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
   const [tests, setTests] = useState<Test[]>([]);
-  const [allTestItems, setAllTestItems] = useState<TestItem[]>([]);
 
   const { isOpen, openModal, closeModal } = useModal();
   const { isOpen: isConfirmOpen, openModal: openConfirmModal, closeModal: closeConfirmModal } = useModal();
@@ -308,9 +319,10 @@ export default function SpecialTestsPage() {
     console.log('🔴 Test tuzish boshlandi');
     console.log('📊 Available items:', allTestItems.length);
 
+
     try {
       // Real random test tuzish
-      let generatedTest = generateRandomTest(pendingTest);
+      const generatedTest = generateRandomTest(pendingTest);
       console.log('✅ Test tuzildi:', generatedTest);
 
       // Yetarli savol borligini tekshirish
@@ -322,24 +334,94 @@ export default function SpecialTestsPage() {
             .map(id => sections.find(s => s.id === id)?.name)
             .filter(Boolean) as string[];
         }
-        const msg = missingSections.length > 0
-          ? `Tanlangan bo'limlarda (${missingSections.join(", ")}) savollar topilmadi.`
-          : `Tanlangan bo'limlar uchun savollar topilmadi.`;
-
-        if (window.confirm(msg + " Boshqa bo'limlardan random savollar olishni xohlaysizmi?")) {
-          // Fallback: barcha test-itemlardan random tanlash
-          generatedTest = {
-            ...generatedTest,
-            items: allTestItems.sort(() => Math.random() - 0.5).slice(0, pendingTest.testConfig.questionCount),
-            answerKey: Object.fromEntries(
-              allTestItems.slice(0, pendingTest.testConfig.questionCount).map((item, i) => [i + 1, item.answer])
-            )
-          };
-        } else {
-          closeConfirmModal();
-          return;
-        }
+        setFallbackPendingTest(pendingTest);
+        setFallbackMissingSections(missingSections);
+        setIsFallbackModalOpen(true);
+        return;
       }
+  // Fallback random testni modal orqali tasdiqlash
+  const handleFallbackRandom = () => {
+    if (!fallbackPendingTest) return;
+    const questionCount = fallbackPendingTest.testConfig.questionCount;
+    const selectedItems = allTestItems.sort(() => Math.random() - 0.5).slice(0, questionCount);
+    const answerKey: { [key: number]: string } = {};
+    selectedItems.forEach((item, i) => { answerKey[i + 1] = item.answer; });
+    const generatedTest = {
+      id: `gen_${Date.now()}`,
+      specialTestId: fallbackPendingTest.id!,
+      items: selectedItems.map((item, i) => ({ ...item, number: i + 1 })),
+      createdAt: new Date().toISOString(),
+      answerKey,
+    };
+    const testWithGenerated = { ...fallbackPendingTest, generatedTest };
+    if (editingTest) {
+      setData(data.map(test => test.id === editingTest.id ? testWithGenerated : test));
+      toast.success('Test yangilandi');
+    } else {
+      setData([...data, testWithGenerated]);
+      toast.success('Test muvaffaqiyatli tuzildi');
+    }
+    setPendingTest(null);
+    setFallbackPendingTest(null);
+    setIsFallbackModalOpen(false);
+    closeConfirmModal();
+  };
+
+  const handleFallbackCancel = () => {
+    setFallbackPendingTest(null);
+    setIsFallbackModalOpen(false);
+    closeConfirmModal();
+  };
+      {/* Fallback random modal */}
+      <Modal isOpen={isFallbackModalOpen} onClose={handleFallbackCancel} className="max-w-[400px] m-4">
+        <div className="p-6">
+          <h4 className="mb-3 text-lg font-semibold text-gray-800 dark:text-white">Savollar topilmadi</h4>
+          <p className="mb-4 text-gray-700 dark:text-gray-300">
+            {fallbackMissingSections.length > 0
+              ? `Tanlangan bo'limlarda (${fallbackMissingSections.join(", ")}) savollar topilmadi.`
+              : `Tanlangan bo'limlar uchun savollar topilmadi.`}
+            <br />
+            <span className="font-medium">Boshqa bo'limlardan random savollar olishni xohlaysizmi?</span>
+          </p>
+          <div className="flex gap-3 justify-end">
+            <Button variant="outline" onClick={handleFallbackCancel}>Yo‘q</Button>
+            <Button onClick={handleFallbackRandom}>Ha, random tuzilsin</Button>
+          </div>
+        </div>
+      </Modal>
+      {/* Barcha test-itemlarni jadvalda ko‘rsatish */}
+      <ComponentCard title="Barcha test-itemlar (API dan)">
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-xs border">
+            <thead>
+              <tr className="bg-gray-100 dark:bg-gray-800">
+                <th className="p-2 border">#</th>
+                <th className="p-2 border">Savol</th>
+                <th className="p-2 border">A</th>
+                <th className="p-2 border">B</th>
+                <th className="p-2 border">C</th>
+                <th className="p-2 border">D</th>
+                <th className="p-2 border">To‘g‘ri javob</th>
+                <th className="p-2 border">Test ID</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allTestItems.map((item, idx) => (
+                <tr key={item.id} className="border-b">
+                  <td className="p-2 border">{idx + 1}</td>
+                  <td className="p-2 border">{item.question}</td>
+                  <td className="p-2 border">{item.answer_A}</td>
+                  <td className="p-2 border">{item.answer_B}</td>
+                  <td className="p-2 border">{item.answer_C}</td>
+                  <td className="p-2 border">{item.answer_D}</td>
+                  <td className="p-2 border font-bold">{item.answer?.toUpperCase()}</td>
+                  <td className="p-2 border">{item.test_id}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </ComponentCard>
 
       if (generatedTest.items.length < pendingTest.testConfig.questionCount) {
         toast.warning(
@@ -380,7 +462,7 @@ export default function SpecialTestsPage() {
       // Tanlangan bo'limlardagi testlarni topish (ichma-ich filter)
       const sectionTests = tests.filter(t => testConfig.sectionIds!.includes(t.section_id));
       const testIds = sectionTests.map(t => t.id);
-      availableItems = allTestItems.filter(item => testIds.includes(item.test_id));
+  availableItems = allTestItems.filter(item => item.test_id !== undefined && testIds.includes(item.test_id));
     }
     // 2. Kitob tanlangan bo'lsa
     else if (testConfig.bookId) {
@@ -418,7 +500,7 @@ export default function SpecialTestsPage() {
     // Javoblar kalitini tuzish
     const answerKey: { [key: number]: string } = {};
     selectedItems.forEach((item, index) => {
-      answerKey[index + 1] = item.answer;
+  answerKey[index + 1] = item.answer ?? "";
     });
 
     return {
@@ -476,10 +558,10 @@ export default function SpecialTestsPage() {
           <div class="question">
             <p class="question-number">${index + 1}. ${item.question}</p>
             <div class="options">
-              <p>A) ${item.a}</p>
-              <p>B) ${item.b}</p>
-              <p>C) ${item.c}</p>
-              <p>D) ${item.d}</p>
+              <p>A) ${item.answer_A}</p>
+              <p>B) ${item.answer_B}</p>
+              <p>C) ${item.answer_C}</p>
+              <p>D) ${item.answer_D}</p>
             </div>
           </div>
         `).join('')}
@@ -529,10 +611,10 @@ export default function SpecialTestsPage() {
                 text: `${idx + 1}. ${item.question}`,
                 spacing: { after: 100 }
               }),
-              new Paragraph({ text: `A) ${item.a}` }),
-              new Paragraph({ text: `B) ${item.b}` }),
-              new Paragraph({ text: `C) ${item.c}` }),
-              new Paragraph({ text: `D) ${item.d}` }),
+              new Paragraph({ text: `A) ${item.answer_A}` }),
+              new Paragraph({ text: `B) ${item.answer_B}` }),
+              new Paragraph({ text: `C) ${item.answer_C}` }),
+              new Paragraph({ text: `D) ${item.answer_D}` }),
               new Paragraph({ text: "" })
             ]).flat(),
             new Paragraph({ text: "Javoblar kaliti", heading: HeadingLevel.HEADING_2 }),
@@ -664,19 +746,9 @@ export default function SpecialTestsPage() {
                           size="mini"
                           variant="outline"
                           onClick={() => handleViewTest(test)}
+                          aria-label="Ko'rish"
                         >
-                          👁️
-                        </Button>
-                      )}
-                      {/* PDF Download - test tuzilgan bo'lsa */}
-                      {test.generatedTest && (
-                        <Button
-                          size="mini"
-                          variant="outline"
-                          onClick={() => exportToPDF(test)}
-                          aria-label="PDF yuklab olish"
-                        >
-                          <FaFilePdf className="w-5 h-5 text-red-600" />
+                          <FiEye className="w-5 h-5 font-bold text-gray-700" />
                         </Button>
                       )}
                       {/* DOCX Download - test tuzilgan bo'lsa */}
@@ -687,7 +759,7 @@ export default function SpecialTestsPage() {
                           onClick={() => exportToDOCX(test)}
                           aria-label="DOCX yuklab olish"
                         >
-                          <FaFileWord className="w-5 h-5 text-blue-700" />
+                          <FiDownload className="w-5 h-5 font-bold text-blue-700" />
                         </Button>
                       )}
                       {/* O'chirish */}
@@ -1019,10 +1091,50 @@ export default function SpecialTestsPage() {
             <Button variant="outline" onClick={closeConfirmModal}>
               Bekor qilish
             </Button>
+            <Button variant="outline" onClick={() => setIsAllItemsModalOpen(true)}>
+              Barcha savollarni ko‘rish
+            </Button>
             <Button onClick={confirmAndSaveTest}>
               Ha, test tuzilsin
             </Button>
           </div>
+      {/* Barcha test-itemlar modal */}
+      <Modal isOpen={isAllItemsModalOpen} onClose={() => setIsAllItemsModalOpen(false)} className="max-w-5xl m-4">
+        <div className="p-6">
+          <h4 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white">Barcha test-itemlar (API dan)</h4>
+          <div className="max-h-[70vh] overflow-y-auto space-y-6">
+            {allTestItems
+              .slice()
+              .sort(() => Math.random() - 0.5)
+              .map((item: TestItem, idx: number) => {
+                // Savol boshidagi raqam va nuqtani olib tashlash ("1. Savol ..." -> "Savol ...")
+                const cleanQuestion = item.question?.replace(/^\s*\d+\.?\s*/, "") || "";
+                return (
+                  <div key={item.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border dark:border-gray-700 shadow-sm">
+                    <div className="flex items-start gap-3 mb-2">
+                      <span className="shrink-0 w-8 h-8 bg-gray-200 dark:bg-gray-700 text-primary dark:text-white rounded-full flex items-center justify-center font-semibold text-sm">{idx + 1}</span>
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-800 dark:text-white mb-2">{cleanQuestion}</p>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div><span className="font-semibold">A)</span> {item.answer_A}</div>
+                          <div><span className="font-semibold">B)</span> {item.answer_B}</div>
+                          <div><span className="font-semibold">C)</span> {item.answer_C}</div>
+                          <div><span className="font-semibold">D)</span> {item.answer_D}</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-3 text-sm text-center">
+                      <span className="inline-block bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-3 py-1 rounded-full font-semibold">Kalit: {item.answer?.toUpperCase()}</span>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+          <div className="flex justify-end mt-4">
+            <Button variant="outline" onClick={() => setIsAllItemsModalOpen(false)}>Yopish</Button>
+          </div>
+        </div>
+      </Modal>
         </div>
       </Modal>
 
@@ -1071,7 +1183,7 @@ export default function SpecialTestsPage() {
                   return (
                     <div key={item.id} className="border dark:border-gray-700 rounded-lg p-4">
                       <div className="flex items-start gap-3">
-                        <span className="flex-shrink-0 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-semibold text-sm">
+                        <span className="shrink-0 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-semibold text-sm">
                           {index + 1}
                         </span>
                         <div className="flex-1 space-y-3">
@@ -1084,7 +1196,7 @@ export default function SpecialTestsPage() {
                             }`}>
                               <span className="font-semibold mr-2">A)</span>
                               <span className={answerKey === 'a' ? 'font-medium' : ''}>
-                                {item.a}
+                                {item.answer_A}
                               </span>
                             </div>
                             <div className={`p-3 rounded-lg transition-colors ${
@@ -1094,7 +1206,7 @@ export default function SpecialTestsPage() {
                             }`}>
                               <span className="font-semibold mr-2">B)</span>
                               <span className={answerKey === 'b' ? 'font-medium' : ''}>
-                                {item.b}
+                                {item.answer_B}
                               </span>
                             </div>
                             <div className={`p-3 rounded-lg transition-colors ${
@@ -1104,7 +1216,7 @@ export default function SpecialTestsPage() {
                             }`}>
                               <span className="font-semibold mr-2">C)</span>
                               <span className={answerKey === 'c' ? 'font-medium' : ''}>
-                                {item.c}
+                                {item.answer_C}
                               </span>
                             </div>
                             <div className={`p-3 rounded-lg transition-colors ${
@@ -1114,7 +1226,7 @@ export default function SpecialTestsPage() {
                             }`}>
                               <span className="font-semibold mr-2">D)</span>
                               <span className={answerKey === 'd' ? 'font-medium' : ''}>
-                                {item.d}
+                                {item.answer_D}
                               </span>
                             </div>
                           </div>
