@@ -1,39 +1,37 @@
-import EcommerceMetrics from "../../components/ecommerce/EcommerceMetrics";
-import MonthlySalesChart from "../../components/ecommerce/MonthlySalesChart";
-import StatisticsChart from "../../components/ecommerce/StatisticsChart";
-import MonthlyTarget from "../../components/ecommerce/MonthlyTarget";
-import RecentOrders from "../../components/ecommerce/RecentOrders";
-import DemographicCard from "../../components/ecommerce/DemographicCard";
+import DashboardMetrics from "../../components/dashboard/DashboardMetrics";
+import SubjectDistributionChart from "../../components/dashboard/SubjectDistributionChart";
+import RecentTests from "../../components/dashboard/RecentTests";
+import GroupStatistics from "../../components/dashboard/GroupStatistics";
+import PerformanceChart from "../../components/dashboard/PerformanceChart";
 import PageMeta from "../../components/common/PageMeta";
 
 export default function Home() {
   return (
     <>
       <PageMeta
-        title="Test Dashboard"
-        description="Test Dashboard"
+        title="Test Tizimi Dashboard"
+        description="Test Tizimi Dashboard"
       />
       <div className="grid grid-cols-12 gap-4 md:gap-6">
-        <div className="col-span-12 space-y-6 xl:col-span-7">
-          <EcommerceMetrics />
-
-          <MonthlySalesChart />
-        </div>
-
-        <div className="col-span-12 xl:col-span-5">
-          <MonthlyTarget />
-        </div>
-
+        {/* Asosiy statistikalar */}
         <div className="col-span-12">
-          <StatisticsChart />
+          <DashboardMetrics />
         </div>
 
-        <div className="col-span-12 xl:col-span-5">
-          <DemographicCard />
+        {/* Fanlar taqsimoti va oxirgi testlar */}
+        <div className="col-span-12 space-y-6 xl:col-span-8">
+          <SubjectDistributionChart />
+          <PerformanceChart />
         </div>
 
-        <div className="col-span-12 xl:col-span-7">
-          <RecentOrders />
+        {/* Guruhlar statistikasi */}
+        <div className="col-span-12 xl:col-span-4">
+          <GroupStatistics />
+        </div>
+
+        {/* Oxirgi testlar */}
+        <div className="col-span-12">
+          <RecentTests />
         </div>
       </div>
     </>
