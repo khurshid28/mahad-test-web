@@ -39,6 +39,7 @@ import FileInput from "../../form/input/FileInput";
 import { useFetchWithLoader } from "../../../hooks/useFetchWithLoader";
 import axiosClient from "../../../service/axios.service";
 import { toast } from "react-toastify";
+import Pagination from "../../common/Pagination";
 
 // interface Order {
 //   id: number;
@@ -167,9 +168,9 @@ export default function GroupsTable({
     }
   };
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/5 dark:bg-white/3">
       <div className="max-w-full overflow-x-auto">
-        <div className="px-5 py-3  flex flex-row justify-between items-center border-b border-gray-100 dark:border-white/[0.05]">
+        <div className="px-5 py-3  flex flex-row justify-between items-center border-b border-gray-100 dark:border-white/5">
           <div className="flex flex-row items-center gap-2 text-theme-sm font-medium text-gray-500 text-start  dark:text-gray-400">
             {/* <span>Show</span> */}
 
@@ -194,7 +195,7 @@ export default function GroupsTable({
         </div>
         <Table>
           {/* Table Header */}
-          <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+          <TableHeader className="border-b border-gray-100 dark:border-white/5">
             <TableRow>
               <TableCell
                 isHeader
@@ -232,7 +233,7 @@ export default function GroupsTable({
           </TableHeader>
 
           {/* Table Body */}
-          <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+          <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
             {currentItems.map((order, index) => (
               <TableRow key={index}>
                 <TableCell className="px-5 py-4 sm:px-6 text-start">
@@ -309,47 +310,17 @@ export default function GroupsTable({
         </Table>
       </div>
 
-      <div className="px-5 py-3 gap-3 flex flex-col md:flex-row justify-between md:items-center border-t border-gray-100 dark:border-white/[0.05] text-theme-sm font-medium text-gray-500  dark:text-gray-400">
-        <div className="flex flex-row items-center gap-2  text-start  ">
-          <Button
-            size="sm"
-            variant="outline"
-            className="w-10 h-10"
-            disabled={currentPage === 1}
-            onClick={goToPreviousPage}
-          >
-            <ArrowRightIcon className="rotate-180 fill-gray-500  dark:fill-gray-400 scale-200" />
-          </Button>
-
-          {[...Array(maxPage)].map((_, i) => (
-            <Button
-              size="sm"
-              variant={currentPage === i + 1 ? "primary" : "outline"}
-              className="w-10 h-10"
-              disabled={false}
-              key={i}
-              onClick={() => {
-                currentPage !== i + 1 && setCurrentPage(i + 1);
-              }}
-            >
-              {i + 1}
-            </Button>
-          ))}
-
-          <Button
-            size="sm"
-            variant="outline"
-            className="w-10 h-10"
-            disabled={currentPage === maxPage}
-            onClick={goToNextPage}
-          >
-            <ArrowRightIcon className=" fill-gray-500  dark:fill-gray-400 scale-200" />
-          </Button>
-        </div>
-        <div>
+      <div className="px-5 py-3 gap-3 flex flex-col md:flex-row justify-between md:items-center border-t border-gray-100 dark:border-white/5 text-theme-sm font-medium text-gray-500  dark:text-gray-400">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={maxPage}
+          onPageChange={setCurrentPage}
+          className="flex-1"
+        />
+        <div className="text-center md:text-right">
           {(currentPage - 1) * +optionValue + 1} dan{" "}
           {Math.min(tableData.length, currentPage * +optionValue)} gacha,{" "}
-          {tableData.length}
+          {tableData.length} ta
         </div>
       </div>
 

@@ -12,6 +12,7 @@ import Button from "../../components/ui/button/Button";
 import { useModal } from "../../hooks/useModal";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
+import DateTimePicker from "../../components/form/date-time-picker";
 import { Modal } from "../../components/ui/modal";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
@@ -84,8 +85,12 @@ export interface SpecialTest {
   name: string;
   activationStartTime: string;
   activationEndTime: string;
-  duration: number;
+  timePerQuestion?: number; // seconds per question
+  totalTime?: number; // total test time in seconds
   groupIds: number[];
+  subjectIds: number[];
+  bookIds: number[];
+  sectionIds: number[];
   testConfig: {
     subjectId: number; // Fan (majburiy)
     bookId?: number; // Kitob (ixtiyoriy)
@@ -110,8 +115,11 @@ const mockSpecialTests: SpecialTest[] = [
     name: "Matematika fani bo'yicha",
     activationStartTime: "2025-11-14T08:00:00",
     activationEndTime: "2025-11-16T23:59:00",
-    duration: 120,
+    totalTime: 7200, // 120 minutes in seconds
     groupIds: [1, 2],
+    subjectIds: [1],
+    bookIds: [],
+    sectionIds: [],
     testConfig: {
       subjectId: 1, // Matematika
       questionCount: 30
@@ -123,8 +131,11 @@ const mockSpecialTests: SpecialTest[] = [
     name: "Fizika kitobidan",
     activationStartTime: "2025-11-11T12:00:00",
     activationEndTime: "2025-11-13T18:00:00",
-    duration: 90,
+    totalTime: 5400, // 90 minutes in seconds
     groupIds: [3],
+    subjectIds: [2],
+    bookIds: [2],
+    sectionIds: [],
     testConfig: {
       subjectId: 2, // Fizika
       bookId: 2, // Kitob tanlangan
@@ -137,8 +148,11 @@ const mockSpecialTests: SpecialTest[] = [
     name: "Tanlangan bo'limlardan",
     activationStartTime: "2025-11-12T10:00:00",
     activationEndTime: "2025-11-14T20:00:00",
-    duration: 60,
+    totalTime: 3600, // 60 minutes in seconds
     groupIds: [1],
+    subjectIds: [1],
+    bookIds: [1],
+    sectionIds: [1, 3],
     testConfig: {
       subjectId: 1, // Matematika
       bookId: 1, // Kitob
@@ -183,9 +197,12 @@ export default function SpecialTestsPage() {
   const [viewingTest, setViewingTest] = useState<SpecialTest | null>(null);
 
   const [name, setName] = useState("");
+  const [activationStartDate, setActivationStartDate] = useState("");
   const [activationStartTime, setActivationStartTime] = useState("");
+  const [activationEndDate, setActivationEndDate] = useState("");
   const [activationEndTime, setActivationEndTime] = useState("");
-  const [duration, setDuration] = useState<number>(60);
+  const [timePerQuestion, setTimePerQuestion] = useState<number>(0);
+  const [totalTime, setTotalTime] = useState<number>(3600); // 60 minutes in seconds
   const [selectedGroups, setSelectedGroups] = useState<number[]>([]);
   
   // Test config - Fan majburiy, Kitob va Bo'limlar ixtiyoriy
@@ -193,6 +210,35 @@ export default function SpecialTestsPage() {
   const [selectedBook, setSelectedBook] = useState<number>(0); // 0 = tanlangan yo'q
   const [selectedSectionIds, setSelectedSectionIds] = useState<number[]>([]);
   const [questionCount, setQuestionCount] = useState<number>(10);
+
+  // Modal filtered items
+  const [modalFilteredItems, setModalFilteredItems] = useState<TestItem[]>([]);
+
+  // Filter modal items when selections change
+  useEffect(() => {
+    if (selectedSubject === 0) {
+      setModalFilteredItems([]);
+      return;
+    }
+
+    const filtered = allTestItems.filter(item => {
+      if (!item.test_id) return false;
+      const test = tests.find(t => t.id === item.test_id);
+      if (!test) return false;
+      const section = sections.find(s => s.id === test.section_id);
+      if (!section) return false;
+
+      if (selectedSectionIds.length > 0) {
+        return selectedSectionIds.includes(section.id);
+      }
+      if (selectedBook > 0) {
+        return section.book_id === selectedBook;
+      }
+      return books.find(b => b.id === section.book_id && b.subject_id === selectedSubject);
+    });
+
+    setModalFilteredItems(filtered);
+  }, [selectedSubject, selectedBook, selectedSectionIds, allTestItems, tests, sections, books]);
 
   // API dan guruhlarni yuklash
   useEffect(() => {
@@ -259,9 +305,13 @@ export default function SpecialTestsPage() {
   const handleOpenModal = () => {
     setEditingTest(null);
     setName("");
-    setActivationStartTime("");
-    setActivationEndTime("");
-    setDuration(60);
+    // Ruhsat etilgan vaqt ixtiyoriy - bo'sh qoldirish mumkin
+    setActivationStartDate("");
+    setActivationStartTime("08:00");
+    setActivationEndDate("");
+    setActivationEndTime("23:59");
+    setTimePerQuestion(0);
+    setTotalTime(3600); // 60 minutes
     setSelectedGroups([]);
     setSelectedSubject(subjects.length > 0 ? subjects[0].id : 0);
     setSelectedBook(0);
@@ -273,9 +323,25 @@ export default function SpecialTestsPage() {
   const handleEditTest = (test: SpecialTest) => {
     setEditingTest(test);
     setName(test.name);
-    setActivationStartTime(test.activationStartTime);
-    setActivationEndTime(test.activationEndTime);
-    setDuration(test.duration);
+    // Split datetime into separate date and time for inputs
+    if (test.activationStartTime) {
+      const startDateTime = new Date(test.activationStartTime);
+      setActivationStartDate(startDateTime.toISOString().split('T')[0]);
+      setActivationStartTime(startDateTime.toTimeString().slice(0, 5));
+    } else {
+      setActivationStartDate("");
+      setActivationStartTime("");
+    }
+    if (test.activationEndTime) {
+      const endDateTime = new Date(test.activationEndTime);
+      setActivationEndDate(endDateTime.toISOString().split('T')[0]);
+      setActivationEndTime(endDateTime.toTimeString().slice(0, 5));
+    } else {
+      setActivationEndDate("");
+      setActivationEndTime("");
+    }
+    setTimePerQuestion(test.timePerQuestion || 0);
+    setTotalTime(test.totalTime || 3600);
     setSelectedGroups(test.groupIds);
     setSelectedSubject(test.testConfig.subjectId);
     setSelectedBook(test.testConfig.bookId || 0);
@@ -287,8 +353,56 @@ export default function SpecialTestsPage() {
   const createOrUpdateTest = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log('🔵 Form submit bosildi');
-    // Validation vaqtincha olib tashlandi
+
+    // Validation
+    if (!name.trim()) {
+      toast.error('Test nomi majburiy');
+      return;
+    }
+
+    if (selectedGroups.length === 0) {
+      toast.error('Kamida bitta guruh tanlash majburiy');
+      return;
+    }
+
+    if (selectedSubject === 0) {
+      toast.error('Fan tanlash majburiy');
+      return;
+    }
+
+    // Vaqt maydonlari endi ixtiyoriy - validation olib tashlandi
+    // if (timePerQuestion === 0 && totalTime === 0) {
+    //   toast.error('Har bir savol uchun vaqt yoki to\'liq test uchun vaqtni kiriting');
+    //   return;
+    // }
+
+    // Ruhsat etilgan vaqt ixtiyoriy - lekin agar bittasi kiritilgan bo'lsa, ikkalasi ham kerak
+    const hasStartDate = activationStartDate.trim() !== "";
+    const hasStartTime = activationStartTime.trim() !== "";
+    const hasEndDate = activationEndDate.trim() !== "";
+    const hasEndTime = activationEndTime.trim() !== "";
+
+    if ((hasStartDate || hasStartTime) && (!hasStartDate || !hasStartTime)) {
+      toast.error('Boshlanish vaqti uchun sana va vaqt ikkalasi ham kiritilishi kerak');
+      return;
+    }
+
+    if ((hasEndDate || hasEndTime) && (!hasEndDate || !hasEndTime)) {
+      toast.error('Tugash vaqti uchun sana va vaqt ikkalasi ham kiritilishi kerak');
+      return;
+    }
+
+    if ((hasStartDate && hasStartTime && hasEndDate && hasEndTime) && 
+        new Date(`${activationStartDate}T${activationStartTime}`) >= new Date(`${activationEndDate}T${activationEndTime}`)) {
+      toast.error('Boshlanish vaqti tugash vaqtidan oldin bo\'lishi kerak');
+      return;
+    }
+
     try {
+      // Combine date and time into datetime strings
+      const activationStartTimeCombined = hasStartDate && hasStartTime ? `${activationStartDate}T${activationStartTime}` : "";
+      const activationEndTimeCombined = hasEndDate && hasEndTime ? `${activationEndDate}T${activationEndTime}` : "";
+
       const testConfig: SpecialTest['testConfig'] = {
         subjectId: selectedSubject,
         questionCount,
@@ -302,10 +416,14 @@ export default function SpecialTestsPage() {
       const testData: SpecialTest = {
         id: editingTest?.id || data.length + 1,
         name,
-        activationStartTime,
-        activationEndTime,
-        duration,
+        activationStartTime: activationStartTimeCombined,
+        activationEndTime: activationEndTimeCombined,
+        timePerQuestion: timePerQuestion > 0 ? timePerQuestion : undefined,
+        totalTime: totalTime > 0 ? totalTime : undefined,
         groupIds: selectedGroups,
+        subjectIds: selectedSubject > 0 ? [selectedSubject] : [],
+        bookIds: selectedBook > 0 ? [selectedBook] : [],
+        sectionIds: selectedSectionIds,
         testConfig,
         status: editingTest?.status || "Kutilmoqda",
       };
@@ -318,6 +436,45 @@ export default function SpecialTestsPage() {
       console.error('Test yaratishda xatolik:', error);
       toast.error('Xatolik yuz berdi');
     }
+  };
+
+  const generateRandomTest = (specialTest: SpecialTest): GeneratedTest => {
+    const testConfig = specialTest.testConfig;
+
+    // Filter available items based on test config
+    const availableItems = allTestItems.filter(item => {
+      if (!item.test_id) return false;
+      const test = tests.find(t => t.id === item.test_id);
+      if (!test) return false;
+      const section = sections.find(s => s.id === test.section_id);
+      if (!section) return false;
+
+      if (testConfig.sectionIds && testConfig.sectionIds.length > 0) {
+        return testConfig.sectionIds.includes(section.id);
+      }
+      if (testConfig.bookId) {
+        return section.book_id === testConfig.bookId;
+      }
+      return books.find(b => b.id === section.book_id && b.subject_id === testConfig.subjectId);
+    });
+
+    // Random tanlash
+    const shuffled = [...availableItems].sort(() => Math.random() - 0.5);
+    const selectedItems = shuffled.slice(0, Math.min(testConfig.questionCount, shuffled.length));
+
+    // Javoblar kalitini tuzish
+    const answerKey: { [key: number]: string } = {};
+    selectedItems.forEach((item, index) => {
+      answerKey[index + 1] = item.answer || "";
+    });
+
+    return {
+      id: `gen_${Date.now()}`,
+      specialTestId: specialTest.id!,
+      items: selectedItems.map((item, index) => ({ ...item, number: index + 1 })),
+      createdAt: new Date().toISOString(),
+      answerKey,
+    };
   };
 
   const confirmAndSaveTest = () => {
@@ -346,16 +503,30 @@ export default function SpecialTestsPage() {
         setIsFallbackModalOpen(true);
         return;
       }
+
+      // Testni saqlash
+      const testWithGenerated = { ...pendingTest, generatedTest };
+      if (editingTest) {
+        setData(data.map(test => test.id === editingTest.id ? testWithGenerated : test));
+        toast.success('Test yangilandi');
+      } else {
+        setData([...data, testWithGenerated]);
+        toast.success('Test muvaffaqiyatli tuzildi');
+      }
+      setPendingTest(null);
+      closeConfirmModal();
+
     } catch (e) {
       console.error('Test tuzishda xatolik:', e);
     }
+  };
   // Fallback random testni modal orqali tasdiqlash
   const handleFallbackRandom = () => {
     if (!fallbackPendingTest) return;
     const questionCount = fallbackPendingTest.testConfig.questionCount;
     const selectedItems = allTestItems.sort(() => Math.random() - 0.5).slice(0, questionCount);
     const answerKey: { [key: number]: string } = {};
-    selectedItems.forEach((item, i) => { answerKey[i + 1] = item.answer; });
+    selectedItems.forEach((item, i) => { answerKey[i + 1] = item.answer || ""; });
     const generatedTest = {
       id: `gen_${Date.now()}`,
       specialTestId: fallbackPendingTest.id!,
@@ -382,6 +553,7 @@ export default function SpecialTestsPage() {
     setIsFallbackModalOpen(false);
     closeConfirmModal();
   };
+
       {/* Fallback random modal */}
       <Modal isOpen={isFallbackModalOpen} onClose={handleFallbackCancel} className="max-w-[400px] m-4">
         <div className="p-6">
@@ -399,68 +571,8 @@ export default function SpecialTestsPage() {
           </div>
         </div>
       </Modal>
-      {/* Barcha test-itemlarni jadvalda ko‘rsatish */}
-      <Modal isOpen={isAllItemsModalOpen} onClose={() => setIsAllItemsModalOpen(false)} className="max-w-5xl m-4">
-        <div className="p-6">
-          <h4 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white">Barcha test-itemlar (API dan)</h4>
-          <div className="max-h-[70vh] overflow-y-auto space-y-6">
-            {/* Faqat random tanlangan (test tuzishda tanlangan) test-itemlar */}
-            {previewTestItems.length > 0 && (
-              <>
-                {previewTestItems.map((item: TestItem, idx: number) => {
-                  const cleanQuestion = item.question?.replace(/^\s*\d+\.?\s*/, "") || "";
-                  const answerKey = previewAnswerKeys[item.id] || "A";
-                  return (
-                    <div key={item.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border dark:border-gray-700 shadow-sm">
-                      <div className="flex items-start gap-3 mb-2">
-                        <span className="shrink-0 w-8 h-8 bg-gray-200 dark:bg-gray-700 text-primary dark:text-white rounded-full flex items-center justify-center font-semibold text-sm">{idx + 1}</span>
-                        <div className="flex-1">
-                          <p className="font-medium text-gray-800 dark:text-white mb-2">{cleanQuestion}</p>
-                          <div className="grid grid-cols-2 gap-2 text-sm">
-                            <div><span className="font-semibold">A)</span> {item.answer_A}</div>
-                            <div><span className="font-semibold">B)</span> {item.answer_B}</div>
-                            <div><span className="font-semibold">C)</span> {item.answer_C}</div>
-                            <div><span className="font-semibold">D)</span> {item.answer_D}</div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="mt-3 text-sm text-center">
-                        <span className="inline-block bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-3 py-1 rounded-full font-semibold">Kalit: {answerKey}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-                <div className="flex justify-end gap-3 mt-6">
-                  <Button variant="outline" onClick={() => setIsAllItemsModalOpen(false)}>Bekor qilish</Button>
-                  <Button variant="outline" onClick={() => {/* testni ko‘rish */}}>Savollarni ko‘rish</Button>
-                  <Button onClick={() => {/* testni saqlash */}}>Saqlash</Button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      </Modal>
 
-    // Random tanlash
-    const shuffled = [...availableItems].sort(() => Math.random() - 0.5);
-    const selectedItems = shuffled.slice(0, Math.min(testConfig.questionCount, shuffled.length));
-
-    // Javoblar kalitini tuzish
-    const answerKey: { [key: number]: string } = {};
-    selectedItems.forEach((item, index) => {
-  answerKey[index + 1] = item.answer ?? "";
-    });
-
-    return {
-      id: `gen_${Date.now()}`,
-      specialTestId: specialTest.id!,
-      items: selectedItems.map((item, index) => ({ ...item, number: index + 1 })),
-      createdAt: new Date().toISOString(),
-      answerKey,
-    };
-  };
-
-  // Testni ko'rish
+      {/* Test ko'rish modali */}
   const handleViewTest = (test: SpecialTest) => {
     if (!test.generatedTest) {
       toast.error('Test hali tuzilmagan');
@@ -498,7 +610,7 @@ export default function SpecialTestsPage() {
       </head>
       <body>
         <h1>${test.name}</h1>
-        <p><strong>Davomiyligi:</strong> ${test.duration} daqiqa</p>
+        <p><strong>Davomiyligi:</strong> ${test.totalTime ? Math.floor(test.totalTime / 60) + ' daqiqa' : test.timePerQuestion ? test.timePerQuestion + ' soniya/savol' : 'Noma\'lum'}</p>
         <p><strong>Savollar soni:</strong> ${test.generatedTest.items.length} ta</p>
         <hr>
         
@@ -551,7 +663,7 @@ export default function SpecialTestsPage() {
               heading: HeadingLevel.HEADING_1,
               alignment: "center"
             }),
-            new Paragraph({ text: `Davomiyligi: ${test.duration} daqiqa` }),
+            new Paragraph({ text: `Davomiyligi: ${test.totalTime ? Math.floor(test.totalTime / 60) + ' daqiqa' : test.timePerQuestion ? test.timePerQuestion + ' soniya/savol' : 'Noma\'lum'}` }),
             new Paragraph({ text: `Savollar soni: ${test.generatedTest.items.length} ta` }),
             new Paragraph({ text: "" }),
             ...test.generatedTest.items.map((item, idx) => [
@@ -613,6 +725,40 @@ export default function SpecialTestsPage() {
     }
     
     return display;
+  };
+
+  const generatePreviewForPendingTest = () => {
+    if (!pendingTest) return;
+
+    // Filter based on pendingTest.testConfig
+    let filtered = allTestItems.filter(item => {
+      if (!item.test_id) return false;
+      const test = tests.find(t => t.id === item.test_id);
+      if (!test) return false;
+      const section = sections.find(s => s.id === test.section_id);
+      if (!section) return false;
+
+      if (pendingTest.testConfig.sectionIds && pendingTest.testConfig.sectionIds.length > 0) {
+        return pendingTest.testConfig.sectionIds.includes(section.id);
+      }
+      if (pendingTest.testConfig.bookId) {
+        return section.book_id === pendingTest.testConfig.bookId;
+      }
+      return books.find(b => b.id === section.book_id && b.subject_id === pendingTest.testConfig.subjectId);
+    });
+
+    // Show up to 10 questions as preview
+    const previewCount = Math.min(10, filtered.length);
+    filtered = filtered.slice().sort(() => Math.random() - 0.5).slice(0, previewCount);
+
+    const keys: {[key: number]: string} = {};
+    filtered.forEach(item => {
+      const variants = ["A", "B", "C", "D"];
+      keys[item.id] = variants[Math.floor(Math.random() * 4)];
+    });
+
+    setPreviewTestItems(filtered);
+    setPreviewAnswerKeys(keys);
   };
 
   return (
@@ -729,8 +875,12 @@ export default function SpecialTestsPage() {
                       <div className="flex-1">
                         <p className="text-xs text-gray-500 dark:text-gray-400">Ruhsat etilgan vaqt</p>
                         <p className="text-sm text-gray-800 dark:text-white">
-                          {Moment(test.activationStartTime).format("DD MMM, HH:mm")} -{" "}
-                          {Moment(test.activationEndTime).format("DD MMM, HH:mm")}
+                          {test.activationStartTime && Moment(test.activationStartTime).isValid()
+                            ? Moment(test.activationStartTime).format("DD MMM, HH:mm")
+                            : "Noma'lum"} -{" "}
+                          {test.activationEndTime && Moment(test.activationEndTime).isValid()
+                            ? Moment(test.activationEndTime).format("DD MMM, HH:mm")
+                            : "Noma'lum"}
                         </p>
                       </div>
                     </div>
@@ -741,7 +891,7 @@ export default function SpecialTestsPage() {
                       <div className="flex-1">
                         <p className="text-xs text-gray-500 dark:text-gray-400">Test davomiyligi</p>
                         <p className="text-sm font-medium text-gray-800 dark:text-white">
-                          {test.duration} daqiqa
+                          {test.totalTime ? Math.floor(test.totalTime / 60) + ' daqiqa' : test.timePerQuestion ? test.timePerQuestion + ' soniya/savol' : 'Noma\'lum'}
                         </p>
                       </div>
                     </div>
@@ -789,7 +939,7 @@ export default function SpecialTestsPage() {
             <div className="px-2 overflow-y-auto custom-scrollbar flex-1">
               <div className="grid grid-cols-1 gap-x-6 gap-y-5">
                 <div>
-                  <Label>Test nomi</Label>
+                  <Label>Test nomi <span className="text-red-500">*</span></Label>
                   <Input
                     type="text"
                     value={name}
@@ -800,38 +950,82 @@ export default function SpecialTestsPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Ruhsat etilgan vaqt (dan)</Label>
-                    <Input
-                      type="datetime-local"
-                      value={activationStartTime}
-                      onChange={(e) => setActivationStartTime(e.target.value)}
+                    <DateTimePicker
+                      dateId="activationStartDate"
+                      timeId="activationStartTime"
+                      dateLabel=""
+                      timeLabel="Qaysi vaqtdan ko'rish mumkin"
+                      datePlaceholder="Sana tanlang"
+                      timePlaceholder="08:00"
+                      dateValue={activationStartDate}
+                      timeValue={activationStartTime}
+                      onDateChange={setActivationStartDate}
+                      onTimeChange={setActivationStartTime}
+                      dateDefaultDate={activationStartDate ? new Date(activationStartDate) : undefined}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Qaysi vaqtdan ko'rish mumkin</p>
                   </div>
                   <div>
-                    <Label>Ruhsat etilgan vaqt (gacha)</Label>
-                    <Input
-                      type="datetime-local"
-                      value={activationEndTime}
-                      onChange={(e) => setActivationEndTime(e.target.value)}
+                    <DateTimePicker
+                      dateId="activationEndDate"
+                      timeId="activationEndTime"
+                      dateLabel=""
+                      timeLabel="Qaysi vaqtgacha ko'rish mumkin"
+                      datePlaceholder="Sana tanlang"
+                      timePlaceholder="22:00"
+                      dateValue={activationEndDate}
+                      timeValue={activationEndTime}
+                      onDateChange={setActivationEndDate}
+                      onTimeChange={setActivationEndTime}
+                      dateDefaultDate={activationEndDate ? new Date(activationEndDate) : undefined}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Qaysi vaqtgacha ko'rish mumkin</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Har bir savol uchun vaqt (sekund)</Label>
+                    <Input
+                      type="number"
+                      value={timePerQuestion}
+                      onChange={(e) => {
+                        let val = e.target.value;
+                        // Remove leading zeros
+                        if (val.startsWith('0') && val.length > 1) {
+                          val = val.replace(/^0+/, '');
+                        }
+                        const v = Number(val || 0);
+                        setTimePerQuestion(v);
+                        if (v > 0) setTotalTime(0);
+                      }}
+                      placeholder="60"
+                      min="0"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Har bir savol uchun berilgan vaqt</p>
+                  </div>
+                  <div>
+                    <Label>To'liq test uchun vaqt (sekund)</Label>
+                    <Input
+                      type="number"
+                      value={totalTime}
+                      onChange={(e) => {
+                        let val = e.target.value;
+                        // Remove leading zeros
+                        if (val.startsWith('0') && val.length > 1) {
+                          val = val.replace(/^0+/, '');
+                        }
+                        const v = Number(val || 0);
+                        setTotalTime(v);
+                        if (v > 0) setTimePerQuestion(0);
+                      }}
+                      placeholder="3600"
+                      min="0"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Butun test uchun umumiy vaqt</p>
                   </div>
                 </div>
 
                 <div>
-                  <Label>Test ishlash davomiyligi (daqiqa)</Label>
-                  <Input
-                    type="number"
-                    value={duration}
-                    onChange={(e) => setDuration(Number(e.target.value))}
-                    placeholder="100"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Har bir student uchun test davomiyligi</p>
-                </div>
-
-                <div>
-                  <Label>Guruhlar</Label>
+                  <Label>Guruhlar <span className="text-red-500">*</span></Label>
                   <div className="mt-2 max-h-48 overflow-y-auto border border-gray-300 dark:border-gray-700 rounded-lg p-3 space-y-2">
                     {groups.length === 0 ? (
                       <p className="text-sm text-gray-500">Guruhlar yuklanmoqda...</p>
@@ -960,6 +1154,23 @@ export default function SpecialTestsPage() {
                   />
                 </div>
 
+                {/* Mavjud savollar soni */}
+                {selectedSubject > 0 && (
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                        Mavjud savollar: {modalFilteredItems.length} ta
+                      </p>
+                    </div>
+                    {modalFilteredItems.length < questionCount && (
+                      <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
+                        Tanlangan savollar soni ({questionCount}) mavjud savollardan ko'proq. Faqat {modalFilteredItems.length} ta savol ishlatiladi.
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 {/* ESKI FORM - Comment qilingan */}
               </div>
             </div>
@@ -1039,8 +1250,8 @@ export default function SpecialTestsPage() {
             <Button variant="outline" onClick={closeConfirmModal}>
               Bekor qilish
             </Button>
-            <Button variant="outline" onClick={() => setIsAllItemsModalOpen(true)}>
-              Barcha savollarni ko‘rish
+            <Button variant="outline" onClick={() => { generatePreviewForPendingTest(); setIsAllItemsModalOpen(true); }}>
+              Savollarni ko'rish
             </Button>
             <Button onClick={confirmAndSaveTest}>
               Ha, test tuzilsin
@@ -1114,39 +1325,15 @@ export default function SpecialTestsPage() {
                     </div>
                   );
                 })}
-                <div className="flex justify-end gap-3 mt-6">
-                  <Button variant="outline" onClick={() => setIsAllItemsModalOpen(false)}>Bekor qilish</Button>
-                  <Button variant="outline" onClick={() => {/* testni ko‘rish */}}>Testni ko‘rish</Button>
-                  <Button onClick={() => {/* testni saqlash */}}>Saqlash</Button>
-                </div>
               </>
             )}
           </div>
           <div className="flex justify-end mt-4">
-            {/* Barcha savollarni ko‘rish tugmasi filter va son bo‘yicha previewni tayyorlaydi */}
             <Button
               variant="outline"
-              onClick={() => {
-                // Filterlangan test-itemlarni olish
-                let filtered = allTestItems.filter(item => {
-                  if (filterSection) return item.test_id && sections.find(s => s.id === filterSection && s.id === item.test_id);
-                  if (filterBook) return item.test_id && sections.find(s => s.book_id === filterBook && s.id === item.test_id);
-                  if (filterSubject) return item.test_id && books.find(b => b.subject_id === filterSubject && sections.find(s => s.book_id === b.id && s.id === item.test_id));
-                  return true;
-                });
-                // Random aralashtirish va tanlangan sonni olish (masalan, 10 ta)
-                filtered = filtered.slice().sort(() => Math.random() - 0.5).slice(0, questionCount);
-                // Har bir test uchun random kalit (A/B/C/D)
-                const keys = {};
-                filtered.forEach(item => {
-                  const variants = ["A", "B", "C", "D"];
-                  keys[item.id] = variants[Math.floor(Math.random() * 4)];
-                });
-                setPreviewTestItems(filtered);
-                setPreviewAnswerKeys(keys);
-              }}
+              onClick={() => setIsAllItemsModalOpen(false)}
             >
-              Barcha savollarni ko‘rish
+              Orqaga
             </Button>
           </div>
         </div>

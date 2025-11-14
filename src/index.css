@@ -776,3 +776,110 @@ span.flatpickr-weekday,
 .simplebar-scrollbar.simplebar-visible:before {
   @apply opacity-100;
 }
+
+/* Force 24-hour format for datetime-local inputs */
+.datetime-24h::-webkit-datetime-edit-ampm-field {
+  display: none;
+}
+
+.datetime-24h::-webkit-datetime-edit-hour-field,
+.datetime-24h::-webkit-datetime-edit-minute-field,
+.datetime-24h::-webkit-datetime-edit-second-field {
+  padding: 0;
+}
+
+.datetime-24h::-webkit-calendar-picker-indicator {
+  margin-left: 0.5rem;
+}
+
+/* Firefox support for 24-hour format */
+.datetime-24h {
+  -moz-appearance: textfield;
+}
+
+/* Hide AM/PM in Firefox datetime inputs */
+.datetime-24h::-moz-datetime-edit-ampm-field {
+  display: none;
+}
+
+/* Ensure time inputs are 24-hour format */
+input[type="time"] {
+  /* Modern browsers default to 24-hour format */
+}
+
+/* Force 24-hour format for time inputs in WebKit browsers */
+input[type="time"]::-webkit-datetime-edit-ampm-field {
+  display: none;
+}
+
+input[type="time"]::-webkit-datetime-edit-hour-field,
+input[type="time"]::-webkit-datetime-edit-minute-field {
+  /* Ensure 24-hour display */
+}
+
+/* Flatpickr calendar positioning */
+.flatpickr-calendar {
+  z-index: 999999 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+.flatpickr-calendar.open {
+  animation: none !important;
+}
+
+/* Force 24-hour time format for all browsers */
+input[type="time"] {
+  /* Ensure browsers use 24-hour format */
+}
+
+/* WebKit browsers (Chrome, Safari, Edge) */
+input[type="time"]::-webkit-datetime-edit-ampm-field {
+  display: none !important;
+}
+
+input[type="time"]::-webkit-datetime-edit-hour-field {
+  /* Force 24-hour display */
+}
+
+input[type="time"]::-webkit-datetime-edit-minute-field {
+  /* Force 24-hour display */
+}
+
+/* Firefox */
+input[type="time"]::-moz-datetime-edit-ampm-field {
+  display: none !important;
+}
+
+/* Additional styles to ensure 24-hour format */
+input[type="time"] {
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+}
+
+/* Force hide AM/PM in all time inputs globally */
+input[type="time"]::-webkit-datetime-edit-ampm-field,
+input[type="time"]::-webkit-datetime-edit-meridiem-field {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+input[type="time"]::-moz-datetime-edit-ampm-field {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Ensure time inputs show 24-hour format */
+input[type="time"] {
+  /* Force 24-hour format */
+  font-variant-numeric: tabular-nums;
+}
