@@ -116,6 +116,13 @@ export default function SpecialTestsPage() {
   // Modal filtered items
   const [modalFilteredItems, setModalFilteredItems] = useState<TestItem[]>([]);
 
+  // Editable answer keys for confirmation modal
+  const [editableAnswerKeys, setEditableAnswerKeys] = useState<{[key: number]: string}>({});
+
+  // Edit mode for preview modal
+  const [isPreviewEditMode, setIsPreviewEditMode] = useState(false);
+  const [editableQuestions, setEditableQuestions] = useState<{[key: number]: TestItem}>({});
+
   // Filter modal items when selections change
   useEffect(() => {
     console.log('🔍 Filtering modal items:', {
@@ -934,6 +941,12 @@ export default function SpecialTestsPage() {
     if (pendingTest.generatedTest) {
       setPreviewTestItems(pendingTest.generatedTest.items);
       setPreviewAnswerKeys(pendingTest.generatedTest.answerKey);
+      // Initialize editable questions with current items
+      const editable: {[key: number]: TestItem} = {};
+      pendingTest.generatedTest.items.forEach(item => {
+        editable[item.number] = { ...item };
+      });
+      setEditableQuestions(editable);
       return;
     }
 
@@ -969,13 +982,16 @@ export default function SpecialTestsPage() {
     filtered = filtered.slice().sort(() => Math.random() - 0.5).slice(0, previewCount);
 
     const keys: {[key: number]: string} = {};
-    filtered.forEach(item => {
+    const editable: {[key: number]: TestItem} = {};
+    filtered.forEach((item, index) => {
       const variants = ["A", "B", "C", "D"];
       keys[item.id] = variants[Math.floor(Math.random() * 4)];
+      editable[index + 1] = { ...item, number: index + 1 };
     });
 
     setPreviewTestItems(filtered);
     setPreviewAnswerKeys(keys);
+    setEditableQuestions(editable);
   };
 
   return (
@@ -1496,10 +1512,73 @@ export default function SpecialTestsPage() {
             </Button>
           </div>
       {/* Barcha test-itemlar modal */}
-      <Modal isOpen={isAllItemsModalOpen} onClose={() => setIsAllItemsModalOpen(false)} className="max-w-5xl m-4">
+      <Modal isOpen={isAllItemsModalOpen} onClose={() => { setIsAllItemsModalOpen(false); setIsPreviewEditMode(false); }} className="max-w-5xl m-4">
         <div className="p-6">
-          <h4 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white">Test savollari</h4>
-          <div className="max-h-[70vh] overflow-y-auto space-y-6">
+          <div className="flex items-center justify-between mb-6 pr-12">
+            <h4 className="text-lg font-semibold text-gray-800 dark:text-white">Test savollari</h4>
+            <div className="flex items-center gap-2">
+              {isPreviewEditMode && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => {
+                    // Save the edited questions back to pendingTest
+                    if (pendingTest?.generatedTest) {
+                      const updatedItems = pendingTest.generatedTest.items.map(item => {
+                        const edited = editableQuestions[item.number];
+                        if (edited) {
+                          return { ...item, ...edited };
+                        }
+                        return item;
+                      });
+                      
+                      const updatedAnswerKey = { ...pendingTest.generatedTest.answerKey };
+                      Object.keys(editableQuestions).forEach(key => {
+                        const numKey = parseInt(key);
+                        if (editableQuestions[numKey]?.answer) {
+                          updatedAnswerKey[numKey] = editableQuestions[numKey].answer;
+                        }
+                      });
+                      
+                      setPendingTest({
+                        ...pendingTest,
+                        generatedTest: {
+                          ...pendingTest.generatedTest,
+                          items: updatedItems,
+                          answerKey: updatedAnswerKey
+                        }
+                      });
+                      
+                      // Update preview
+                      setPreviewTestItems(updatedItems);
+                      setPreviewAnswerKeys(updatedAnswerKey);
+                    }
+                    setIsPreviewEditMode(false);
+                  }}
+                >
+                  Saqlash
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (isPreviewEditMode) {
+                    // Reset editable questions
+                    const reset: {[key: number]: TestItem} = {};
+                    previewTestItems.forEach(item => {
+                      reset[item.number] = { ...item };
+                    });
+                    setEditableQuestions(reset);
+                  }
+                  setIsPreviewEditMode(!isPreviewEditMode);
+                }}
+              >
+                {isPreviewEditMode ? 'Bekor qilish' : 'Tahrirlash'}
+              </Button>
+            </div>
+          </div>
+          <div className="max-h-[65vh] overflow-y-auto space-y-6">
 
             {/* Filterlangan va random tanlangan test-itemlar (preview) */}
             {previewTestItems.length > 0 && (
@@ -1508,29 +1587,138 @@ export default function SpecialTestsPage() {
                   const cleanQuestion = item.question?.replace(/^\s*\d+\.?\s*/, "") || "";
                   const answerKey = previewAnswerKeys[item.number] || "A";
                   return (
-                    <div key={item.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border dark:border-gray-700 shadow-sm">
+                    <div key={item.id} className={`rounded-lg p-4 border shadow-sm transition-all duration-200 ${
+                      isPreviewEditMode 
+                        ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800 shadow-blue-100 dark:shadow-blue-900/20' 
+                        : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                    }`}>
                       <div className="flex items-start gap-3 mb-2">
-                        <span className="shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full flex items-center justify-center font-semibold text-sm">{idx + 1}</span>
+                        <span className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm ${
+                          isPreviewEditMode 
+                            ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300' 
+                            : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                        }`}>{idx + 1}</span>
                         <div className="flex-1">
-                          <p className="font-medium text-gray-800 dark:text-white mb-2">{cleanQuestion}</p>
-                          <div className="grid grid-cols-2 gap-2 text-sm">
-                            <div><span className="font-semibold">A)</span> {item.answer_A}</div>
-                            <div><span className="font-semibold">B)</span> {item.answer_B}</div>
-                            <div><span className="font-semibold">C)</span> {item.answer_C}</div>
-                            <div><span className="font-semibold">D)</span> {item.answer_D}</div>
-                          </div>
+                          {isPreviewEditMode ? (
+                            <textarea
+                              value={editableQuestions[item.number]?.question || cleanQuestion}
+                              onChange={(e) => {
+                                setEditableQuestions(prev => ({
+                                  ...prev,
+                                  [item.number]: {
+                                    ...prev[item.number],
+                                    question: e.target.value
+                                  }
+                                }));
+                              }}
+                              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-2"
+                              rows={3}
+                              placeholder="Savolni kiriting..."
+                            />
+                          ) : (
+                            <p className="font-medium text-gray-800 dark:text-white mb-2">{cleanQuestion}</p>
+                          )}
+                          {isPreviewEditMode ? (
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold">A)</span>
+                                <input
+                                  type="text"
+                                  value={editableQuestions[item.number]?.answer_A || item.answer_A}
+                                  onChange={(e) => {
+                                    setEditableQuestions(prev => ({
+                                      ...prev,
+                                      [item.number]: {
+                                        ...prev[item.number],
+                                        answer_A: e.target.value
+                                      }
+                                    }));
+                                  }}
+                                  className="flex-1 p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs"
+                                />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold">B)</span>
+                                <input
+                                  type="text"
+                                  value={editableQuestions[item.number]?.answer_B || item.answer_B}
+                                  onChange={(e) => {
+                                    setEditableQuestions(prev => ({
+                                      ...prev,
+                                      [item.number]: {
+                                        ...prev[item.number],
+                                        answer_B: e.target.value
+                                      }
+                                    }));
+                                  }}
+                                  className="flex-1 p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs"
+                                />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold">C)</span>
+                                <input
+                                  type="text"
+                                  value={editableQuestions[item.number]?.answer_C || item.answer_C}
+                                  onChange={(e) => {
+                                    setEditableQuestions(prev => ({
+                                      ...prev,
+                                      [item.number]: {
+                                        ...prev[item.number],
+                                        answer_C: e.target.value
+                                      }
+                                    }));
+                                  }}
+                                  className="flex-1 p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs"
+                                />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold">D)</span>
+                                <input
+                                  type="text"
+                                  value={editableQuestions[item.number]?.answer_D || item.answer_D}
+                                  onChange={(e) => {
+                                    setEditableQuestions(prev => ({
+                                      ...prev,
+                                      [item.number]: {
+                                        ...prev[item.number],
+                                        answer_D: e.target.value
+                                      }
+                                    }));
+                                  }}
+                                  className="flex-1 p-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs"
+                                />
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                              <div><span className="font-semibold">A)</span> {item.answer_A}</div>
+                              <div><span className="font-semibold">B)</span> {item.answer_B}</div>
+                              <div><span className="font-semibold">C)</span> {item.answer_C}</div>
+                              <div><span className="font-semibold">D)</span> {item.answer_D}</div>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="mt-3 text-sm text-center">
                         <div className="flex items-center justify-center gap-2">
                           <span className="text-gray-600 dark:text-gray-400">{idx + 1}. Kalit:</span>
                           <select
-                            value={previewAnswerKeys[item.number] || "A"}
+                            value={isPreviewEditMode ? (editableQuestions[item.number]?.answer || item.answer) : (previewAnswerKeys[item.number] || "A")}
                             onChange={(e) => {
-                              setPreviewAnswerKeys(prev => ({
-                                ...prev,
-                                [item.number]: e.target.value
-                              }));
+                              if (isPreviewEditMode) {
+                                setEditableQuestions(prev => ({
+                                  ...prev,
+                                  [item.number]: {
+                                    ...prev[item.number],
+                                    answer: e.target.value
+                                  }
+                                }));
+                              } else {
+                                setPreviewAnswerKeys(prev => ({
+                                  ...prev,
+                                  [item.number]: e.target.value
+                                }));
+                              }
                             }}
                             className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           >
@@ -1547,13 +1735,67 @@ export default function SpecialTestsPage() {
               </>
             )}
           </div>
-          <div className="flex justify-end mt-4">
-            <Button
-              variant="outline"
-              onClick={() => setIsAllItemsModalOpen(false)}
-            >
-              Orqaga
-            </Button>
+          <div className="flex justify-end gap-3 mt-4">
+            {isPreviewEditMode ? (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsPreviewEditMode(false);
+                    // Reset editable questions to original
+                    const reset: {[key: number]: TestItem} = {};
+                    previewTestItems.forEach(item => {
+                      reset[item.number] = { ...item };
+                    });
+                    setEditableQuestions(reset);
+                  }}
+                >
+                  Bekor qilish
+                </Button>
+                <Button
+                  onClick={() => {
+                    // Save changes to pendingTest
+                    if (pendingTest && pendingTest.generatedTest) {
+                      const updatedItems = pendingTest.generatedTest.items.map(item => {
+                        const editable = editableQuestions[item.number];
+                        return editable ? { ...item, ...editable } : item;
+                      });
+
+                      const updatedAnswerKey = { ...pendingTest.generatedTest.answerKey };
+                      Object.keys(editableQuestions).forEach(key => {
+                        const numKey = parseInt(key);
+                        if (editableQuestions[numKey]?.answer) {
+                          updatedAnswerKey[numKey] = editableQuestions[numKey].answer;
+                        }
+                      });
+
+                      setPendingTest({
+                        ...pendingTest,
+                        generatedTest: {
+                          ...pendingTest.generatedTest,
+                          items: updatedItems,
+                          answerKey: updatedAnswerKey
+                        }
+                      });
+
+                      // Update preview
+                      setPreviewTestItems(updatedItems);
+                      setPreviewAnswerKeys(updatedAnswerKey);
+                    }
+                    setIsPreviewEditMode(false);
+                  }}
+                >
+                  Saqlash
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={() => setIsAllItemsModalOpen(false)}
+              >
+                Orqaga
+              </Button>
+            )}
           </div>
         </div>
       </Modal>
