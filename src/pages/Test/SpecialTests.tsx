@@ -1516,67 +1516,23 @@ export default function SpecialTestsPage() {
         <div className="p-6">
           <div className="flex items-center justify-between mb-6 pr-12">
             <h4 className="text-lg font-semibold text-gray-800 dark:text-white">Test savollari</h4>
-            <div className="flex items-center gap-2">
-              {isPreviewEditMode && (
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => {
-                    // Save the edited questions back to pendingTest
-                    if (pendingTest?.generatedTest) {
-                      const updatedItems = pendingTest.generatedTest.items.map(item => {
-                        const edited = editableQuestions[item.number];
-                        if (edited) {
-                          return { ...item, ...edited };
-                        }
-                        return item;
-                      });
-                      
-                      const updatedAnswerKey = { ...pendingTest.generatedTest.answerKey };
-                      Object.keys(editableQuestions).forEach(key => {
-                        const numKey = parseInt(key);
-                        if (editableQuestions[numKey]?.answer) {
-                          updatedAnswerKey[numKey] = editableQuestions[numKey].answer;
-                        }
-                      });
-                      
-                      setPendingTest({
-                        ...pendingTest,
-                        generatedTest: {
-                          ...pendingTest.generatedTest,
-                          items: updatedItems,
-                          answerKey: updatedAnswerKey
-                        }
-                      });
-                      
-                      // Update preview
-                      setPreviewTestItems(updatedItems);
-                      setPreviewAnswerKeys(updatedAnswerKey);
-                    }
-                    setIsPreviewEditMode(false);
-                  }}
-                >
-                  Saqlash
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  if (isPreviewEditMode) {
-                    // Reset editable questions
-                    const reset: {[key: number]: TestItem} = {};
-                    previewTestItems.forEach(item => {
-                      reset[item.number] = { ...item };
-                    });
-                    setEditableQuestions(reset);
-                  }
-                  setIsPreviewEditMode(!isPreviewEditMode);
-                }}
-              >
-                {isPreviewEditMode ? 'Bekor qilish' : 'Tahrirlash'}
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (isPreviewEditMode) {
+                  // Reset editable questions when canceling edit
+                  const reset: {[key: number]: TestItem} = {};
+                  previewTestItems.forEach(item => {
+                    reset[item.number] = { ...item };
+                  });
+                  setEditableQuestions(reset);
+                }
+                setIsPreviewEditMode(!isPreviewEditMode);
+              }}
+            >
+              {isPreviewEditMode ? 'Bekor qilish' : 'Tahrirlash'}
+            </Button>
           </div>
           <div className="max-h-[65vh] overflow-y-auto space-y-6">
 
@@ -1691,10 +1647,34 @@ export default function SpecialTestsPage() {
                             </div>
                           ) : (
                             <div className="grid grid-cols-2 gap-2 text-sm">
-                              <div><span className="font-semibold">A)</span> {item.answer_A}</div>
-                              <div><span className="font-semibold">B)</span> {item.answer_B}</div>
-                              <div><span className="font-semibold">C)</span> {item.answer_C}</div>
-                              <div><span className="font-semibold">D)</span> {item.answer_D}</div>
+                              <div className={`p-2 rounded-lg transition-colors ${
+                                (isPreviewEditMode ? (editableQuestions[item.number]?.answer || item.answer) : (previewAnswerKeys[item.number] || "A")) === 'A'
+                                  ? 'bg-green-200 dark:bg-green-800/50 border-2 border-green-600 shadow-md' 
+                                  : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                              }`}>
+                                <span className="font-semibold">A)</span> {item.answer_A}
+                              </div>
+                              <div className={`p-2 rounded-lg transition-colors ${
+                                (isPreviewEditMode ? (editableQuestions[item.number]?.answer || item.answer) : (previewAnswerKeys[item.number] || "A")) === 'B'
+                                  ? 'bg-green-200 dark:bg-green-800/50 border-2 border-green-600 shadow-md' 
+                                  : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                              }`}>
+                                <span className="font-semibold">B)</span> {item.answer_B}
+                              </div>
+                              <div className={`p-2 rounded-lg transition-colors ${
+                                (isPreviewEditMode ? (editableQuestions[item.number]?.answer || item.answer) : (previewAnswerKeys[item.number] || "A")) === 'C'
+                                  ? 'bg-green-200 dark:bg-green-800/50 border-2 border-green-600 shadow-md' 
+                                  : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                              }`}>
+                                <span className="font-semibold">C)</span> {item.answer_C}
+                              </div>
+                              <div className={`p-2 rounded-lg transition-colors ${
+                                (isPreviewEditMode ? (editableQuestions[item.number]?.answer || item.answer) : (previewAnswerKeys[item.number] || "A")) === 'D'
+                                  ? 'bg-green-200 dark:bg-green-800/50 border-2 border-green-600 shadow-md' 
+                                  : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                              }`}>
+                                <span className="font-semibold">D)</span> {item.answer_D}
+                              </div>
                             </div>
                           )}
                         </div>
@@ -1750,7 +1730,7 @@ export default function SpecialTestsPage() {
                     setEditableQuestions(reset);
                   }}
                 >
-                  Bekor qilish
+                  Orqaga
                 </Button>
                 <Button
                   onClick={() => {
@@ -1844,52 +1824,54 @@ export default function SpecialTestsPage() {
               <div className="space-y-4 mb-6">
                 {viewingTest.generatedTest.items.map((item: TestItem, index: number) => {
                   const answerKey = viewingTest.generatedTest!.answerKey[item.number];
+                  // Remove any leading number and dot from the question text
+                  const cleanQuestion = item.question?.replace(/^\s*\d+\.?\s*/, "") || "";
                   return (
-                    <div key={item.id} className="border dark:border-gray-700 rounded-lg p-4">
+                    <div key={item.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border dark:border-gray-700 shadow-sm">
                       <div className="flex items-start gap-3">
-                        <span className="shrink-0 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-semibold text-sm">
-                          {index + 1}
+                        <span className="shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full flex items-center justify-center font-semibold text-base border-2 border-blue-200 dark:border-blue-700">
+                          {item.number}
                         </span>
                         <div className="flex-1 space-y-3">
-                          <p className="font-medium text-gray-800 dark:text-white">{item.question}</p>
-                          <div className="space-y-2">
+                          <p className="font-medium text-gray-800 dark:text-white">{cleanQuestion}</p>
+                          <div className="grid grid-cols-2 gap-2">
                             <div className={`p-3 rounded-lg transition-colors ${
-                              answerKey === 'a' 
-                                ? 'bg-green-100 dark:bg-green-900/30 border-2 border-green-500' 
+                              answerKey === 'A' 
+                                ? 'bg-green-200 dark:bg-green-800/50 border-2 border-green-600 shadow-md' 
                                 : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
                             }`}>
                               <span className="font-semibold mr-2">A)</span>
-                              <span className={answerKey === 'a' ? 'font-medium' : ''}>
+                              <span className={answerKey === 'A' ? 'font-medium text-green-700 dark:text-green-300' : ''}>
                                 {item.answer_A}
                               </span>
                             </div>
                             <div className={`p-3 rounded-lg transition-colors ${
-                              answerKey === 'b' 
-                                ? 'bg-green-100 dark:bg-green-900/30 border-2 border-green-500' 
+                              answerKey === 'B' 
+                                ? 'bg-green-200 dark:bg-green-800/50 border-2 border-green-600 shadow-md' 
                                 : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
                             }`}>
                               <span className="font-semibold mr-2">B)</span>
-                              <span className={answerKey === 'b' ? 'font-medium' : ''}>
+                              <span className={answerKey === 'B' ? 'font-medium text-green-700 dark:text-green-300' : ''}>
                                 {item.answer_B}
                               </span>
                             </div>
                             <div className={`p-3 rounded-lg transition-colors ${
-                              answerKey === 'c' 
-                                ? 'bg-green-100 dark:bg-green-900/30 border-2 border-green-500' 
+                              answerKey === 'C' 
+                                ? 'bg-green-200 dark:bg-green-800/50 border-2 border-green-600 shadow-md' 
                                 : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
                             }`}>
                               <span className="font-semibold mr-2">C)</span>
-                              <span className={answerKey === 'c' ? 'font-medium' : ''}>
+                              <span className={answerKey === 'C' ? 'font-medium text-green-700 dark:text-green-300' : ''}>
                                 {item.answer_C}
                               </span>
                             </div>
                             <div className={`p-3 rounded-lg transition-colors ${
-                              answerKey === 'd' 
-                                ? 'bg-green-100 dark:bg-green-900/30 border-2 border-green-500' 
+                              answerKey === 'D' 
+                                ? 'bg-green-200 dark:bg-green-800/50 border-2 border-green-600 shadow-md' 
                                 : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
                             }`}>
                               <span className="font-semibold mr-2">D)</span>
-                              <span className={answerKey === 'd' ? 'font-medium' : ''}>
+                              <span className={answerKey === 'D' ? 'font-medium text-green-700 dark:text-green-300' : ''}>
                                 {item.answer_D}
                               </span>
                             </div>
