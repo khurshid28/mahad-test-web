@@ -1,0 +1,60 @@
+{
+  "name": "Matematika fanidan maxsus test",
+  "description": "1-sinf o'quvchilari uchun maxsus matematika testi",
+  "subject_id": 1,
+  "book_id": 2,
+  "section_id": 3,
+  "group_ids": [1, 2, 3],
+  "activation_start": "2025-11-15T08:00:00Z",
+  "activation_end": "2025-11-20T22:00:00Z",
+  "time_per_question": 60,
+  "total_time": 3600,
+  "question_count": 10,
+  "questions": [
+    {
+      "number": 1,
+      "question": "2 + 3 = ?",
+      "answer_A": "4",
+      "answer_B": "5",
+      "answer_C": "6",
+      "answer_D": "7",
+      "answer": "B"
+    },
+    {
+      "number": 2,
+      "question": "5 × 6 = ?",
+      "answer_A": "25",
+      "answer_B": "30",
+      "answer_C": "35",
+      "answer_D": "40",
+      "answer": "B"
+    },
+    {
+      "number": 3,
+      "question": "Kvadratning barcha tomonlari teng. Tog'rimi?",
+      "answer_A": "Ha",
+      "answer_B": "Yo'q",
+      "answer_C": null,
+      "answer_D": null,
+      "answer": "A"
+    },
+    {
+      "number": 4,
+      "question": "Doiraning yuzini topish formulasi qaysi?",
+      "answer_A": "πr²",
+      "answer_B": "2πr",
+      "answer_C": "πd",
+      "answer_D": "2πr²",
+      "answer": "A"
+    },
+    {
+      "number": 5,
+      "question": "3 ning kvadrati 9 ga teng. Tog'rimi?",
+      "answer_A": "Ha",
+      "answer_B": "Yo'q",
+      "answer_C": null,
+      "answer_D": null,
+      "answer": "A"
+    }
+  ]
+}

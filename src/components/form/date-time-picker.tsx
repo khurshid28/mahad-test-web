@@ -24,7 +24,7 @@ export default function DateTimePicker({
   dateLabel = "",
   timeLabel = "",
   datePlaceholder = "Sana tanlang",
-  timePlaceholder = "08:00",
+  timePlaceholder = "00:00",
   dateValue,
   timeValue,
   onDateChange,
