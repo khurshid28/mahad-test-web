@@ -37,8 +37,8 @@ const Pagination: React.FC<PaginationProps> = ({
     }
 
     // Joriy sahifadan oldingi va keyingi sahifalarni qo'shamiz
-    const start = Math.max(2, currentPage - 1);
-    const end = Math.min(totalPages - 1, currentPage + 1);
+    const start = Math.max(2, currentPage - 2);
+    const end = Math.min(totalPages - 1, currentPage + 2);
 
     for (let i = start; i <= end; i++) {
       if (i !== 1 && i !== totalPages) {
@@ -46,8 +46,8 @@ const Pagination: React.FC<PaginationProps> = ({
       }
     }
 
-    // Agar joriy sahifa oxirgi sahifadan 3 tagacha bo'lsa, "..." qo'shamiz
-    if (currentPage < totalPages - 3) {
+    // Agar joriy sahifa oxirgi sahifadan 2 tagacha bo'lsa, "..." qo'shamiz
+    if (currentPage < totalPages - 2) {
       pages.push('...');
     }
 
