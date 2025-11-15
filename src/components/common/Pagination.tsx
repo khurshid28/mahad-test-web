@@ -20,6 +20,14 @@ const Pagination: React.FC<PaginationProps> = ({
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
 
+    // Agar jami sahifalar 7 dan kam bo'lsa, barcha sahifalarni ko'rsatamiz
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+      return pages;
+    }
+
     // Har doim 1-chi sahifani ko'rsatamiz
     pages.push(1);
 
