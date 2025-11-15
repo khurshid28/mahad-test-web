@@ -1465,13 +1465,13 @@ export default function SpecialTestsPage() {
               <>
                 {previewTestItems.map((item: TestItem, idx: number) => {
                   const cleanQuestion = item.question?.replace(/^\s*\d+\.?\s*/, "") || "";
-                  const answerKey = previewAnswerKeys[item.id] || "A";
+                  const answerKey = previewAnswerKeys[item.number] || "A";
                   return (
                     <div key={item.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border dark:border-gray-700 shadow-sm">
                       <div className="flex items-start gap-3 mb-2">
                         <span className="shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full flex items-center justify-center font-semibold text-sm">{idx + 1}</span>
                         <div className="flex-1">
-                          <p className="font-bold text-gray-800 dark:text-white mb-2">{cleanQuestion}</p>
+                          <p className="font-medium text-gray-800 dark:text-white mb-2">{cleanQuestion}</p>
                           <div className="grid grid-cols-2 gap-2 text-sm">
                             <div><span className="font-semibold">A)</span> {item.answer_A}</div>
                             <div><span className="font-semibold">B)</span> {item.answer_B}</div>
@@ -1543,7 +1543,7 @@ export default function SpecialTestsPage() {
               {/* Savollar ro'yxati */}
               <div className="space-y-4 mb-6">
                 {viewingTest.generatedTest.items.map((item: TestItem, index: number) => {
-                  const answerKey = viewingTest.generatedTest!.answerKey[index + 1];
+                  const answerKey = viewingTest.generatedTest!.answerKey[item.number];
                   return (
                     <div key={item.id} className="border dark:border-gray-700 rounded-lg p-4">
                       <div className="flex items-start gap-3">
