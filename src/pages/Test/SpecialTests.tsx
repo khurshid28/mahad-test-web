@@ -1469,9 +1469,9 @@ export default function SpecialTestsPage() {
                   return (
                     <div key={item.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border dark:border-gray-700 shadow-sm">
                       <div className="flex items-start gap-3 mb-2">
-                        <span className="shrink-0 w-8 h-8 bg-gray-200 dark:bg-gray-700 text-primary dark:text-white rounded-full flex items-center justify-center font-semibold text-sm">{idx + 1}</span>
+                        <span className="shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full flex items-center justify-center font-semibold text-sm">{idx + 1}</span>
                         <div className="flex-1">
-                          <p className="font-medium text-gray-800 dark:text-white mb-2">{cleanQuestion}</p>
+                          <p className="font-bold text-gray-800 dark:text-white mb-2">{cleanQuestion}</p>
                           <div className="grid grid-cols-2 gap-2 text-sm">
                             <div><span className="font-semibold">A)</span> {item.answer_A}</div>
                             <div><span className="font-semibold">B)</span> {item.answer_B}</div>
@@ -1481,7 +1481,7 @@ export default function SpecialTestsPage() {
                         </div>
                       </div>
                       <div className="mt-3 text-sm text-center">
-                        <span className="inline-block bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-3 py-1 rounded-full font-semibold">Kalit: {answerKey}</span>
+                        <span className="inline-block bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full font-semibold">{idx + 1}. Kalit: {answerKey}</span>
                       </div>
                     </div>
                   );
