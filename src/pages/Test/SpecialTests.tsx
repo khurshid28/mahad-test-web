@@ -473,6 +473,7 @@ export default function SpecialTestsPage() {
 
       const finalTest = generatedTest ? { ...testWithGenerated, generatedTest } : testWithGenerated;
       setPendingTest(finalTest as APISpecialTest);
+      
       closeModal();
       openConfirmModal();
       console.log('🟡 Tasdiqlash modali ochildi');
@@ -578,25 +579,47 @@ export default function SpecialTestsPage() {
 
     console.log('✅ Selected items:', selectedItems.length);
 
-    // Javoblar kalitini tuzish
+    // Javoblar kalitini tuzish va javob variantlarini random almashtirish
     const answerKey: { [key: number]: string } = {};
-    selectedItems.forEach((item, index) => {
-      answerKey[index + 1] = item.answer || "";
+    const processedItems = selectedItems.map((item, index) => {
+      // Javob variantlarini array ga aylantirish
+      const options = [
+        { key: 'A', text: item.answer_A || "" },
+        { key: 'B', text: item.answer_B || "" },
+        { key: 'C', text: item.answer_C || "" },
+        { key: 'D', text: item.answer_D || "" }
+      ].filter(opt => opt.text.trim() !== ""); // Bo'sh variantlarni olib tashlash
+
+      // Variantlarni random tartibda aralashtirish
+      const shuffledOptions = [...options].sort(() => Math.random() - 0.5);
+
+      // To'g'ri javobni topish
+      const originalCorrectKey = item.answer || "A";
+      const correctOption = options.find(opt => opt.key === originalCorrectKey);
+      
+      // Yangi to'g'ri javob pozitsiyasini aniqlash
+      const newCorrectIndex = shuffledOptions.findIndex(opt => opt.text === correctOption?.text);
+      const newCorrectKey = ['A', 'B', 'C', 'D'][newCorrectIndex];
+
+      // Answer key ni saqlash
+      answerKey[index + 1] = newCorrectKey;
+
+      return {
+        ...item,
+        number: index + 1,
+        question: item.question || "",
+        answer_A: shuffledOptions[0]?.text || "",
+        answer_B: shuffledOptions[1]?.text || "",
+        answer_C: shuffledOptions[2]?.text || "",
+        answer_D: shuffledOptions[3]?.text || "",
+        answer: newCorrectKey
+      };
     });
 
     return {
       id: `gen_${Date.now()}`,
       specialTestId: specialTest.id!,
-      items: selectedItems.map((item, index) => ({
-        ...item,
-        number: index + 1,
-        question: item.question || "",
-        answer_A: item.answer_A || "",
-        answer_B: item.answer_B || "",
-        answer_C: item.answer_C || "",
-        answer_D: item.answer_D || "",
-        answer: item.answer || ""
-      })),
+      items: processedItems,
       createdAt: new Date().toISOString(),
       answerKey,
     };
@@ -609,15 +632,32 @@ export default function SpecialTestsPage() {
 
     try {
       setIsLoading(true);
+      
+      // Update the generated test with modified answer keys from preview modal
+      let updatedPendingTest = { ...pendingTest };
+      if (pendingTest.generatedTest) {
+        // Use previewAnswerKeys if available (user edited in preview modal), otherwise use original
+        const finalAnswerKeys = Object.keys(previewAnswerKeys).length > 0 
+          ? previewAnswerKeys 
+          : pendingTest.generatedTest.answerKey;
+        updatedPendingTest = {
+          ...pendingTest,
+          generatedTest: {
+            ...pendingTest.generatedTest,
+            answerKey: finalAnswerKeys
+          }
+        };
+      }
+      
       let savedTest: APISpecialTest;
 
       if (editingTest?.id) {
         // Update existing test
-        const updateData = { ...pendingTest };
+        const updateData = { ...updatedPendingTest };
         delete updateData.generatedTest; // Don't send generatedTest in update
         savedTest = await specialTestService.update(editingTest.id, updateData);
         // Keep the existing generatedTest or use the new one
-        savedTest = { ...savedTest, generatedTest: pendingTest.generatedTest };
+        savedTest = { ...savedTest, generatedTest: updatedPendingTest.generatedTest };
 
         // Process the updated test data the same way as fetchSpecialTests
         let processedTest = { ...editingTest, ...savedTest }; // Preserve original data and merge with API response
@@ -640,16 +680,17 @@ export default function SpecialTestsPage() {
         toast.success('Test yangilandi');
       } else {
         // Create new test
-        const createData = { ...pendingTest };
+        const createData = { ...updatedPendingTest };
         delete createData.generatedTest; // Don't send generatedTest in create
         savedTest = await specialTestService.create(createData);
         // Add the generated test back
-        savedTest = { ...savedTest, generatedTest: pendingTest.generatedTest };
+        savedTest = { ...savedTest, generatedTest: updatedPendingTest.generatedTest };
         setData([...data, savedTest]);
         toast.success('Test muvaffaqiyatli yaratildi va saqlandi');
       }
 
       setPendingTest(null);
+      setEditableAnswerKeys({});
       closeConfirmModal();
     } catch (error) {
       console.error('Test saqlashda xatolik:', error);
@@ -1444,7 +1485,7 @@ export default function SpecialTestsPage() {
             </div>
           )}
           <div className="flex items-center gap-3 justify-end">
-            <Button variant="outline" onClick={closeConfirmModal}>
+            <Button variant="outline" onClick={() => { setEditableAnswerKeys({}); closeConfirmModal(); }}>
               Bekor qilish
             </Button>
             <Button variant="outline" onClick={() => { generatePreviewForPendingTest(); setIsAllItemsModalOpen(true); }}>
@@ -1481,7 +1522,24 @@ export default function SpecialTestsPage() {
                         </div>
                       </div>
                       <div className="mt-3 text-sm text-center">
-                        <span className="inline-block bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full font-semibold">{idx + 1}. Kalit: {answerKey}</span>
+                        <div className="flex items-center justify-center gap-2">
+                          <span className="text-gray-600 dark:text-gray-400">{idx + 1}. Kalit:</span>
+                          <select
+                            value={previewAnswerKeys[item.number] || "A"}
+                            onChange={(e) => {
+                              setPreviewAnswerKeys(prev => ({
+                                ...prev,
+                                [item.number]: e.target.value
+                              }));
+                            }}
+                            className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          >
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
                   );
