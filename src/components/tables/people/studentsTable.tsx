@@ -560,6 +560,8 @@ export default function StudentsTable({ data, groups, refetch }: {
 
   const [tableData, settableData] = useState<StudentItemProps[]>(data);
   const { isOpen, openModal, closeModal } = useModal();
+  const { isOpen: isDeleteConfirmOpen, openModal: openDeleteConfirmModal, closeModal: closeDeleteConfirmModal } = useModal();
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
   let emptyStudent: Student = {
     name: "",
@@ -845,7 +847,10 @@ export default function StudentsTable({ data, groups, refetch }: {
                   <Button
                     size="mini"
                     variant="outline"
-                    onClick={async () => { deleteStudent(order.id) }}
+                    onClick={() => {
+                      setPendingDeleteId(order.id);
+                      openDeleteConfirmModal();
+                    }}
                   >
                     <DeleteIcon className="text-xl fill-gray-500 dark:fill-gray-400"></DeleteIcon>
                   </Button>
@@ -963,6 +968,35 @@ export default function StudentsTable({ data, groups, refetch }: {
               </Button>
             </div>
           </form>
+        </div>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal isOpen={isDeleteConfirmOpen} onClose={closeDeleteConfirmModal} className="max-w-[400px] m-4">
+        <div className="relative w-full p-6 bg-white rounded-3xl dark:bg-gray-900">
+          <h4 className="mb-4 text-xl font-semibold text-gray-800 dark:text-white/90">
+            Talabani o'chirishni tasdiqlaysizmi?
+          </h4>
+          <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
+            Bu talaba va unga tegishli barcha ma'lumotlar o'chiriladi. Bu amalni qaytarib bo'lmaydi.
+          </p>
+          <div className="flex items-center gap-3 justify-end">
+            <Button variant="outline" onClick={closeDeleteConfirmModal}>
+              Bekor qilish
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => {
+                if (pendingDeleteId) {
+                  deleteStudent(pendingDeleteId);
+                  setPendingDeleteId(null);
+                }
+                closeDeleteConfirmModal();
+              }}
+            >
+              Ha, o'chirish
+            </Button>
+          </div>
         </div>
       </Modal>
     </div>
