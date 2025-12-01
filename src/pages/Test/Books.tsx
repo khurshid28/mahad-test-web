@@ -251,11 +251,11 @@ export default function BooksPage() {
                 <div className="flex items-center">
                   <Switch
                     label="Testni ishlashga ruhsat berish"
-                    checked={Book.fullBlock ?? false}
+                    checked={!(Book.fullBlock ?? false)}
                     onChange={(v) =>
                       setBook({
                         ...Book,
-                        fullBlock: v,
+                        fullBlock: !v,
                       })
                     }
                   />
@@ -263,11 +263,11 @@ export default function BooksPage() {
                 <div className="flex items-center">
                   <Switch
                     label="Ketma-ket ishlash"
-                    checked={Book.stepBlock ?? false}
+                    checked={!(Book.stepBlock ?? false)}
                     onChange={(v) =>
                       setBook({
                         ...Book,
-                        stepBlock: v,
+                        stepBlock: !v,
                       })
                     }
                   />

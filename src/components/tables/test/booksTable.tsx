@@ -518,11 +518,11 @@ export default function BooksTable({
                  
 
                   {
-                    order.fullBlock ?  <CheckCircleIcon className="inline-block w-5 h-5 mr-1 text-green-500 dark:text-green-400" /> : <CloseCircleIcon className="inline-block w-5 h-5 ml-1  text-red-500 dark:text-red-400" />
+                    !order.fullBlock ?  <CheckCircleIcon className="inline-block w-5 h-5 mr-1 text-green-500 dark:text-green-400" /> : <CloseCircleIcon className="inline-block w-5 h-5 ml-1  text-red-500 dark:text-red-400" />
                   }
 
                   {
-                    order.stepBlock ?  <CheckCircleIcon className="inline-block w-5 h-5 mr-1 text-green-500 dark:text-green-400" /> : <CloseCircleIcon className="inline-block w-5 h-5 ml-1  text-red-500 dark:text-red-400" />
+                    !order.stepBlock ?  <CheckCircleIcon className="inline-block w-5 h-5 mr-1 text-green-500 dark:text-green-400" /> : <CloseCircleIcon className="inline-block w-5 h-5 ml-1  text-red-500 dark:text-red-400" />
                   }
                 </TableCell>
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 flex gap-2  flex-row items-center">
@@ -536,8 +536,8 @@ export default function BooksTable({
                         name: order.name,
                         image: order.image,
                         subject_id: order.subject_id,
-                        fullBlock: order.fullBlock ?? false,
-                        stepBlock: order.stepBlock ?? false,
+                        fullBlock: order.fullBlock ?? true,
+                        stepBlock: order.stepBlock ?? true,
                       });
                       // alert(order.subject_id,)
 
@@ -649,11 +649,11 @@ export default function BooksTable({
                 <div className="flex items-center">
                   <Switch
                     label="Testni ishlashga ruhsat berish"
-                    checked={Book.fullBlock ?? false}
+                    checked={!(Book.fullBlock ?? false)}
                     onChange={(v) =>
                       setBook({
                         ...Book,
-                        fullBlock: v,
+                        fullBlock: !v,
                       })
                     }
                   />
@@ -661,11 +661,11 @@ export default function BooksTable({
                 <div className="flex items-center">
                   <Switch
                     label="Ketma-ket ishlash"
-                    checked={Book.stepBlock ?? false}
+                    checked={!(Book.stepBlock ?? false)}
                     onChange={(v) =>
                       setBook({
                         ...Book,
-                        stepBlock: v,
+                        stepBlock: !v,
                       })
                     }
                   />
