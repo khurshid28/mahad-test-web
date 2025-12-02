@@ -42,18 +42,40 @@ export default function RatePage() {
   let sortedData = (list: RateItemProps[]): RateItemProps[] => {
     return list.map((e) => {
       if (e.results && e.results?.length > 0) {
-        let rate = 0;
+        let totalScore = 0;
+        let totalTests = 0;
+        
         for (let index = 0; index < e.results?.length; index++) {
-          if (e.results[index].type != "RANDOM") {
-            let count = e.results[index].test?._count?.test_items ?? 1;
-            let solved = e.results[index]?.solved ?? 0;
-            rate += (solved / count);
+          const result = e.results[index];
+          
+          if (result.type === "RANDOM") {
+            // Random testlar
+            const totalItems = (result.answers as any[])?.length ?? 0;
+            const solved = result.solved ?? 0;
+            if (totalItems > 0) {
+              totalScore += (solved / totalItems);
+              totalTests++;
+            }
+          } else if (result.type === "SPECIAL") {
+            // Maxsus testlar
+            const totalItems = (result.answers as any[])?.length ?? 0;
+            const solved = result.solved ?? 0;
+            if (totalItems > 0) {
+              totalScore += (solved / totalItems);
+              totalTests++;
+            }
+          } else {
+            // Oddiy testlar
+            const count = result.test?._count?.test_items ?? 1;
+            const solved = result.solved ?? 0;
+            totalScore += (solved / count);
+            totalTests++;
           }
         }
 
-        console.log(">>>>" + rate);
-
-        e.rate = (rate * 100) / e.results?.length;
+        e.rate = totalTests > 0 ? (totalScore * 100) / totalTests : 0;
+      } else {
+        e.rate = 0;
       }
       return e;
     }).sort((a, b) => {

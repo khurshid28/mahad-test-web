@@ -20,6 +20,8 @@ import bookImage from "../../../../public/images/product/book.png"
 interface ResultProps {
   id?: number;
   type?: string;
+  solved?: number;
+  answers?: any[];
   student?: {
     id?: number;
     image?: string;
@@ -49,6 +51,12 @@ interface ResultProps {
 
       }
     };
+  };
+
+  specialTest?: {
+    id?: number;
+    name?: string;
+    question_count?: number;
   };
 
   // test_count : number,
@@ -360,26 +368,54 @@ export default function ResultsTable(
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                   <div>
                     {
-                      order.type != "RANDOM" ? <>
+                      order.type === "RANDOM" ? (
                         <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                          {order.test?.section?.book?.name ?? ""}
+                          RANDOM TEST
                         </span>
-                        <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
-                          {order.test?.section?.name ?? ""}
-                        </span></> : <>
-                        <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                          RANDOM
-                        </span>
-                      </>
+                      ) : order.type === "SPECIAL" ? (
+                        <>
+                          <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                            MAXSUS TEST
+                          </span>
+                          <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
+                            {order.specialTest?.name ?? ""}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                            {order.test?.section?.book?.name ?? ""}
+                          </span>
+                          <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
+                            {order.test?.section?.name ?? ""}
+                          </span>
+                        </>
+                      )
                     }
                   </div>
                 </TableCell>
 
                 <TableCell className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400">
-                  {order.test?._count?.results ?? ""}/{order.test?._count?.test_items ?? ""}
+                  {
+                    order.type === "RANDOM" || order.type === "SPECIAL" 
+                      ? `${order.solved ?? 0}/${(order.answers as any[])?.length ?? 0}`
+                      : `${order.solved ?? 0}/${order.test?._count?.test_items ?? 0}`
+                  }
                 </TableCell>
                 <TableCell className="px-4 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
-                  {Number(((order.test?._count?.results ?? 0) * 100 / (order.test?._count?.test_items ?? 1)).toFixed(2))} %
+                  {
+                    (() => {
+                      if (order.type === "RANDOM" || order.type === "SPECIAL") {
+                        const total = (order.answers as any[])?.length ?? 1;
+                        const solved = order.solved ?? 0;
+                        return Number(((solved * 100) / total).toFixed(2));
+                      } else {
+                        const total = order.test?._count?.test_items ?? 1;
+                        const solved = order.solved ?? 0;
+                        return Number(((solved * 100) / total).toFixed(2));
+                      }
+                    })()
+                  } %
                 </TableCell>
               </TableRow>
             ))}
