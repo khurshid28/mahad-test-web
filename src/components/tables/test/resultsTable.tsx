@@ -209,10 +209,11 @@ interface ResultProps {
 
 
 export default function ResultsTable(
-  { data, groups, refetch }: {
+  { data, groups, refetch, studentIdFilter }: {
     data: ResultProps[],
     groups: any[]
     refetch: () => Promise<void>
+    studentIdFilter?: string | null
   }
 ) {
 
@@ -268,13 +269,20 @@ export default function ResultsTable(
   useEffect(() => {
     setCurrentPage(1);
 
-    if (groupoptionValue == "Hamma guruh") {
-      setTableData(data)
-
-    } else {
-      setTableData(data.filter((item) => item.student?.group?.id == +groupoptionValue));
+    let filteredData = data;
+    
+    // Filter by student_id if provided
+    if (studentIdFilter) {
+      filteredData = filteredData.filter((item) => item.student?.id?.toString() === studentIdFilter);
     }
-  }, [optionValue, groupoptionValue]);
+    
+    // Filter by group
+    if (groupoptionValue !== "Hamma guruh") {
+      filteredData = filteredData.filter((item) => item.student?.group?.id == +groupoptionValue);
+    }
+    
+    setTableData(filteredData);
+  }, [optionValue, groupoptionValue, data, studentIdFilter]);
 
 
   return (

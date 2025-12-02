@@ -8,6 +8,10 @@ import { useFetchWithLoader } from "../../hooks/useFetchWithLoader";
 import { LoadSpinner } from "../../components/spinner/load-spinner";
 
 export default function ResultsPage() {
+  // Get student_id from URL params if exists
+  const params = new URLSearchParams(window.location.search);
+  const studentIdParam = params.get('student_id');
+  
   const fetchResults = useCallback(() => {
     return axiosClient.get('/result/all').then(res => res.data);
   }, []);
@@ -49,7 +53,7 @@ const [all_group_options, set_all_group_options] = useState<HTMLOptionElement[]>
         }
         {
           data && <ComponentCard title="Natijalar jadvali">
-            <ResultsTable data={data} refetch={refetch} groups={all_group_options}/>
+            <ResultsTable data={data} refetch={refetch} groups={all_group_options} studentIdFilter={studentIdParam}/>
           </ComponentCard>
         }
        

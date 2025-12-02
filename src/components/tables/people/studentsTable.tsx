@@ -830,6 +830,19 @@ export default function StudentsTable({ data, groups, refetch }: {
                     variant="outline"
                     className="text-xl fill-gray-500 dark:fill-gray-400"
                     onClick={() => {
+                      // Navigate to results page for this student
+                      window.location.href = `/test/results?student_id=${order.id}`;
+                    }}
+                    title="Natijalarni ko'rish"
+                  >
+                    <EyeIcon></EyeIcon>
+                  </Button>
+                  
+                  <Button
+                    size="mini"
+                    variant="outline"
+                    className="text-xl fill-gray-500 dark:fill-gray-400"
+                    onClick={() => {
 
                       setStudent({
                         id: order.id,
