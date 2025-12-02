@@ -349,16 +349,6 @@ export default function ResultsTable(
           {/* Table Body */}
           <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
             {currentItems.map((order, index) => {
-              // Debug log
-              if (index === 0) {
-                console.log("Sample result item:", {
-                  type: order.type,
-                  solved: order.solved,
-                  answers_length: (order.answers as any[])?.length,
-                  test_items: order.test?._count?.test_items
-                });
-              }
-              
               return (
               <TableRow key={index}>
                 <TableCell className="px-5 py-4 sm:px-6 text-start">
