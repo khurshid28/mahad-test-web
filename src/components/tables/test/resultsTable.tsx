@@ -381,7 +381,7 @@ export default function ResultsTable(
                         <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
                           RANDOM TEST
                         </span>
-                      ) : order.type === "SPECIAL" ? (
+                      ) : (order.type === "SPECIAL" || order.type === "SpecialTest") ? (
                         <>
                           <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
                             MAXSUS TEST
@@ -406,22 +406,48 @@ export default function ResultsTable(
 
                 <TableCell className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400">
                   {
-                    order.type === "RANDOM" || order.type === "SPECIAL" 
-                      ? `${order.solved ?? 0}/${(order.answers as any[])?.length ?? 0}`
-                      : `${order.solved ?? 0}/${order.test?._count?.test_items ?? 0}`
+                    (() => {
+                      // Calculate solved from answers if solved is null
+                      let actualSolved = order.solved ?? 0;
+                      if ((order.type === "SPECIAL" || order.type === "SpecialTest" || order.type === "RANDOM") && order.solved === null && order.answers) {
+                        // Count non-empty answers
+                        if (Array.isArray(order.answers)) {
+                          actualSolved = order.answers.filter(a => a != null && a !== '').length;
+                        } else if (typeof order.answers === 'object') {
+                          actualSolved = Object.keys(order.answers).length;
+                        }
+                      }
+                      
+                      return order.type === "RANDOM" 
+                        ? `${actualSolved}/${(order.answers as any[])?.length ?? Object.keys(order.answers || {}).length}`
+                        : (order.type === "SPECIAL" || order.type === "SpecialTest")
+                        ? `${actualSolved}/${(order.specialTest?.question_count ?? Object.keys(order.answers || {}).length)}`
+                        : `${actualSolved}/${order.test?._count?.test_items ?? 0}`;
+                    })()
                   }
                 </TableCell>
                 <TableCell className="px-4 py-3 text-gray-500 text-theme-sm dark:text-gray-400">
                   {
                     (() => {
-                      if (order.type === "RANDOM" || order.type === "SPECIAL") {
-                        const total = (order.answers as any[])?.length ?? 1;
-                        const solved = order.solved ?? 0;
-                        return Number(((solved * 100) / total).toFixed(2));
+                      // Calculate solved from answers if solved is null
+                      let actualSolved = order.solved ?? 0;
+                      if ((order.type === "SPECIAL" || order.type === "SpecialTest" || order.type === "RANDOM") && order.solved === null && order.answers) {
+                        if (Array.isArray(order.answers)) {
+                          actualSolved = order.answers.filter(a => a != null && a !== '').length;
+                        } else if (typeof order.answers === 'object') {
+                          actualSolved = Object.keys(order.answers).length;
+                        }
+                      }
+                      
+                      if (order.type === "RANDOM") {
+                        const total = Array.isArray(order.answers) ? order.answers.length : (Object.keys(order.answers || {}).length || 1);
+                        return Number(((actualSolved * 100) / total).toFixed(2));
+                      } else if (order.type === "SPECIAL" || order.type === "SpecialTest") {
+                        const total = (order.specialTest?.question_count ?? Object.keys(order.answers || {}).length) || 1;
+                        return Number(((actualSolved * 100) / total).toFixed(2));
                       } else {
                         const total = order.test?._count?.test_items ?? 1;
-                        const solved = order.solved ?? 0;
-                        return Number(((solved * 100) / total).toFixed(2));
+                        return Number(((actualSolved * 100) / total).toFixed(2));
                       }
                     })()
                   } %
