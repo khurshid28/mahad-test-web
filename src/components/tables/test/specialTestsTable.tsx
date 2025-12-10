@@ -14,7 +14,7 @@ import {
   ArrowRightIcon,
   DeleteIcon,
   DownloadIcon,
-  EditIcon,
+  PencilIcon,
 } from "../../../icons";
 import { useEffect, useState } from "react";
 import { useModal } from "../../../hooks/useModal";
@@ -23,7 +23,7 @@ import Label from "../../form/Label";
 import { Modal } from "../../ui/modal";
 import Select from "../../form/Select";
 import { toast } from "react-toastify";
-import { ConfirmDeleteModal } from "../../ui/ConfirmDeleteModal";
+import ConfirmDeleteModal from "../../ui/ConfirmDeleteModal";
 import axiosClient from "../../../service/axios.service";
 import Pagination from "../../ui/pagination/Pagination";
 

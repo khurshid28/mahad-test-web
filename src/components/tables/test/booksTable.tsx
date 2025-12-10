@@ -563,7 +563,7 @@ export default function BooksTable({
 
                     <button
                       onClick={() => {
-                        handleDeleteClick(order.id, order.name || 'Nomsiz kitob');
+                        handleDeleteClick(order.id!, order.name || 'Nomsiz kitob');
                       }}
                       className="p-2 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 transition-colors group"
                       title="O'chirish"

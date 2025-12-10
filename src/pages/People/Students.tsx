@@ -150,7 +150,7 @@ export default function StudentsPage() {
               <div className="flex gap-3 items-center">
                 <Select
                   options={[new Option('Barcha guruhlar', ''), ...options]}
-                  value={selectedGroupFilter}
+                  defaultValue={selectedGroupFilter}
                   onChange={(value) => setSelectedGroupFilter(value)}
                   className="dark:bg-dark-900 min-w-[200px]"
                 />
@@ -242,7 +242,7 @@ export default function StudentsPage() {
                   <Select
                     options={options}
                     placeholder="Select group"
-                    value={Student.group_id?.toString() || ''}
+                    defaultValue={Student.group_id?.toString() || ''}
                     onChange={(e)=>{
                       setStudent({
                         ...Student,

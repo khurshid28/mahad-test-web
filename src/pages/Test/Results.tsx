@@ -10,7 +10,7 @@ import Select from "../../components/form/Select";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Button from "../../components/ui/button/Button";
-import { FilterIcon } from "../../icons";
+import { FileIcon as FilterIcon } from "../../icons";
 
 export default function ResultsPage() {
   // Get student_id from URL params if exists
@@ -209,7 +209,7 @@ const handleResetFilters = () => {
                         <Label>Guruh</Label>
                         <Select
                           options={[new Option('Barcha guruhlar', ''), ...all_group_options]}
-                          value={selectedGroup}
+                          defaultValue={selectedGroup}
                           onChange={(value) => {
                             setSelectedGroup(value);
                             if (value && selectedStudent) {
@@ -228,7 +228,7 @@ const handleResetFilters = () => {
                         <Label>Student</Label>
                         <Select
                           options={[new Option('Barcha studentlar', ''), ...filteredStudents]}
-                          value={selectedStudent}
+                          defaultValue={selectedStudent}
                           onChange={setSelectedStudent}
                           className="dark:bg-dark-900"
                         />
@@ -241,7 +241,7 @@ const handleResetFilters = () => {
                         <Label>Fan</Label>
                         <Select
                           options={[new Option('Barcha fanlar', ''), ...all_subject_options]}
-                          value={selectedSubject}
+                          defaultValue={selectedSubject}
                           onChange={setSelectedSubject}
                           className="dark:bg-dark-900"
                         />
@@ -251,7 +251,7 @@ const handleResetFilters = () => {
                         <Label>Kitob</Label>
                         <Select
                           options={[new Option('Barcha kitoblar', ''), ...filteredBooks]}
-                          value={selectedBook}
+                          defaultValue={selectedBook}
                           onChange={setSelectedBook}
                           className="dark:bg-dark-900"
                         />
@@ -269,7 +269,7 @@ const handleResetFilters = () => {
                             new Option('Maxsus test', 'maxsus'),
                             new Option('Random test', 'random')
                           ]}
-                          value={selectedType}
+                          defaultValue={selectedType}
                           onChange={setSelectedType}
                           className="dark:bg-dark-900"
                         />

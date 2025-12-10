@@ -515,7 +515,7 @@ export default function SectionsTable(
 
                                         <button
                                             onClick={() => {
-                                              setPendingDeleteId(order.id);
+                                              setPendingDeleteId(order.id!);
                                               openDeleteConfirmModal();
                                             }}
                                             className="p-2 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 transition-colors group"

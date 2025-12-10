@@ -50,7 +50,7 @@ export default function RatePage() {
           
           if (result.type === "RANDOM") {
             // Random testlar
-            const totalItems = (result.answers as any[])?.length ?? 0;
+            const totalItems = ((result as any).answers as any[])?.length ?? 0;
             const solved = result.solved ?? 0;
             if (totalItems > 0) {
               totalScore += (solved / totalItems);
@@ -58,7 +58,7 @@ export default function RatePage() {
             }
           } else if (result.type === "SPECIAL") {
             // Maxsus testlar
-            const totalItems = (result.answers as any[])?.length ?? 0;
+            const totalItems = ((result as any).answers as any[])?.length ?? 0;
             const solved = result.solved ?? 0;
             if (totalItems > 0) {
               totalScore += (solved / totalItems);
