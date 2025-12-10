@@ -39,8 +39,10 @@ import {
   ParsedResult,
   parseQuestions,
   readDocx,
+  downloadAsDocx,
 } from "../../../service/parse-docs.service";
 import Pagination from "../../ui/pagination/Pagination";
+import axiosClient from "../../../service/axios.service";
 
 interface TestProps {
   id: number;
@@ -50,16 +52,21 @@ interface TestProps {
   section: any;
   section_id?: number;
   _count?: any;
+  test_items?: any[];
 }
 
 export default function TestsTable({
   data,
   books,
   refetch,
+  onEdit,
+  onDownload,
 }: {
   data: TestProps[];
   books: any[];
   refetch: () => Promise<void>;
+  onEdit?: (testId: number, testItems?: any[]) => void;
+  onDownload?: (testId: number, testName: string) => void;
 }) {
   const [tableData, settableData] = useState(data);
 
@@ -153,6 +160,56 @@ export default function TestsTable({
   ];
 
   const [quiz, setQuiz] = useState<ParsedResult | null>(null);
+
+  const handleDeleteTest = async (testId: number, testName: string) => {
+    const confirmed = window.confirm(
+      `"${testName}" testini va unga tegishli barcha savollarni o'chirmoqchimisiz? Bu amalni bekor qilib bo'lmaydi.`
+    );
+    
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await axiosClient.delete(`/test/${testId}`);
+      alert('Test muvaffaqiyatli o\'chirildi');
+      await refetch();
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('O\'chirishda xatolik yuz berdi');
+    }
+  };
+
+  const handleDownloadTest = async (test: TestProps) => {
+    try {
+      console.log('Downloading test:', test.id, test.name);
+      
+      if (!test.test_items || test.test_items.length === 0) {
+        alert('Test bo\'sh');
+        return;
+      }
+      
+      // Test items ni Question formatiga o'tkazish
+      const questions = test.test_items.map((item: any, index: number) => ({
+        number: index + 1,
+        text: item.question,
+        options: [
+          { text: item.answer_A, isCorrect: item.answer === 'A' },
+          { text: item.answer_B, isCorrect: item.answer === 'B' },
+          { text: item.answer_C, isCorrect: item.answer === 'C' },
+          { text: item.answer_D || '', isCorrect: item.answer === 'D' },
+        ].filter(opt => opt.text)
+      }));
+      
+      console.log('Questions formatted:', questions.length);
+      // DOCX formatida yuklab olish
+      await downloadAsDocx(questions, test.name, `${test.name}.docx`);
+      console.log('Download initiated');
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('Yuklab olishda xatolik yuz berdi');
+    }
+  };
 
   
   return (
@@ -275,21 +332,26 @@ export default function TestsTable({
                   <Button
                     size="mini"
                     variant="outline"
-                    className="text-xl fill-gray-500 dark:fill-gray-400"
                     onClick={() => {
-                      setTest({
-                        ...order,
-                      });
-                      openModal();
+                      if (onEdit) {
+                        onEdit(order.id, order.test_items);
+                      } else {
+                        setTest({
+                          ...order,
+                        });
+                        openModal();
+                      }
                     }}
                   >
-                    <EditIcon></EditIcon>
+                    <EditIcon className="text-xl fill-gray-500 dark:fill-gray-400"></EditIcon>
                   </Button>
 
                   <Button
                     size="mini"
                     variant="outline"
-                    onClick={async () => {}}
+                    onClick={async () => {
+                      await handleDeleteTest(order.id, order.name);
+                    }}
                   >
                     <DeleteIcon className="text-xl fill-gray-500 dark:fill-gray-400"></DeleteIcon>
                   </Button>
@@ -297,7 +359,13 @@ export default function TestsTable({
                   <Button
                     size="mini"
                     variant="outline"
-                    onClick={async () => {}}
+                    onClick={async () => {
+                      if (onDownload) {
+                        onDownload(order.id, order.name);
+                      } else {
+                        await handleDownloadTest(order);
+                      }
+                    }}
                   >
                     <DownloadIcon className="text-xl fill-gray-500 dark:fill-gray-400"></DownloadIcon>
                   </Button>
