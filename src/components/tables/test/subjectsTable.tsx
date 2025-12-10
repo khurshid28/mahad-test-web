@@ -18,7 +18,7 @@ import {
     CopyIcon,
     DeleteIcon,
     DownloadIcon,
-    EditIcon,
+    PencilIcon,
     EyeCloseIcon,
     EyeIcon,
     PlusIcon,
@@ -432,33 +432,34 @@ import Pagination from "../../ui/pagination/Pagination";
 
                     </Badge>
                   </TableCell>
-                  <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 flex gap-2  flex-row items-center">
-                    <Button
-                      size="mini"
-                      variant="outline"
-                      className="text-xl fill-gray-500 dark:fill-gray-400"
-                      onClick={() => {
-                        setSubject({
-                          id : order.id,
-                          name: order.name,
-                          image: order.image,
-                          imageFile : undefined
-                        });
-                        openModal();
-                      }}
-                    >
-                      <EditIcon></EditIcon>
-                    </Button>
-  
-                    <Button
-                      size="mini"
-                      variant="outline"
-                      onClick={async () => {
-                        deleteSubject(order.id);
-                      }}
-                    >
-                      <DeleteIcon className="text-xl fill-gray-500 dark:fill-gray-400"></DeleteIcon>
-                    </Button>
+                  <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                    <div className="flex gap-2 flex-row items-center">
+                      <button
+                        onClick={() => {
+                          setSubject({
+                            id : order.id,
+                            name: order.name,
+                            image: order.image,
+                            imageFile : undefined
+                          });
+                          openModal();
+                        }}
+                        className="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 transition-colors group"
+                        title="Tahrirlash"
+                      >
+                        <PencilIcon className="w-5 h-5 fill-blue-600 dark:fill-blue-400 group-hover:scale-110 transition-transform"></PencilIcon>
+                      </button>
+    
+                      <button
+                        onClick={async () => {
+                          deleteSubject(order.id);
+                        }}
+                        className="p-2 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 transition-colors group"
+                        title="O'chirish"
+                      >
+                        <DeleteIcon className="text-xl fill-red-600 dark:fill-red-400 group-hover:scale-110 transition-transform"></DeleteIcon>
+                      </button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

@@ -17,7 +17,7 @@ import {
   CopyIcon,
   DeleteIcon,
   DownloadIcon,
-  EditIcon,
+  PencilIcon,
   EyeCloseIcon,
   EyeIcon,
   PlusIcon,
@@ -70,6 +70,12 @@ export default function TestsTable({
   onDownload?: (testId: number, testName: string) => void;
 }) {
   const [tableData, settableData] = useState(data);
+
+  // Props dan kelgan data o'zgarganda tableData ni yangilash
+  useEffect(() => {
+    console.log('TestsTable: data prop changed, updating tableData');
+    settableData(data);
+  }, [data]);
 
   const { isOpen, openModal, closeModal } = useModal();
   const handleAdding = () => {
@@ -335,47 +341,49 @@ export default function TestsTable({
                     Active
                   </Badge>
                 </TableCell>
-                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 flex gap-2  flex-row items-center">
-                  <Button
-                    size="mini"
-                    variant="outline"
-                    onClick={() => {
-                      if (onEdit) {
-                        onEdit(order.id, order.test_items);
-                      } else {
-                        setTest({
-                          ...order,
-                        });
-                        openModal();
-                      }
-                    }}
-                  >
-                    <EditIcon className="text-xl fill-gray-500 dark:fill-gray-400"></EditIcon>
-                  </Button>
+                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                  <div className="flex gap-2 flex-row items-center">
+                    <button
+                      onClick={() => {
+                        if (onEdit) {
+                          onEdit(order.id, order.test_items);
+                        } else {
+                          setTest({
+                            ...order,
+                          });
+                          openModal();
+                        }
+                      }}
+                      className="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 transition-colors group"
+                      title="Tahrirlash"
+                    >
+                      <PencilIcon className="w-5 h-5 fill-blue-600 dark:fill-blue-400 group-hover:scale-110 transition-transform"></PencilIcon>
+                    </button>
 
-                  <Button
-                    size="mini"
-                    variant="outline"
-                    onClick={() => {
-                      handleDeleteClick(order.id, order.name);
-                    }}
-                  >
-                    <DeleteIcon className="text-xl fill-gray-500 dark:fill-gray-400"></DeleteIcon>
-                  </Button>
+                    <button
+                      onClick={() => {
+                        handleDeleteClick(order.id, order.name);
+                      }}
+                      className="p-2 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 transition-colors group"
+                      title="O'chirish"
+                    >
+                      <DeleteIcon className="text-xl fill-red-600 dark:fill-red-400 group-hover:scale-110 transition-transform"></DeleteIcon>
+                    </button>
 
-                  <Button
-                    size="mini"
-                    variant="outline"
-                    onClick={async () => {
-                      if (onDownload) {
-                        onDownload(order.id, order.name);
-                      } else {
-                        await handleDownloadTest(order);
-                      }
-                    }}
-                  >
-                    <DownloadIcon className="text-xl fill-gray-500 dark:fill-gray-400"></DownloadIcon>
-                  </Button>
+                    <button
+                      onClick={async () => {
+                        if (onDownload) {
+                          onDownload(order.id, order.name);
+                        } else {
+                          await handleDownloadTest(order);
+                        }
+                      }}
+                      className="p-2 rounded-lg bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/40 transition-colors group"
+                      title="Yuklab olish"
+                    >
+                      <DownloadIcon className="text-xl fill-green-600 dark:fill-green-400 group-hover:scale-110 transition-transform"></DownloadIcon>
+                    </button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

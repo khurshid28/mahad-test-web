@@ -135,35 +135,48 @@ export default function TestsPage() {
 
   const handleQuestionEdit = (index: number, field: string, value: string) => {
     if (!quiz) return;
-    const updatedQuestions = [...quiz.questions];
-    if (field === 'text') {
-      updatedQuestions[index].text = value;
-    }
+    console.log('handleQuestionEdit called:', { index, field, value });
+    const updatedQuestions = quiz.questions.map((q, i) => 
+      i === index 
+        ? { ...q, [field]: value }
+        : q
+    );
+    console.log('Updated questions:', updatedQuestions);
     setQuiz({ ...quiz, questions: updatedQuestions });
   };
 
   const handleOptionEdit = (qIndex: number, oIndex: number, value: string) => {
     if (!quiz) return;
-    const updatedQuestions = [...quiz.questions];
-    updatedQuestions[qIndex] = {
-      ...updatedQuestions[qIndex],
-      options: updatedQuestions[qIndex].options.map((opt, i) => 
-        i === oIndex ? { ...opt, text: value } : opt
-      )
-    };
+    console.log('handleOptionEdit called:', { qIndex, oIndex, value });
+    const updatedQuestions = quiz.questions.map((q, i) => 
+      i === qIndex 
+        ? {
+            ...q,
+            options: q.options.map((opt, j) => 
+              j === oIndex ? { ...opt, text: value } : opt
+            )
+          }
+        : q
+    );
+    console.log('Updated questions after option edit:', updatedQuestions);
     setQuiz({ ...quiz, questions: updatedQuestions });
   };
 
   const handleCorrectAnswerChange = (qIndex: number, oIndex: number) => {
     if (!quiz) return;
-    const updatedQuestions = [...quiz.questions];
-    updatedQuestions[qIndex] = {
-      ...updatedQuestions[qIndex],
-      options: updatedQuestions[qIndex].options.map((opt, i) => ({
-        ...opt,
-        isCorrect: i === oIndex
-      }))
-    };
+    console.log('handleCorrectAnswerChange called:', { qIndex, oIndex });
+    const updatedQuestions = quiz.questions.map((q, i) => 
+      i === qIndex 
+        ? {
+            ...q,
+            options: q.options.map((opt, j) => ({
+              ...opt,
+              isCorrect: j === oIndex
+            }))
+          }
+        : q
+    );
+    console.log('Updated question options:', updatedQuestions[qIndex]?.options);
     setQuiz({ ...quiz, questions: updatedQuestions });
   };
 
@@ -312,6 +325,9 @@ export default function TestsPage() {
         return;
       }
 
+      console.log('Saving test with questions:', quiz.questions);
+      console.log('Question 22 text:', quiz.questions[21]?.text);
+
       // Test ma'lumotlarini yangilash
       await axiosClient.patch(`/test/${editingTestId}`, {
         name: Test.name,
@@ -319,14 +335,26 @@ export default function TestsPage() {
       });
 
       // Test itemlarni update/create/delete qilish (smart update)
-      await axiosClient.patch(`/test-item/test/${editingTestId}`, {
-        items: quiz.questions.map((q) => mapQuestionToDto(q, editingTestId)),
+      const itemsToSend = quiz.questions.map((q) => {
+        const dto = mapQuestionToDto(q, editingTestId);
+        console.log('Question DTO:', q.number, dto);
+        return dto;
       });
 
-      // Ma'lumotlarni yangilash
-      await refetchTest();
-      
+      console.log('Sending items to backend:', itemsToSend);
+
+      await axiosClient.patch(`/test-item/test/${editingTestId}`, {
+        items: itemsToSend,
+      });
+
       toast.success('Saqlandi');
+
+      // Ma'lumotlarni yangilash - modal yopilishidan OLDIN
+      console.log('Refetching data...');
+      const newData = await refetchTest();
+      console.log('Data refetched successfully. New data:', newData);
+      
+      // Faqat refetch tugagandan keyin modal yopish va state tozalash
       closePreviewModal();
       setEditingTestId(null);
       setQuiz(null);
@@ -485,6 +513,7 @@ export default function TestsPage() {
             }
           >
             <TestsTable
+              key={data?.length || 0}
               data={data}
               refetch={refetchTest}
               books={all_Book_options}
@@ -567,12 +596,24 @@ export default function TestsPage() {
                 </div>
 
                 <div>
-                  <Label>Fayl [docx]</Label>
-                  <FileInput
-                    onChange={handleFileChange}
-                    className="custom-class"
-                    accept=".docx" // faqat .docx fayllar ko‘rinadi
-                  />
+                  <Label>Fayl orqali qo'shish</Label>
+                  <div className="flex gap-2">
+                    <FileInput
+                      onChange={handleFileChange}
+                      className="custom-class flex-1"
+                      accept=".docx" // faqat .docx fayllar ko'rinadi
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="primary"
+                      onClick={openAddQuestionModal}
+                      className="flex items-center gap-2 whitespace-nowrap"
+                    >
+                      <PlusIcon className="size-5 fill-white" />
+                      Savol qo'shish
+                    </Button>
+                  </div>
                 </div>
               </div>
 
@@ -714,8 +755,8 @@ export default function TestsPage() {
               const originalIndex = quiz.questions.length - 1 - qIdx;
               // Savol matnidan boshidagi raqam va nuqtani olib tashlash
               const cleanText = q.text.replace(/^\d+\.\s*/, '');
-              const displayNumber = qIdx + 1; // 1, 2, 3... tartibda raqamlash
-              console.log('Question:', qIdx, 'Options:', q.options);
+              const displayNumber = q.number; // Savolning asl raqamini ko'rsatish
+              console.log('Question:', qIdx, 'Original Index:', originalIndex, 'Display Number:', displayNumber, 'Question number:', q.number);
               return (
               <div
                 key={q.number}
@@ -724,11 +765,14 @@ export default function TestsPage() {
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
                     {editingQuestion === originalIndex ? (
-                      <Input
+                      <input
                         type="text"
-                        value={cleanText}
-                        onChange={(e) => handleQuestionEdit(originalIndex, 'text', e.target.value)}
-                        className="font-semibold mb-2"
+                        value={q.text}
+                        onChange={(e) => {
+                          console.log('Input onChange triggered:', e.target.value);
+                          handleQuestionEdit(originalIndex, 'text', e.target.value);
+                        }}
+                        className="h-11 w-full rounded-lg border px-4 py-2.5 text-sm font-semibold mb-2 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/20 dark:bg-gray-900 dark:border-gray-700 dark:text-white/90 dark:focus:border-brand-800 focus:outline-hidden"
                         placeholder="Savol matni"
                       />
                     ) : (
@@ -772,11 +816,14 @@ export default function TestsPage() {
                           <span className="font-bold text-base text-gray-800 dark:text-white min-w-[30px] shrink-0">
                             {String.fromCharCode(65 + oIdx)})
                           </span>
-                          <Input
+                          <input
                             type="text"
                             value={opt.text || ''}
-                            onChange={(e) => handleOptionEdit(originalIndex, oIdx, e.target.value)}
-                            className="flex-1"
+                            onChange={(e) => {
+                              console.log('Option onChange triggered:', e.target.value);
+                              handleOptionEdit(originalIndex, oIdx, e.target.value);
+                            }}
+                            className="h-11 w-full rounded-lg border px-4 py-2.5 text-sm bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/20 dark:bg-gray-900 dark:border-gray-700 dark:text-white/90 dark:focus:border-brand-800 focus:outline-hidden"
                             placeholder={`Variant ${String.fromCharCode(65 + oIdx)}`}
                           />
                         </div>
@@ -794,6 +841,9 @@ export default function TestsPage() {
                           >
                             {opt.text || ''}
                           </span>
+                          {opt.isCorrect && (
+                            <CheckCircleIcon className="size-5 fill-green-600 dark:fill-green-400 shrink-0" />
+                          )}
                         </div>
                       )}
                     </li>
@@ -894,7 +944,7 @@ export default function TestsPage() {
         title="Savolni o'chirish"
         message="Ushbu savolni o'chirmoqchimisiz?"
         itemName={deletingQuestionIndex !== null && quiz?.questions[deletingQuestionIndex] 
-          ? `Savol ${deletingQuestionIndex + 1}: ${quiz.questions[deletingQuestionIndex].text.substring(0, 50)}...` 
+          ? `Savol ${quiz.questions[deletingQuestionIndex].number}: ${quiz.questions[deletingQuestionIndex].text.replace(/^\d+\.\s*/, '').substring(0, 50)}...` 
           : undefined}
         isLoading={false}
       />

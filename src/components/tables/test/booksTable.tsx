@@ -20,7 +20,7 @@ import {
   CopyIcon,
   DeleteIcon,
   DownloadIcon,
-  EditIcon,
+  PencilIcon,
   EyeCloseIcon,
   EyeIcon,
   PlusIcon,
@@ -40,6 +40,7 @@ import MultiSelect from "../../form/MultiSelect";
 import axiosClient from "../../../service/axios.service";
 import Pagination from "../../ui/pagination/Pagination";
 import { toast } from "react-toastify";
+import ConfirmDeleteModal from "../../ui/ConfirmDeleteModal";
 
 // interface Order {
 //   id: number;
@@ -386,15 +387,30 @@ export default function BooksTable({
     }
   };
 
-  let deleteBook = async (id: number | undefined) => {
-    try {
-      const res = await axiosClient.delete(`/book/${id}`);
+  const { isOpen: isDeleteModalOpen, openModal: openDeleteModal, closeModal: closeDeleteModal } = useModal();
+  const [deletingBook, setDeletingBook] = useState<{ id: number; name: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-      toast.success("Book muvaffaqiyatli o'chirildi");
+  const handleDeleteClick = (bookId: number, bookName: string) => {
+    setDeletingBook({ id: bookId, name: bookName });
+    openDeleteModal();
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingBook) return;
+    
+    setIsDeleting(true);
+    try {
+      await axiosClient.delete(`/book/${deletingBook.id}`);
+      toast.success("Kitob muvaffaqiyatli o'chirildi");
       await refetch();
+      closeDeleteModal();
+      setDeletingBook(null);
     } catch (error) {
       console.error("Delete Book error:", error);
       toast.error("Xatolik yuz berdi");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -525,37 +541,36 @@ export default function BooksTable({
                     !order.stepBlock ?  <CheckCircleIcon className="inline-block w-5 h-5 mr-1 text-green-500 dark:text-green-400" /> : <CloseCircleIcon className="inline-block w-5 h-5 ml-1  text-red-500 dark:text-red-400" />
                   }
                 </TableCell>
-                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 flex gap-2  flex-row items-center">
-                  <Button
-                    size="mini"
-                    variant="outline"
-                    className="text-xl fill-gray-500 dark:fill-gray-400"
-                    onClick={() => {
-                      setBook({
-                        id: order.id,
-                        name: order.name,
-                        image: order.image,
-                        subject_id: order.subject_id,
-                        fullBlock: order.fullBlock ?? true,
-                        stepBlock: order.stepBlock ?? true,
-                      });
-                      // alert(order.subject_id,)
+                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                  <div className="flex gap-2 flex-row items-center">
+                    <button
+                      onClick={() => {
+                        setBook({
+                          id: order.id,
+                          name: order.name,
+                          image: order.image,
+                          subject_id: order.subject_id,
+                          fullBlock: order.fullBlock ?? true,
+                          stepBlock: order.stepBlock ?? true,
+                        });
+                        openModal();
+                      }}
+                      className="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 transition-colors group"
+                      title="Tahrirlash"
+                    >
+                      <PencilIcon className="w-5 h-5 fill-blue-600 dark:fill-blue-400 group-hover:scale-110 transition-transform"></PencilIcon>
+                    </button>
 
-                      openModal();
-                    }}
-                  >
-                    <EditIcon></EditIcon>
-                  </Button>
-
-                  <Button
-                    size="mini"
-                    variant="outline"
-                    onClick={async () => {
-                      deleteBook(order.id);
-                    }}
-                  >
-                    <DeleteIcon className="text-xl fill-gray-500 dark:fill-gray-400"></DeleteIcon>
-                  </Button>
+                    <button
+                      onClick={() => {
+                        handleDeleteClick(order.id, order.name || 'Nomsiz kitob');
+                      }}
+                      className="p-2 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 transition-colors group"
+                      title="O'chirish"
+                    >
+                      <DeleteIcon className="text-xl fill-red-600 dark:fill-red-400 group-hover:scale-110 transition-transform"></DeleteIcon>
+                    </button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -684,6 +699,17 @@ export default function BooksTable({
           </form>
         </div>
       </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title="Kitobni o'chirish"
+        message="Ushbu kitobni o'chirmoqchimisiz?"
+        itemName={deletingBook?.name}
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

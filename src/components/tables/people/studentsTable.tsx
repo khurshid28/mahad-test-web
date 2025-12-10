@@ -17,7 +17,7 @@ import {
   CopyIcon,
   DeleteIcon,
   DownloadIcon,
-  EditIcon,
+  PencilIcon,
   EyeCloseIcon,
   EyeIcon,
   PlusIcon,
@@ -552,10 +552,12 @@ interface StudentItemProps {
 
 }
 
-export default function StudentsTable({ data, groups, refetch }: {
+export default function StudentsTable({ data, groups, refetch, onEdit, onDelete }: {
   data: StudentItemProps[],
   groups: any[]
   refetch: () => Promise<void>
+  onEdit: (student: Student) => void
+  onDelete: (id: number) => void
 }) {
 
   const [tableData, settableData] = useState<StudentItemProps[]>(data);
@@ -825,48 +827,43 @@ export default function StudentsTable({ data, groups, refetch }: {
                   </Badge>
                 </TableCell>
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 flex gap-2  flex-row items-center">
-                  <Button
-                    size="mini"
-                    variant="outline"
-                    className="text-xl fill-gray-500 dark:fill-gray-400"
+                  <button
                     onClick={() => {
                       // Navigate to results page for this student
-                      window.location.href = `/test/results?student_id=${order.id}`;
+                      window.location.href = `/results?student_id=${order.id}`;
                     }}
+                    className="p-2 rounded-lg bg-green-50 hover:bg-green-100 dark:bg-green-900/20 dark:hover:bg-green-900/40 transition-colors group"
                     title="Natijalarni ko'rish"
                   >
-                    <EyeIcon></EyeIcon>
-                  </Button>
+                    <EyeIcon className="w-5 h-5 fill-green-600 dark:fill-green-400 group-hover:scale-110 transition-transform"></EyeIcon>
+                  </button>
                   
-                  <Button
-                    size="mini"
-                    variant="outline"
-                    className="text-xl fill-gray-500 dark:fill-gray-400"
+                  <button
                     onClick={() => {
-
-                      setStudent({
+                      onEdit({
                         id: order.id,
                         name: order.name,
                         password: order.password,
                         phone: order.phone,
                         group_id: order.group_id
                       });
-                      openModal();
                     }}
+                    className="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 transition-colors group"
+                    title="Tahrirlash"
                   >
-                    <EditIcon></EditIcon>
-                  </Button>
+                    <PencilIcon className="w-5 h-5 fill-blue-600 dark:fill-blue-400 group-hover:scale-110 transition-transform"></PencilIcon>
+                  </button>
 
-                  <Button
-                    size="mini"
-                    variant="outline"
+                  <button
                     onClick={() => {
                       setPendingDeleteId(order.id);
                       openDeleteConfirmModal();
                     }}
+                    className="p-2 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 transition-colors group"
+                    title="O'chirish"
                   >
-                    <DeleteIcon className="text-xl fill-gray-500 dark:fill-gray-400"></DeleteIcon>
-                  </Button>
+                    <DeleteIcon className="w-5 h-5 fill-red-600 dark:fill-red-400 group-hover:scale-110 transition-transform"></DeleteIcon>
+                  </button>
                 </TableCell>
               </TableRow>
             ))}
@@ -1001,7 +998,7 @@ export default function StudentsTable({ data, groups, refetch }: {
               variant="primary"
               onClick={() => {
                 if (pendingDeleteId) {
-                  deleteStudent(pendingDeleteId);
+                  onDelete(pendingDeleteId);
                   setPendingDeleteId(null);
                 }
                 closeDeleteConfirmModal();

@@ -23,6 +23,7 @@ import Label from "../../form/Label";
 import { Modal } from "../../ui/modal";
 import Select from "../../form/Select";
 import { toast } from "react-toastify";
+import { ConfirmDeleteModal } from "../../ui/ConfirmDeleteModal";
 import axiosClient from "../../../service/axios.service";
 import Pagination from "../../ui/pagination/Pagination";
 
@@ -63,8 +64,9 @@ export default function SpecialTestsTable({
   }, []);
 
   const { isOpen, openModal, closeModal } = useModal();
-  const { isOpen: isDeleteConfirmOpen, openModal: openDeleteConfirmModal, closeModal: closeDeleteConfirmModal } = useModal();
-  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const { isOpen: isDeleteModalOpen, openModal: openDeleteModal, closeModal: closeDeleteModal } = useModal();
+  const [deletingTest, setDeletingTest] = useState<{ id: number; name: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [name, setName] = useState("");
   const [editId, setEditId] = useState<number | undefined>();
   const [activationTime, setActivationTime] = useState("");
@@ -136,15 +138,27 @@ export default function SpecialTestsTable({
     setCurrentPage(1);
   }, [optionValue]);
 
-  const deleteSpecialTest = async (testId: number) => {
+  const handleDeleteClick = (testId: number, testName: string) => () => {
+    setDeletingTest({ id: testId, name: testName });
+    openDeleteModal();
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingTest) return;
+
+    setIsDeleting(true);
     try {
       // Mock delete - in real app this would call backend
-      console.log('Deleting test:', testId);
+      console.log('Deleting test:', deletingTest.id);
       toast.success("Maxsus test o'chirildi");
       await refetch();
+      closeDeleteModal();
+      setDeletingTest(null);
     } catch (error) {
       console.error('Delete Special Test error:', error);
       toast.error('Xatolik yuz berdi');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -260,34 +274,32 @@ export default function SpecialTestsTable({
                     {item.status}
                   </Badge>
                 </TableCell>
-                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 flex gap-2 flex-row items-center">
-                  <Button
-                    size="mini"
-                    variant="outline"
-                    className="text-xl fill-gray-500 dark:fill-gray-400"
-                    onClick={() => {
-                      setName(item.name);
-                      setEditId(item.id);
-                      setActivationTime(item.activationTime);
-                      setStartTime(item.startTime);
-                      setEndTime(item.endTime);
-                      setDuration(item.duration);
-                      openModal();
-                    }}
-                  >
-                    <EditIcon />
-                  </Button>
+                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                  <div className="flex gap-2 flex-row items-center">
+                    <button
+                      onClick={() => {
+                        setName(item.name);
+                        setEditId(item.id);
+                        setActivationTime(item.activationTime);
+                        setStartTime(item.startTime);
+                        setEndTime(item.endTime);
+                        setDuration(item.duration);
+                        openModal();
+                      }}
+                      className="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 transition-colors group"
+                      title="Tahrirlash"
+                    >
+                      <PencilIcon className="w-5 h-5 fill-blue-600 dark:fill-blue-400 group-hover:scale-110 transition-transform" />
+                    </button>
 
-                  <Button
-                    size="mini"
-                    variant="outline"
-                    onClick={() => {
-                      setPendingDeleteId(item.id);
-                      openDeleteConfirmModal();
-                    }}
-                  >
-                    <DeleteIcon className="text-xl fill-gray-500 dark:fill-gray-400" />
-                  </Button>
+                    <button
+                      onClick={handleDeleteClick(item.id, item.name)}
+                      className="p-2 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 transition-colors group"
+                      title="O'chirish"
+                    >
+                      <DeleteIcon className="text-xl fill-red-600 dark:fill-red-400 group-hover:scale-110 transition-transform" />
+                    </button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -381,33 +393,15 @@ export default function SpecialTestsTable({
       </Modal>
 
       {/* Delete Confirmation Modal */}
-      <Modal isOpen={isDeleteConfirmOpen} onClose={closeDeleteConfirmModal} className="max-w-[400px] m-4">
-        <div className="relative w-full p-6 bg-white rounded-3xl dark:bg-gray-900">
-          <h4 className="mb-4 text-xl font-semibold text-gray-800 dark:text-white/90">
-            Maxsus testni o'chirishni tasdiqlaysizmi?
-          </h4>
-          <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
-            Bu maxsus test va unga tegishli barcha ma'lumotlar o'chiriladi. Bu amalni qaytarib bo'lmaydi.
-          </p>
-          <div className="flex items-center gap-3 justify-end">
-            <Button variant="outline" onClick={closeDeleteConfirmModal}>
-              Bekor qilish
-            </Button>
-            <Button
-              variant="primary"
-              onClick={() => {
-                if (pendingDeleteId) {
-                  deleteSpecialTest(pendingDeleteId);
-                  setPendingDeleteId(null);
-                }
-                closeDeleteConfirmModal();
-              }}
-            >
-              Ha, o'chirish
-            </Button>
-          </div>
-        </div>
-      </Modal>
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title="Maxsus testni o'chirish"
+        message="Ushbu maxsus testni o'chirmoqchimisiz?"
+        itemName={deletingTest?.name}
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

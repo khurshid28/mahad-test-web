@@ -46,6 +46,7 @@ export default function StudentsPage() {
   let [options, setOptions] = useState<HTMLOptionElement[]>([]);
 
   let [optionValue, setoptionValue] = useState("");
+  let [selectedGroupFilter, setSelectedGroupFilter] = useState<string>("");
 
   const handleSelectChange = (value: string) => {
     setoptionValue(value);
@@ -57,24 +58,45 @@ export default function StudentsPage() {
     }
   };
 
+  const handleEditStudent = (student: Student) => {
+    setStudent(student);
+    openModal();
+  };
+
+  const handleDeleteStudent = async (id: number) => {
+    try {
+      await axiosClient.delete(`/student/${id}`);
+      toast.success('Student o\'chirildi');
+      await refetch();
+    } catch (error) {
+      console.error('Delete Student error:', error);
+      toast.error('O\'chirishda xatolik');
+    }
+  };
 
   
   let createStudent = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
-      const res = await axiosClient.post('/student', { ...Student });
-      
-     
-      toast.success('Student muvaffaqiyatli yaratildi');
+      if (Student.id) {
+        // Edit existing student
+        await axiosClient.put(`/student/${Student.id}`, { ...Student });
+        toast.success('Student muvaffaqiyatli yangilandi');
+      } else {
+        // Create new student
+        await axiosClient.post('/student', { ...Student });
+        toast.success('Student muvaffaqiyatli yaratildi');
+      }
       await refetch();
 
     } catch (error) {
-      console.error('Create Student error:', error);
+      console.error('Create/Update Student error:', error);
       toast.error('Xatolik yuz berdi');
 
     }finally { 
       closeModal();
+      setStudent(emptyStudent);
     }
   };
 
@@ -125,28 +147,42 @@ export default function StudentsPage() {
           title="Studentlar jadvali"
           action={
             <>
-              <Button
-                size="sm"
-                variant="primary"
-                startIcon={<PlusIcon className="size-5 fill-white" />}
-                onClick={() => {
-                  setStudent(emptyStudent)
-                  openModal()
-                }}
-              >
-                Qo'shish
-              </Button>
+              <div className="flex gap-3 items-center">
+                <Select
+                  options={[new Option('Barcha guruhlar', ''), ...options]}
+                  value={selectedGroupFilter}
+                  onChange={(value) => setSelectedGroupFilter(value)}
+                  className="dark:bg-dark-900 min-w-[200px]"
+                />
+                <Button
+                  size="sm"
+                  variant="primary"
+                  startIcon={<PlusIcon className="size-5 fill-white" />}
+                  onClick={() => {
+                    setStudent(emptyStudent)
+                    openModal()
+                  }}
+                >
+                  Qo'shish
+                </Button>
+              </div>
             </>
           }
         >
-          <StudentsTable data={data} refetch={refetch} groups={options} />
+          <StudentsTable 
+            data={selectedGroupFilter ? data.filter((s: any) => s.group_id?.toString() === selectedGroupFilter) : data} 
+            refetch={refetch} 
+            groups={options} 
+            onEdit={handleEditStudent} 
+            onDelete={handleDeleteStudent} 
+          />
         </ComponentCard>}
       </div>
       <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
         <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
           <div className="px-2 pr-14">
             <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Student qo'shish
+              {Student.id ? "Studentni tahrirlash" : "Student qo'shish"}
             </h4>
             <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
               Create new Student with full details.
@@ -184,6 +220,20 @@ export default function StudentsPage() {
                   />
                 </div>
 
+                <div>
+                  <Label>Password</Label>
+                  <Input
+                    type="text"
+                    value={Student.password || ''}
+                    onChange={(e) =>
+                      setStudent({
+                        ...Student,
+                        password: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+
 
 
 
@@ -192,6 +242,7 @@ export default function StudentsPage() {
                   <Select
                     options={options}
                     placeholder="Select group"
+                    value={Student.group_id?.toString() || ''}
                     onChange={(e)=>{
                       setStudent({
                         ...Student,
