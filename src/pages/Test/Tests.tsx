@@ -145,16 +145,25 @@ export default function TestsPage() {
   const handleOptionEdit = (qIndex: number, oIndex: number, value: string) => {
     if (!quiz) return;
     const updatedQuestions = [...quiz.questions];
-    updatedQuestions[qIndex].options[oIndex].text = value;
+    updatedQuestions[qIndex] = {
+      ...updatedQuestions[qIndex],
+      options: updatedQuestions[qIndex].options.map((opt, i) => 
+        i === oIndex ? { ...opt, text: value } : opt
+      )
+    };
     setQuiz({ ...quiz, questions: updatedQuestions });
   };
 
   const handleCorrectAnswerChange = (qIndex: number, oIndex: number) => {
     if (!quiz) return;
     const updatedQuestions = [...quiz.questions];
-    updatedQuestions[qIndex].options.forEach((opt, i) => {
-      opt.isCorrect = i === oIndex;
-    });
+    updatedQuestions[qIndex] = {
+      ...updatedQuestions[qIndex],
+      options: updatedQuestions[qIndex].options.map((opt, i) => ({
+        ...opt,
+        isCorrect: i === oIndex
+      }))
+    };
     setQuiz({ ...quiz, questions: updatedQuestions });
   };
 
