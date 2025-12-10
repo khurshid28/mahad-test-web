@@ -301,12 +301,8 @@ export default function TestsPage() {
         section_id: Test.section_id,
       });
 
-      // Avvalgi test itemlarni o'chirish
-      await axiosClient.delete(`/test-item/test/${editingTestId}`);
-
-      // Yangi test itemlarni qo'shish
-      await axiosClient.post('/test-item/more', {
-        section_id: Test.section_id,
+      // Test itemlarni update/create/delete qilish (smart update)
+      await axiosClient.patch(`/test-item/test/${editingTestId}`, {
         items: quiz.questions.map((q) => mapQuestionToDto(q, editingTestId)),
       });
 
