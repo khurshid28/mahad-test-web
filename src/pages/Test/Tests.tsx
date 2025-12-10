@@ -306,12 +306,14 @@ export default function TestsPage() {
         items: quiz.questions.map((q) => mapQuestionToDto(q, editingTestId)),
       });
 
+      // Ma'lumotlarni yangilash
+      await refetchTest();
+      
       toast.success('Saqlandi');
       closePreviewModal();
       setEditingTestId(null);
       setQuiz(null);
       setTest(emptyTest);
-      await refetchTest();
     } catch (error) {
       console.error('Saqlashda xatolik:', error);
       toast.error('Saqlashda xatolik yuz berdi');
@@ -407,13 +409,14 @@ export default function TestsPage() {
           section_id: Test.section_id,
           items: quiz?.questions.map((q) => mapQuestionToDto(q, 0)),
         });
+        
+        // Ma'lumotlarni yangilash
+        await refetchTest();
+        
         toast.success("Saqlandi");
         console.log("Saqlandi");
-
-        refetchTest().then((e) => {
-          setTest(emptyTest);
-          setQuiz(null);
-        });
+        setTest(emptyTest);
+        setQuiz(null);
       } else {
         toast.warn("Ma'lumotlar to'liq emas");
       }
