@@ -23,6 +23,7 @@ import {
 } from "../../service/parse-docs.service";
 
 import { toast } from "react-toastify";
+import ConfirmDeleteModal from "../../components/ui/ConfirmDeleteModal";
 export interface Test {
   id?: number;
   name?: string;
@@ -36,6 +37,9 @@ export default function TestsPage() {
   const { isOpen, openModal, closeModal } = useModal();
   const { isOpen: isPreviewOpen, openModal: openPreviewModal, closeModal: closePreviewModal } = useModal();
   const { isOpen: isAddQuestionOpen, openModal: openAddQuestionModal, closeModal: closeAddQuestionModal } = useModal();
+  const { isOpen: isDeleteQuestionOpen, openModal: openDeleteQuestionModal, closeModal: closeDeleteQuestionModal } = useModal();
+  
+  const [deletingQuestionIndex, setDeletingQuestionIndex] = useState<number | null>(null);
   
   const handleAdding = () => {
     // Handle save logic here
@@ -209,14 +213,15 @@ export default function TestsPage() {
 
   const handleDeleteQuestion = (index: number) => {
     if (!quiz) return;
-    
-    // Tasdiqlash so'rash
-    if (!window.confirm('Bu savolni o\'chirmoqchimisiz?')) {
-      return;
-    }
+    setDeletingQuestionIndex(index);
+    openDeleteQuestionModal();
+  };
+
+  const handleConfirmDeleteQuestion = () => {
+    if (!quiz || deletingQuestionIndex === null) return;
     
     const updatedQuestions = [...quiz.questions];
-    updatedQuestions.splice(index, 1);
+    updatedQuestions.splice(deletingQuestionIndex, 1);
     
     // Qolgan savollarni qayta raqamlash
     updatedQuestions.forEach((q, idx) => {
@@ -224,9 +229,12 @@ export default function TestsPage() {
     });
     
     setQuiz({ ...quiz, questions: updatedQuestions });
-    if (editingQuestion === index) {
+    if (editingQuestion === deletingQuestionIndex) {
       setEditingQuestion(null);
     }
+    
+    closeDeleteQuestionModal();
+    setDeletingQuestionIndex(null);
   };
 
   const handleEditTest = async (testId: number, testItems?: any[]) => {
@@ -868,6 +876,19 @@ export default function TestsPage() {
           </div>
         </div>
       </Modal>
+
+      {/* Delete Question Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={isDeleteQuestionOpen}
+        onClose={closeDeleteQuestionModal}
+        onConfirm={handleConfirmDeleteQuestion}
+        title="Savolni o'chirish"
+        message="Ushbu savolni o'chirmoqchimisiz?"
+        itemName={deletingQuestionIndex !== null && quiz?.questions[deletingQuestionIndex] 
+          ? `Savol ${deletingQuestionIndex + 1}: ${quiz.questions[deletingQuestionIndex].text.substring(0, 50)}...` 
+          : undefined}
+        isLoading={false}
+      />
     </>
   );
 }

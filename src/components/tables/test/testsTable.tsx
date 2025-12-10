@@ -43,6 +43,7 @@ import {
 } from "../../../service/parse-docs.service";
 import Pagination from "../../ui/pagination/Pagination";
 import axiosClient from "../../../service/axios.service";
+import ConfirmDeleteModal from "../../ui/ConfirmDeleteModal";
 
 interface TestProps {
   id: number;
@@ -160,23 +161,29 @@ export default function TestsTable({
   ];
 
   const [quiz, setQuiz] = useState<ParsedResult | null>(null);
+  const { isOpen: isDeleteModalOpen, openModal: openDeleteModal, closeModal: closeDeleteModal } = useModal();
+  const [deletingTest, setDeletingTest] = useState<{ id: number; name: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDeleteTest = async (testId: number, testName: string) => {
-    const confirmed = window.confirm(
-      `"${testName}" testini va unga tegishli barcha savollarni o'chirmoqchimisiz? Bu amalni bekor qilib bo'lmaydi.`
-    );
+  const handleDeleteClick = (testId: number, testName: string) => {
+    setDeletingTest({ id: testId, name: testName });
+    openDeleteModal();
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingTest) return;
     
-    if (!confirmed) {
-      return;
-    }
-
+    setIsDeleting(true);
     try {
-      await axiosClient.delete(`/test/${testId}`);
-      alert('Test muvaffaqiyatli o\'chirildi');
+      await axiosClient.delete(`/test/${deletingTest.id}`);
       await refetch();
+      closeDeleteModal();
+      setDeletingTest(null);
     } catch (error) {
       console.error('Delete error:', error);
       alert('O\'chirishda xatolik yuz berdi');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -349,8 +356,8 @@ export default function TestsTable({
                   <Button
                     size="mini"
                     variant="outline"
-                    onClick={async () => {
-                      await handleDeleteTest(order.id, order.name);
+                    onClick={() => {
+                      handleDeleteClick(order.id, order.name);
                     }}
                   >
                     <DeleteIcon className="text-xl fill-gray-500 dark:fill-gray-400"></DeleteIcon>
@@ -463,6 +470,17 @@ export default function TestsTable({
           </form>
         </div>
       </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title="Testni o'chirish"
+        message="Ushbu testni va unga tegishli barcha savollarni o'chirmoqchimisiz?"
+        itemName={deletingTest?.name}
+        isLoading={isDeleting}
+      />
     </div>
   );
 }
