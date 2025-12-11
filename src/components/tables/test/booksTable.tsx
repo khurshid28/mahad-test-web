@@ -61,6 +61,7 @@ interface BookItemProps {
   subject_id?: number;
   fullBlock?: boolean;
   stepBlock?: boolean;
+  sections?: Array<{id: number; name: string}>;
 }
 // Define the table data using the interface
 // const statictableData: Order[] = [
@@ -249,10 +250,12 @@ export default function BooksTable({
   data,
   subjects,
   refetch,
+  onEdit,
 }: {
   data: BookItemProps[];
   subjects: any[];
   refetch: () => Promise<void>;
+  onEdit?: (bookId: number) => void;
 }) {
   const [tableData, settableData] = useState(data);
 
@@ -502,6 +505,11 @@ export default function BooksTable({
                       <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
                         {order.name}
                       </span>
+                      {order.sections && order.sections.length > 0 && (
+                        <span className="block text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          {order.sections.length} ta bo'lim
+                        </span>
+                      )}
                     </div>
                   </div>
                 </TableCell>
@@ -545,15 +553,9 @@ export default function BooksTable({
                   <div className="flex gap-2 flex-row items-center">
                     <button
                       onClick={() => {
-                        setBook({
-                          id: order.id,
-                          name: order.name,
-                          image: order.image,
-                          subject_id: order.subject_id,
-                          fullBlock: order.fullBlock ?? true,
-                          stepBlock: order.stepBlock ?? true,
-                        });
-                        openModal();
+                        if (onEdit && order.id) {
+                          onEdit(order.id);
+                        }
                       }}
                       className="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 transition-colors group"
                       title="Tahrirlash"
