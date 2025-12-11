@@ -169,7 +169,12 @@ export default function BooksPage() {
       }));
       
       setBook({
-        ...bookData,
+        id: bookData.id,
+        name: bookData.name,
+        subject_id: bookData.subject_id,
+        image: bookData.image,
+        fullBlock: bookData.fullBlock ?? false,
+        stepBlock: bookData.stepBlock ?? false,
         sections: sections,
       });
       setEditingBookId(bookId);
