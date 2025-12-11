@@ -505,11 +505,9 @@ export default function BooksTable({
                       <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
                         {order.name}
                       </span>
-                      {order.sections && order.sections.length > 0 && (
-                        <span className="block text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          {order.sections.length} ta bo'lim
-                        </span>
-                      )}
+                      <span className="block text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {order.sections ? order.sections.length : 0} ta bo'lim
+                      </span>
                     </div>
                   </div>
                 </TableCell>
