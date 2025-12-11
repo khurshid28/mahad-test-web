@@ -349,9 +349,9 @@ export default function BooksPage() {
               </div>
 
               {/* Bo'limlar qismi */}
-              <div className="mt-6">
-                <div className="flex justify-between items-center mb-3">
-                  <Label>Bo'limlar</Label>
+              <div className="mt-6 p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800/50">
+                <div className="flex justify-between items-center mb-4">
+                  <Label className="text-base font-semibold">Bo'limlar</Label>
                   <Button
                     type="button"
                     size="sm"
@@ -363,10 +363,10 @@ export default function BooksPage() {
                   </Button>
                 </div>
                 
-                <div className="space-y-3 max-h-[200px] overflow-y-auto">
+                <div className="space-y-3 max-h-[200px] overflow-y-auto custom-scrollbar">
                   {Book.sections && Book.sections.length > 0 ? (
                     Book.sections.map((section, index) => (
-                      <div key={index} className="flex gap-2 items-center">
+                      <div key={index} className="flex gap-2 items-center p-2 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-600">
                         <Input
                           type="text"
                           value={section.name}
@@ -386,9 +386,11 @@ export default function BooksPage() {
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
-                      Bo'limlar yo'q. Yuqoridagi tugma orqali qo'shing.
-                    </p>
+                    <div className="text-center py-8 px-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Bo'limlar yo'q. Yuqoridagi tugma orqali qo'shing.
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>
