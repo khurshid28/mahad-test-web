@@ -156,13 +156,12 @@ export default function BooksPage() {
 
   const handleEditBook = async (bookId: number) => {
     try {
-      // Kitob ma'lumotlarini olish
+      // Kitob ma'lumotlarini olish (sections ham qo'shilgan holda)
       const bookRes = await axiosClient.get(`/book/${bookId}`);
       const bookData = bookRes.data;
       
-      // Bo'limlarni olish
-      const sectionsRes = await axiosClient.get(`/section/book/${bookId}`);
-      const sections = sectionsRes.data.map((s: any) => ({
+      // Backend'dan kelgan sections'ni format qilish
+      const sections = (bookData.sections || []).map((s: any) => ({
         id: s.id,
         name: s.name,
         book_id: s.book_id,
