@@ -183,7 +183,7 @@ export default function BooksPage() {
             Kitob qo'shish
             </h4>
             <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-              Create new Book with full details.
+              Yangi kitob qo'shish uchun barcha ma'lumotlarni kiriting.
             </p>
           </div>
           <form className="flex flex-col">
@@ -200,12 +200,12 @@ export default function BooksPage() {
                   </p>
                 </div> */}
                 <div>
-                  <Label>Subjects</Label>
+                  <Label>Fan</Label>
                   <Select
                     options={all_Subject_options}
                     className="dark:bg-dark-900"
                     defaultValue={Book.subject_id ?  `${Book.subject_id}` : undefined}
-                    placeholder="Select subject"
+                    placeholder="Fanni tanlang"
                     onChange={(e) => {
                      
                       
@@ -219,7 +219,7 @@ export default function BooksPage() {
                   />
                 </div>
                 <div>
-                  <Label>Name</Label>
+                  <Label>Nomi</Label>
                   <Input
                     type="text"
                     value={Book.name}
@@ -233,7 +233,7 @@ export default function BooksPage() {
                 </div>
 
                 <div>
-                  <Label>Image</Label>
+                  <Label>Rasm</Label>
                   <FileInput
                     onChange={handleFileChange}
                     className="custom-class"

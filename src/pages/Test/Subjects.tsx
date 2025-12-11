@@ -131,14 +131,14 @@ export default function SubjectsPage() {
               Fanlarni qo'shish
             </h4>
             <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-              Create new Subject with full details.
+              Yangi fan qo'shish uchun barcha ma'lumotlarni kiriting.
             </p>
           </div>
           <form className="flex flex-col">
             <div className="px-2 overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                 <div>
-                  <Label>Name</Label>
+                  <Label>Nomi</Label>
                   <Input
                     type="text"
                     value={Subject.name}
@@ -152,7 +152,7 @@ export default function SubjectsPage() {
                 </div>
 
                 <div>
-                  <Label>Image</Label>
+                  <Label>Rasm</Label>
                   <FileInput
                     onChange={handleFileChange}
                     className="custom-class"

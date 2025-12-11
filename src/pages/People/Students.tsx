@@ -185,14 +185,14 @@ export default function StudentsPage() {
               {Student.id ? "Studentni tahrirlash" : "Student qo'shish"}
             </h4>
             <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-              Create new Student with full details.
+              Yangi student qo'shish uchun barcha ma'lumotlarni kiriting.
             </p>
           </div>
           <form className="flex flex-col">
             <div className="px-2 overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                 <div>
-                  <Label>Fullname</Label>
+                  <Label>To'liq ismi</Label>
                   <Input
                     type="text"
                     value={Student.name}
@@ -207,7 +207,7 @@ export default function StudentsPage() {
 
 
                 <div>
-                  <Label>Phonenumber</Label>
+                  <Label>Telefon raqami</Label>
                   <Input
                     type="text"
                     value={Student.phone}
@@ -221,7 +221,7 @@ export default function StudentsPage() {
                 </div>
 
                 <div>
-                  <Label>Password</Label>
+                  <Label>Parol</Label>
                   <Input
                     type="text"
                     value={Student.password || ''}
@@ -238,10 +238,10 @@ export default function StudentsPage() {
 
 
                 <div>
-                  <Label>Group</Label>
+                  <Label>Guruh</Label>
                   <Select
                     options={options}
-                    placeholder="Select group"
+                    placeholder="Guruhni tanlang"
                     defaultValue={Student.group_id?.toString() || ''}
                     onChange={(e)=>{
                       setStudent({
@@ -253,7 +253,7 @@ export default function StudentsPage() {
                   />
                 </div>
                 <div>
-                  <Label>Image</Label>
+                  <Label>Rasm</Label>
                   <FileInput
                     onChange={handleFileChange}
                     className="custom-class"

@@ -152,7 +152,7 @@ export default function SectionsPage() {
                             Qo'shish
                         </h4>
                         <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-                            Create new Section with full details.
+                            Yangi bo'lim qo'shish uchun barcha ma'lumotlarni kiriting.
                         </p>
                     </div>
                     <form className="flex flex-col">
@@ -164,7 +164,7 @@ export default function SectionsPage() {
                                     <Select
                                         options={all_Book_options}
                                         className="dark:bg-dark-900"
-                                        placeholder="Select Book"
+                                        placeholder="Kitobni tanlang"
                                         defaultValue={Section.book_id ?  `${Section.book_id}` : undefined}
                                         onChange={(e) => {
                                             setSection({
