@@ -89,12 +89,12 @@ export default function BooksPage() {
           if (section.isNew && section.name.trim()) {
             await axiosClient.post('/section', {
               name: section.name,
-              book_id: bookId,
+              book_id: String(bookId),
             });
           } else if (section.id && section.name.trim()) {
             await axiosClient.put(`/section/${section.id}`, {
               name: section.name,
-              book_id: bookId,
+              book_id: String(bookId),
             });
           }
         }
