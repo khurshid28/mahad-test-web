@@ -77,6 +77,15 @@ export default function TestsPage() {
     return text.replace(/^[A-Da-d0-9]+[.)]\s*/, '').trim();
   };
 
+  // Faqat "-", "- ", "+", "+ ", "–", "– " belgilarini olib tashlash
+  const fixPunctuationSpacing = (text: string): string => {
+    // "- Text" => "Text", "+ Text" => "Text", "– tahorati" => "tahorati"
+    return text
+      .replace(/^[-–]\s*/, '')   // boshidagi "- ", "-", "– ", "–" ni olib tashlash
+      .replace(/^\+\s*/, '')     // boshidagi "+ ", "+" ni olib tashlash
+      .trim();
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const text = await readDocx(e.target.files[0]);
@@ -96,10 +105,10 @@ export default function TestsPage() {
       // Savol va javob matnlarini tozalash
       const cleanedQuestions = parsed.questions.map(q => ({
         ...q,
-        text: cleanQuestionText(q.text),
+        text: fixPunctuationSpacing(cleanQuestionText(q.text)),
         options: q.options.map(opt => ({
           ...opt,
-          text: cleanOptionText(opt.text)
+          text: fixPunctuationSpacing(cleanOptionText(opt.text))
         }))
       }));
       
@@ -194,6 +203,9 @@ export default function TestsPage() {
     const updatedQuestions = [...quiz.questions, questionToAdd];
     setQuiz({ ...quiz, questions: updatedQuestions });
     
+    // Yangi qo'shilgan savolni tahrirlash rejimiga o'tkazish
+    setEditingQuestion(updatedQuestions.length - 1);
+    
     // Formani tozalash
     setNewQuestion({
       text: '',
@@ -206,6 +218,11 @@ export default function TestsPage() {
     });
     
     closeAddQuestionModal();
+    
+    // Agar preview modal ochilmagan bo'lsa, uni ochish
+    if (!isPreviewOpen) {
+      openPreviewModal();
+    }
   };
 
   const handleAddQuestionAfter = (afterIndex: number) => {
@@ -597,23 +614,11 @@ export default function TestsPage() {
 
                 <div>
                   <Label>Fayl orqali qo'shish</Label>
-                  <div className="flex gap-2">
-                    <FileInput
-                      onChange={handleFileChange}
-                      className="custom-class flex-1"
-                      accept=".docx" // faqat .docx fayllar ko'rinadi
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="primary"
-                      onClick={openAddQuestionModal}
-                      className="flex items-center gap-2 whitespace-nowrap"
-                    >
-                      <PlusIcon className="size-5 fill-white" />
-                      Savol qo'shish
-                    </Button>
-                  </div>
+                  <FileInput
+                    onChange={handleFileChange}
+                    className="custom-class"
+                    accept=".docx" // faqat .docx fayllar ko'rinadi
+                  />
                 </div>
               </div>
 
@@ -632,21 +637,21 @@ export default function TestsPage() {
                     <Button
                       type="button"
                       size="sm"
+                      variant="outline"
+                      onClick={openPreviewModal}
+                      className="mt-2"
+                    >
+                      Ko'rib chiqish va tahrirlash
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
                       variant="primary"
                       onClick={openAddQuestionModal}
                       className="mt-2 flex items-center gap-2"
                     >
                       <PlusIcon className="size-5 fill-white" />
                       Savol qo'shish
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={openPreviewModal}
-                      className="mt-2"
-                    >
-                      Ko'rib chiqish va tahrirlash
                     </Button>
                   </div>
                 </div>
