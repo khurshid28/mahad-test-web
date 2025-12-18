@@ -189,7 +189,7 @@ export default function GroupsPage() {
                       </div>
                   </div>
                   <div className="flex flex-col">
-                    <Label>To'liq test uchun vaqt (sekund)</Label>
+                    <Label>To'liq test uchun vaqt (minut)</Label>
                     <div className="w-1/2">
                       <Input
                         type="number"
