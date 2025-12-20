@@ -58,6 +58,7 @@ interface GroupItemProps {
   hasTime?: boolean;
   timeMinutes?: number;
   fullTime?: number;
+  forceNextQuestion?: boolean;
 }
 export default function GroupsTable({
   data,
@@ -77,6 +78,7 @@ export default function GroupsTable({
   let [hasTime, setHasTime] = useState<boolean>(false);
   let [timeMinutes, setTimeMinutes] = useState<number>(0);
   let [fullTime, setFullTime] = useState<number>(0);
+  let [forceNextQuestion, setForceNextQuestion] = useState<boolean>(false);
 
   let editGroup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -87,6 +89,7 @@ export default function GroupsTable({
         hasTime,
         timeMinutes: hasTime ? timeMinutes : 0,
         fullTime: hasTime ? fullTime : 0,
+        forceNextQuestion: hasTime && timeMinutes > 0 ? forceNextQuestion : false,
       };
       const res = await axiosClient.put(`/group/${id}`, payload);
 
@@ -284,12 +287,14 @@ export default function GroupsTable({
                           hasTime: order.hasTime ?? false,
                           timeMinutes: order.timeMinutes ?? 0,
                           fullTime: order.fullTime ?? 0,
+                          forceNextQuestion: order.forceNextQuestion ?? false,
                         });
                         setName(order.name);
                         setId(order.id);
                         setHasTime(order.hasTime ?? false);
                         setTimeMinutes(order.timeMinutes ?? 0);
                         setFullTime(order.fullTime ?? 0);
+                        setForceNextQuestion(order.forceNextQuestion ?? false);
                         openModal();
                       }}
                       className="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 transition-colors group"
@@ -390,10 +395,23 @@ export default function GroupsTable({
                         onChange={(e) => {
                           const v = Number(e.target.value || 0);
                           setTimeMinutes(v);
-                          if (v > 0) setFullTime(0);
+                          if (v > 0) {
+                            setFullTime(0);
+                          } else {
+                            setForceNextQuestion(false);
+                          }
                         }}
                       />
                     </div>
+                    {timeMinutes > 0 && (
+                      <div className="mt-2">
+                        <Switch
+                          label="Keyingi savolga o'tish majburiy"
+                          checked={forceNextQuestion}
+                          onChange={(v) => setForceNextQuestion(v)}
+                        />
+                      </div>
+                    )}
                   </div>
                   <div className="flex flex-col">
                     <Label>To'liq test uchun vaqt (minut)</Label>

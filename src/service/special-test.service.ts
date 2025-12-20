@@ -58,6 +58,7 @@ export interface SpecialTest {
   activation_end?: string;
   time_per_question?: number;
   total_time?: number;
+  force_next_question?: boolean;
   question_count: number;
   questions?: TestItem[];
   status?: string;

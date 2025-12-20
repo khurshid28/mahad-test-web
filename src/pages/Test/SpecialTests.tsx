@@ -11,6 +11,7 @@ import { PlusIcon } from "../../icons";
 import Button from "../../components/ui/button/Button";
 import { useModal } from "../../hooks/useModal";
 import Label from "../../components/form/Label";
+import Switch from "../../components/form/switch/Switch";
 import Input from "../../components/form/input/InputField";
 import DateTimePicker from "../../components/form/date-time-picker";
 import { Modal } from "../../components/ui/modal";
@@ -101,7 +102,8 @@ export default function SpecialTestsPage() {
   const [activationEndDate, setActivationEndDate] = useState("");
   const [activationEndTime, setActivationEndTime] = useState("");
   const [timePerQuestion, setTimePerQuestion] = useState<number>(0);
-  const [totalTime, setTotalTime] = useState<number>(3600); // 60 minutes in seconds
+  const [totalTime, setTotalTime] = useState<number>(60); // 60 minutes
+  const [forceNextQuestion, setForceNextQuestion] = useState<boolean>(false);
   const [selectedGroups, setSelectedGroups] = useState<number[]>([]);
   
   // Test config - Fan majburiy, Kitob va Bo'limlar ixtiyoriy
@@ -309,7 +311,8 @@ export default function SpecialTestsPage() {
     setActivationEndDate("");
     setActivationEndTime(""); // Default bo'sh
     setTimePerQuestion(0);
-    setTotalTime(3600); // 60 minutes
+    setTotalTime(60); // 60 minutes
+    setForceNextQuestion(false);
     setSelectedGroups([]);
     setSelectedSubject(subjects.length > 0 ? subjects[0].id : 0);
     setSelectedBook(0);
@@ -344,7 +347,8 @@ export default function SpecialTestsPage() {
       setActivationEndTime(""); // Sana yo'q bo'lsa, vaqt ham bo'sh
     }
     setTimePerQuestion(test.time_per_question || 0);
-    setTotalTime(test.time_per_question ? 0 : (test.total_time || 0));
+    setTotalTime(test.time_per_question ? 0 : Math.floor((test.total_time || 0) / 60)); // Convert seconds to minutes
+    setForceNextQuestion(test.force_next_question || false);
     setSelectedGroups(test.group_ids || []);
     setSelectedSubject(test.subject_id);
     setSelectedBook(test.book_id || 0);
@@ -412,7 +416,8 @@ export default function SpecialTestsPage() {
         questions: [], // Will be populated after generation or kept empty for editing
         status: editingTest?.status || "pending",
         ...(timePerQuestion > 0 && { time_per_question: timePerQuestion }),
-        ...(totalTime > 0 && timePerQuestion === 0 && { total_time: totalTime }),
+        ...(totalTime > 0 && timePerQuestion === 0 && { total_time: totalTime * 60 }), // Convert minutes to seconds
+        ...(timePerQuestion > 0 && { force_next_question: forceNextQuestion }),
       };
 
       console.log('🟢 Test data:', testData);
@@ -1220,15 +1225,28 @@ export default function SpecialTestsPage() {
                         }
                         const v = Number(val || 0);
                         setTimePerQuestion(v);
-                        if (v > 0) setTotalTime(0);
+                        if (v > 0) {
+                          setTotalTime(0);
+                        } else {
+                          setForceNextQuestion(false);
+                        }
                       }}
                       placeholder="60"
                       min="0"
                     />
                     <p className="text-xs text-gray-500 mt-1">Har bir savol uchun berilgan vaqt</p>
+                    {timePerQuestion > 0 && (
+                      <div className="mt-3">
+                        <Switch
+                          label="Keyingi savolga o'tish majburiy"
+                          checked={forceNextQuestion}
+                          onChange={(v) => setForceNextQuestion(v)}
+                        />
+                      </div>
+                    )}
                   </div>
                   <div>
-                    <Label>To'liq test uchun vaqt (sekund)</Label>
+                    <Label>To'liq test uchun vaqt (minut)</Label>
                     <Input
                       type="number"
                       value={totalTime}
@@ -1240,9 +1258,13 @@ export default function SpecialTestsPage() {
                         }
                         const v = Number(val || 0);
                         setTotalTime(v);
-                        if (v > 0) setTimePerQuestion(0);
+                        if (v > 0) {
+                          setTimePerQuestion(0);
+                        } else {
+                          setForceNextQuestion(false);
+                        }
                       }}
-                      placeholder="3600"
+                      placeholder="60"
                       min="0"
                     />
                     <p className="text-xs text-gray-500 mt-1">Butun test uchun umumiy vaqt</p>

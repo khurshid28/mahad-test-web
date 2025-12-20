@@ -22,6 +22,7 @@ export interface Group {
   hasTime?: boolean;
   timeMinutes?: number;
   fullTime?: number;
+  forceNextQuestion?: boolean;
 }
 export default function GroupsPage() {
 
@@ -41,6 +42,7 @@ export default function GroupsPage() {
   let [hasTime, setHasTime] = useState<boolean>(false);
   let [timeMinutes, setTimeMinutes] = useState<number>(0);
   let [fullTime, setFullTime] = useState<number>(0);
+  let [forceNextQuestion, setForceNextQuestion] = useState<boolean>(false);
 
 
   let sendGroup = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -52,6 +54,7 @@ export default function GroupsPage() {
         hasTime,
         timeMinutes: hasTime ? timeMinutes : 0,
         fullTime: hasTime ? fullTime : 0,
+        forceNextQuestion: hasTime && timeMinutes > 0 ? forceNextQuestion : false,
       };
       const res = await axiosClient.post('/group', payload);
 
@@ -109,6 +112,7 @@ export default function GroupsPage() {
                     setHasTime(false);
                     setTimeMinutes(0);
                     setFullTime(0);
+                    setForceNextQuestion(false);
                     openModal()
                   }}
                 >
@@ -183,10 +187,23 @@ export default function GroupsPage() {
                           onChange={(e) => {
                             const v = Number(e.target.value || 0);
                             setTimeMinutes(v);
-                            if (v > 0) setFullTime(0);
+                            if (v > 0) {
+                              setFullTime(0);
+                            } else {
+                              setForceNextQuestion(false);
+                            }
                           }}
                         />
                       </div>
+                      {timeMinutes > 0 && (
+                        <div className="mt-2">
+                          <Switch
+                            label="Keyingi savolga o'tish majburiy"
+                            checked={forceNextQuestion}
+                            onChange={(v) => setForceNextQuestion(v)}
+                          />
+                        </div>
+                      )}
                   </div>
                   <div className="flex flex-col">
                     <Label>To'liq test uchun vaqt (minut)</Label>
