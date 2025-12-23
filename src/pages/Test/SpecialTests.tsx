@@ -645,10 +645,10 @@ export default function SpecialTestsPage() {
         return false;
       }
 
-      // If specific book is selected, check it
-      if (specialTest.book_id) {
-        if (section.book_id !== specialTest.book_id) {
-          console.log('❌ Book filter mismatch for item', item.id, 'section book:', section.book_id, 'test book:', specialTest.book_id);
+      // If specific books are selected, check it
+      if (specialTest.book_ids && specialTest.book_ids.length > 0) {
+        if (!specialTest.book_ids.includes(section.book_id)) {
+          console.log('❌ Book filter mismatch for item', item.id, 'section book:', section.book_id, 'test book_ids:', specialTest.book_ids);
           return false;
         }
       }
@@ -1022,9 +1022,12 @@ export default function SpecialTestsPage() {
     const subject = subjects.find(s => s.id === test.subject_id);
     let display = subject ? `Fan: ${subject.name}` : 'Fan';
     
-    if (test.book_id) {
-      const book = books.find(b => b.id === test.book_id);
-      if (book) display += ` → Kitob: ${book.name}`;
+    if (test.book_ids && test.book_ids.length > 0) {
+      const bookNames = test.book_ids
+        .map(id => books.find(b => b.id === id)?.name)
+        .filter(name => name)
+        .join(', ');
+      if (bookNames) display += ` → Kitob: ${bookNames}`;
     }
     
     if (test.section_ids && test.section_ids.length > 0) {
@@ -1068,8 +1071,8 @@ export default function SpecialTestsPage() {
         if (book && book.subject_id !== pendingTest.subject_id) return false;
       }
 
-      // Check book if specified
-      if (pendingTest.book_id && section.book_id !== pendingTest.book_id) return false;
+      // Check books if specified
+      if (pendingTest.book_ids && pendingTest.book_ids.length > 0 && !pendingTest.book_ids.includes(section.book_id)) return false;
 
       // Check section if specified
       if (pendingTest.section_ids && pendingTest.section_ids.length > 0) {
@@ -1609,9 +1612,9 @@ export default function SpecialTestsPage() {
                   <p className="text-sm text-gray-800 dark:text-white">
                     <span className="font-medium">Fan:</span> {subjects.find(s => s.id === pendingTest.subject_id)?.name || 'N/A'}
                   </p>
-                  {pendingTest.book_id && (
+                  {pendingTest.book_ids && pendingTest.book_ids.length > 0 && (
                     <p className="text-sm text-gray-800 dark:text-white">
-                      <span className="font-medium">Kitob:</span> {books.find(b => b.id === pendingTest.book_id)?.name || 'N/A'}
+                      <span className="font-medium">Kitoblar:</span> {pendingTest.book_ids.map(id => books.find(b => b.id === id)?.name).filter(n => n).join(', ') || 'N/A'}
                     </p>
                   )}
                   {pendingTest.section_id && (

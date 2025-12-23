@@ -84,7 +84,6 @@ export default function DateTimePicker({
           placeholder={timePlaceholder}
           pattern={timePattern}
           title={timeTitle}
-          maxLength={5}
         />
       </div>
       {timeLabel && <p className="text-xs text-gray-500 mt-1">{timeLabel}</p>}
