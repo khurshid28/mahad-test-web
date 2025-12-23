@@ -50,7 +50,7 @@ export interface SpecialTest {
   name: string;
   description?: string;
   subject_id: number;
-  book_id?: number;
+  book_ids?: number[]; // Multiple books support
   section_id?: number;
   section_ids?: number[]; // Multiple sections support
   group_ids: number[];

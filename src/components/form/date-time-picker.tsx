@@ -35,13 +35,34 @@ export default function DateTimePicker({
 }: PropsType) {
   const handleDateChange = useCallback((selectedDates: Date[]) => {
     if (selectedDates && selectedDates.length > 0 && onDateChange) {
-      onDateChange(selectedDates[0].toISOString().split('T')[0]);
+      const date = selectedDates[0];
+      // Use local date parts to avoid timezone issues
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      onDateChange(`${year}-${month}-${day}`);
     }
   }, [onDateChange]);
 
   const handleTimeChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (onTimeChange) {
-      onTimeChange(e.target.value);
+      const rawValue = e.target.value;
+      
+      // Agar user tozalayotgan bo'lsa (bo'sh yoki faqat raqamlar), ruxsat berish
+      if (rawValue === '' || /^\d{0,2}:?\d{0,2}$/.test(rawValue)) {
+        let value = rawValue.replace(/\D/g, ''); // Faqat raqamlar
+        
+        // Auto-format: 1000 -> 10:00
+        if (value.length >= 3) {
+          const hours = value.substring(0, 2);
+          const minutes = value.substring(2, 4);
+          value = `${hours}:${minutes}`;
+        } else if (value.length === 2 && !rawValue.includes(':')) {
+          value = `${value}:`;
+        }
+        
+        onTimeChange(value);
+      }
     }
   }, [onTimeChange]);
 
@@ -63,6 +84,7 @@ export default function DateTimePicker({
           placeholder={timePlaceholder}
           pattern={timePattern}
           title={timeTitle}
+          maxLength={5}
         />
       </div>
       {timeLabel && <p className="text-xs text-gray-500 mt-1">{timeLabel}</p>}

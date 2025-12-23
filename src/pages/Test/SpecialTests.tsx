@@ -101,6 +101,7 @@ export default function SpecialTestsPage() {
   const [activationStartTime, setActivationStartTime] = useState("");
   const [activationEndDate, setActivationEndDate] = useState("");
   const [activationEndTime, setActivationEndTime] = useState("");
+  const [dateTimeError, setDateTimeError] = useState(""); // Date/time validation error
   const [timePerQuestion, setTimePerQuestion] = useState<number>(0);
   const [totalTime, setTotalTime] = useState<number>(60); // 60 minutes
   const [forceNextQuestion, setForceNextQuestion] = useState<boolean>(false);
@@ -108,7 +109,7 @@ export default function SpecialTestsPage() {
   
   // Test config - Fan majburiy, Kitob va Bo'limlar ixtiyoriy
   const [selectedSubject, setSelectedSubject] = useState<number>(0);
-  const [selectedBook, setSelectedBook] = useState<number>(0); // 0 = tanlangan yo'q
+  const [selectedBookIds, setSelectedBookIds] = useState<number[]>([]); // Ko'p tanlanadi
   const [selectedSectionIds, setSelectedSectionIds] = useState<number[]>([]);
   const [questionCount, setQuestionCount] = useState<number>(10);
 
@@ -129,7 +130,7 @@ export default function SpecialTestsPage() {
   useEffect(() => {
     console.log('🔍 Filtering modal items:', {
       selectedSubject,
-      selectedBook,
+      selectedBookIds,
       selectedSectionIds,
       allTestItemsCount: allTestItems.length,
       testsCount: tests.length,
@@ -153,8 +154,8 @@ export default function SpecialTestsPage() {
       if (selectedSectionIds.length > 0) {
         return selectedSectionIds.includes(section.id);
       }
-      if (selectedBook > 0) {
-        return section.book_id === selectedBook;
+      if (selectedBookIds.length > 0) {
+        return selectedBookIds.includes(section.book_id);
       }
       return books.find(b => b.id === section.book_id && b.subject_id === selectedSubject);
     });
@@ -179,7 +180,7 @@ export default function SpecialTestsPage() {
     }
 
     setModalFilteredItems(finalFiltered);
-  }, [selectedSubject, selectedBook, selectedSectionIds, allTestItems, tests, sections, books]);
+  }, [selectedSubject, selectedBookIds, selectedSectionIds, allTestItems, tests, sections, books]);
 
   // API dan guruhlarni yuklash
   useEffect(() => {
@@ -305,17 +306,21 @@ export default function SpecialTestsPage() {
   const handleOpenModal = () => {
     setEditingTest(null);
     setName("");
-    // Ruhsat etilgan vaqt - boshlanish majburiy (sana), tugash ixtiyoriy
-    setActivationStartDate("");
-    setActivationStartTime(""); // Default bo'sh
-    setActivationEndDate("");
-    setActivationEndTime(""); // Default bo'sh
+    // Ruhsat etilgan vaqt - bugungi sana bilan default
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    
+    setActivationStartDate(todayStr);
+    setActivationStartTime("00:00"); // Default 00:00
+    setActivationEndDate(todayStr);
+    setActivationEndTime("23:59"); // Default 23:59
+    setDateTimeError(""); // Clear error
     setTimePerQuestion(0);
     setTotalTime(60); // 60 minutes
     setForceNextQuestion(false);
     setSelectedGroups([]);
     setSelectedSubject(subjects.length > 0 ? subjects[0].id : 0);
-    setSelectedBook(0);
+    setSelectedBookIds([]);
     setSelectedSectionIds([]);
     setQuestionCount(10);
     setRegenerateQuestions(true); // Yangi test uchun har doim qayta tuzish
@@ -325,33 +330,49 @@ export default function SpecialTestsPage() {
   const handleEditTest = (test: APISpecialTest) => {
     setEditingTest(test);
     setName(test.name);
+    setDateTimeError(""); // Clear error
     // Split datetime into separate date and time for inputs
+    // Backend UTC da saqlaydi, admin uchun UTC+5 ga o'tkazamiz
     if (test.activation_start) {
-      const startDateTime = new Date(test.activation_start);
-      setActivationStartDate(startDateTime.toISOString().split('T')[0]);
-      const utcHours = startDateTime.getUTCHours().toString().padStart(2, '0');
-      const utcMinutes = startDateTime.getUTCMinutes().toString().padStart(2, '0');
-      setActivationStartTime(`${utcHours}:${utcMinutes}`);
+      console.log('📥 Backend UTC:', test.activation_start);
+      
+      // Moment bilan UTC dan UTC+5 ga to'g'ri konversiya
+      const uzbekTime = Moment.utc(test.activation_start).add(5, 'hours');
+      
+      const dateStr = uzbekTime.format('YYYY-MM-DD');
+      const timeStr = uzbekTime.format('HH:mm');
+      
+      console.log('📤 Display (UTC+5):', dateStr, timeStr);
+      
+      setActivationStartDate(dateStr);
+      setActivationStartTime(timeStr);
     } else {
       setActivationStartDate("");
-      setActivationStartTime(""); // Sana yo'q bo'lsa, vaqt ham bo'sh
+      setActivationStartTime("00:00"); // Default 00:00
     }
     if (test.activation_end) {
-      const endDateTime = new Date(test.activation_end);
-      setActivationEndDate(endDateTime.toISOString().split('T')[0]);
-      const utcHours = endDateTime.getUTCHours().toString().padStart(2, '0');
-      const utcMinutes = endDateTime.getUTCMinutes().toString().padStart(2, '0');
-      setActivationEndTime(`${utcHours}:${utcMinutes}`);
+      console.log('📥 Backend UTC:', test.activation_end);
+      
+      // Moment bilan UTC dan UTC+5 ga to'g'ri konversiya
+      const uzbekTime = Moment.utc(test.activation_end).add(5, 'hours');
+      
+      const dateStr = uzbekTime.format('YYYY-MM-DD');
+      const timeStr = uzbekTime.format('HH:mm');
+      
+      console.log('📤 Display (UTC+5):', dateStr, timeStr);
+      
+      setActivationEndDate(dateStr);
+      setActivationEndTime(timeStr);
     } else {
       setActivationEndDate("");
-      setActivationEndTime(""); // Sana yo'q bo'lsa, vaqt ham bo'sh
+      setActivationEndTime("23:59"); // Default 23:59
     }
     setTimePerQuestion(test.time_per_question || 0);
     setTotalTime(test.time_per_question ? 0 : Math.floor((test.total_time || 0) / 60)); // Convert seconds to minutes
     setForceNextQuestion(test.force_next_question || false);
     setSelectedGroups(test.group_ids || []);
     setSelectedSubject(test.subject_id);
-    setSelectedBook(test.book_id || 0);
+    setSelectedBookIds(test.book_ids || []);
     setSelectedSectionIds(test.section_ids || []);
     setQuestionCount(test.question_count);
     setRegenerateQuestions(false); // Edit uchun default qayta tuzmaslik
@@ -378,6 +399,20 @@ export default function SpecialTestsPage() {
       return;
     }
 
+    // Validate date/time range
+    if (activationStartDate.trim() && activationEndDate.trim()) {
+      const startDateTime = `${activationStartDate}T${activationStartTime.trim() || '00:00'}`;
+      const endDateTime = `${activationEndDate}T${activationEndTime.trim() || '23:59'}`;
+      
+      if (endDateTime <= startDateTime) {
+        setDateTimeError("Vaqt oralig'i noto'g'ri. Tugash sanasi va vaqti boshlanishdan keyin bo'lishi kerak.");
+        return;
+      }
+    }
+    
+    // Clear any previous error
+    setDateTimeError("");
+
     // Vaqt maydonlari endi ixtiyoriy - validation olib tashlandi
     // if (timePerQuestion === 0 && totalTime === 0) {
     //   toast.error('Har bir savol uchun vaqt yoki to\'liq test uchun vaqtni kiriting');
@@ -388,26 +423,90 @@ export default function SpecialTestsPage() {
 
     try {
       // Combine date and time into datetime strings - completely optional
-      // Default times: start=00:00, end=23:59 UTC
+      // Admin UTC+5 (O'zbekiston vaqti) da kiritadi
+      // Default times: start=00:00, end=23:59
       const activationStartTimeCombined = activationStartDate.trim()
         ? (() => {
-            const [hours, minutes] = (activationStartTime.trim() || '00:00').split(':').map(Number);
-            const date = new Date(activationStartDate);
-            date.setHours(hours, minutes, 0, 0);
-            return date.toISOString();
+            const time = activationStartTime.trim() || '00:00';
+            const [year, month, day] = activationStartDate.split('-').map(Number);
+            const [hours, minutes] = time.split(':').map(Number);
+            
+            console.log('🔵 Input (UTC+5):', `${year}-${month}-${day} ${hours}:${minutes}`);
+            
+            // UTC+5 vaqtni UTC ga o'tkazish: 5 soat ayirish
+            // Agar hours < 5 bo'lsa, oldingi kunga o'tadi
+            let utcHours = hours - 5;
+            let utcDay = day;
+            let utcMonth = month;
+            let utcYear = year;
+            
+            if (utcHours < 0) {
+              utcHours += 24;
+              utcDay -= 1;
+              
+              if (utcDay < 1) {
+                utcMonth -= 1;
+                if (utcMonth < 1) {
+                  utcMonth = 12;
+                  utcYear -= 1;
+                }
+                // Get last day of previous month
+                const lastDay = new Date(utcYear, utcMonth, 0).getDate();
+                utcDay = lastDay;
+              }
+            }
+            
+            const utcDate = new Date(Date.UTC(utcYear, utcMonth - 1, utcDay, utcHours, minutes, 0));
+            const utcString = utcDate.toISOString();
+            
+            console.log('🔵 UTC String:', utcString);
+            return utcString;
           })()
         : undefined;
       const activationEndTimeCombined = activationEndDate.trim()
         ? (() => {
-            const [hours, minutes] = (activationEndTime.trim() || '23:59').split(':').map(Number);
-            const date = new Date(activationEndDate);
-            date.setHours(hours, minutes, 0, 0);
-            return date.toISOString();
+            const time = activationEndTime.trim() || '23:59';
+            const [year, month, day] = activationEndDate.split('-').map(Number);
+            const [hours, minutes] = time.split(':').map(Number);
+            
+            console.log('🟢 Input (UTC+5):', `${year}-${month}-${day} ${hours}:${minutes}`);
+            
+            // UTC+5 vaqtni UTC ga o'tkazish: 5 soat ayirish
+            let utcHours = hours - 5;
+            let utcDay = day;
+            let utcMonth = month;
+            let utcYear = year;
+            
+            if (utcHours < 0) {
+              utcHours += 24;
+              utcDay -= 1;
+              
+              if (utcDay < 1) {
+                utcMonth -= 1;
+                if (utcMonth < 1) {
+                  utcMonth = 12;
+                  utcYear -= 1;
+                }
+                const lastDay = new Date(utcYear, utcMonth, 0).getDate();
+                utcDay = lastDay;
+              }
+            }
+            
+            const utcDate = new Date(Date.UTC(utcYear, utcMonth - 1, utcDay, utcHours, minutes, 59));
+            const utcString = utcDate.toISOString();
+            
+            console.log('🟢 UTC String:', utcString);
+            return utcString;
           })()
-        : undefined;      const testData: Omit<APISpecialTest, 'id'> = {
+        : undefined;
+      
+      console.log('📦 Activation Start Combined:', activationStartTimeCombined);
+      console.log('📦 Activation End Combined:', activationEndTimeCombined);
+      
+      const testData: Omit<APISpecialTest, 'id'> = {
         name,
         subject_id: selectedSubject,
-        book_id: selectedBook > 0 ? selectedBook : undefined, // Don't send default 1
+        book_ids: selectedBookIds.length > 0 ? selectedBookIds : undefined,
         section_ids: selectedSectionIds.length > 0 ? selectedSectionIds : undefined,
         group_ids: selectedGroups,
         activation_start: activationStartTimeCombined,
@@ -1101,10 +1200,10 @@ export default function SpecialTestsPage() {
                         <p className="text-xs text-gray-500 dark:text-gray-400">Ruhsat etilgan vaqt</p>
                         <p className="text-sm text-gray-800 dark:text-white">
                           {test.activation_start && Moment(test.activation_start).isValid()
-                            ? Moment(test.activation_start).format("DD MMM, HH:mm")
+                            ? Moment.utc(test.activation_start).add(5, 'hours').format("DD MMM, HH:mm")
                             : "Noma'lum"} -{" "}
                           {test.activation_end && Moment(test.activation_end).isValid()
-                            ? Moment(test.activation_end).format("DD MMM, HH:mm")
+                            ? Moment.utc(test.activation_end).add(5, 'hours').format("DD MMM, HH:mm")
                             : "Noma'lum"}
                         </p>
                       </div>
@@ -1211,6 +1310,13 @@ export default function SpecialTestsPage() {
                   </div>
                 </div>
 
+                {/* Date/Time validation error */}
+                {dateTimeError && (
+                  <div className="text-red-500 text-sm mt-2">
+                    {dateTimeError}
+                  </div>
+                )}
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label>Har bir savol uchun vaqt (sekund)</Label>
@@ -1312,7 +1418,7 @@ export default function SpecialTestsPage() {
                     value={selectedSubject}
                     onChange={(e) => {
                       setSelectedSubject(Number(e.target.value));
-                      setSelectedBook(0); // Fan o'zgarganda kitob va bo'limlarni reset qilish
+                      setSelectedBookIds([]); // Fan o'zgarganda kitob va bo'limlarni reset qilish
                       setSelectedSectionIds([]);
                     }}
                     required
@@ -1327,22 +1433,39 @@ export default function SpecialTestsPage() {
                 {/* Kitob tanlash - IXTIYORIY (faqat fan tanlangan bo'lsa) */}
                 {selectedSubject > 0 && (
                   <div>
-                    <Label>Kitob (ixtiyoriy)</Label>
-                    <select
-                      className="h-11 w-full rounded-lg border border-gray-300 dark:border-gray-700 px-4 py-2.5 text-sm dark:bg-gray-900 dark:text-white/90"
-                      value={selectedBook}
-                      onChange={(e) => {
-                        setSelectedBook(Number(e.target.value));
-                        setSelectedSectionIds([]); // Kitob o'zgarganda bo'limlarni reset qilish
-                      }}
-                    >
-                      <option value="0">Barcha kitoblar</option>
+                    <Label>Kitoblar (ixtiyoriy)</Label>
+                    <div className="border border-gray-300 dark:border-gray-700 rounded-lg p-3 max-h-48 overflow-y-auto mt-2">
                       {books
                         .filter(book => book.subject_id === selectedSubject)
                         .map(book => (
-                          <option key={book.id} value={book.id}>{book.name}</option>
+                          <label
+                            key={book.id}
+                            className="flex items-center gap-2 py-2 px-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedBookIds.includes(book.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedBookIds([...selectedBookIds, book.id]);
+                                } else {
+                                  setSelectedBookIds(selectedBookIds.filter(id => id !== book.id));
+                                  // Kitob o'chirilganda, shu kitobdagi bo'limlarni ham o'chirish
+                                  const sectionsToRemove = sections
+                                    .filter(s => s.book_id === book.id)
+                                    .map(s => s.id);
+                                  setSelectedSectionIds(selectedSectionIds.filter(id => !sectionsToRemove.includes(id)));
+                                }
+                              }}
+                              className="w-4 h-4 text-blue-600 rounded"
+                            />
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{book.name}</span>
+                          </label>
                         ))}
-                    </select>
+                      {books.filter(book => book.subject_id === selectedSubject).length === 0 && (
+                        <p className="text-sm text-gray-500 text-center py-2">Kitoblar mavjud emas</p>
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -1354,8 +1477,8 @@ export default function SpecialTestsPage() {
                       {sections
                         .filter(section => {
                           // Agar kitob tanlangan bo'lsa, faqat shu kitobdagi bo'limlar
-                          if (selectedBook > 0) {
-                            return section.book_id === selectedBook;
+                          if (selectedBookIds.length > 0) {
+                            return selectedBookIds.includes(section.book_id);
                           }
                           // Aks holda, fan bo'yicha filter qilish
                           const book = books.find(b => b.id === section.book_id);
