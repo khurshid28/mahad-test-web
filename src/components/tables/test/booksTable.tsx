@@ -10,33 +10,15 @@ import bookImage from "../../../../public/images/product/book.png";
 import Moment from "moment";
 
 import Badge from "../../ui/badge/Badge";
-import Button from "../../ui/button/Button";
 import {
-  ArrowRightIcon,
   CheckCircleIcon,
   CloseCircleIcon,
-  CloseIcon,
-  CloseLineIcon,
-  CopyIcon,
   DeleteIcon,
-  DownloadIcon,
   PencilIcon,
-  EyeCloseIcon,
-  EyeIcon,
-  PlusIcon,
 } from "../../../icons";
 import { useEffect, useState } from "react";
 import { useModal } from "../../../hooks/useModal";
-import Input from "../../form/input/InputField";
-import Label from "../../form/Label";
-import { Modal } from "../../ui/modal";
 import Select from "../../form/Select";
-import Switch from "../../form/switch/Switch";
-import { Book } from "../../../pages/Test/Books";
-import DropzoneComponent from "../../form/form-elements/DropZone";
-import FileInputExample from "../../form/form-elements/FileInputExample";
-import FileInput from "../../form/input/FileInput";
-import MultiSelect from "../../form/MultiSelect";
 import axiosClient from "../../../service/axios.service";
 import Pagination from "../../ui/pagination/Pagination";
 import { toast } from "react-toastify";
@@ -259,21 +241,6 @@ export default function BooksTable({
 }) {
   const [tableData, settableData] = useState(data);
 
-  const { isOpen, openModal, closeModal } = useModal();
-  const handleAdding = () => {
-    // Handle save logic here
-
-    console.log("handleAdding...");
-
-    closeModal();
-    setBook(emptyBook);
-  };
-  let emptyBook: Book = {
-    name: "",
-    image: "",
-  };
-  let [Book, setBook] = useState<Book>(emptyBook);
-
   const options = [
     { value: "5", label: "5" },
     { value: "10", label: "10" },
@@ -309,24 +276,6 @@ export default function BooksTable({
     currentItems = tableData.slice(startIndex, endIndex);
   }, [currentPage, tableData]);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      console.log("Selected file:", file.name);
-      setBook({
-        ...Book,
-        imageFile: file,
-      });
-    }
-  };
-  const [selectedValues, setSelectedValues] = useState<string[]>([]);
-
-  const multiOptions = [
-    { value: "Group 1", text: "Group 1", selected: false },
-    { value: "Group 2", text: "Group 2", selected: false },
-    { value: "Group 3", text: "Group 3", selected: false },
-  ];
-
   const Subject_options = [
     new Option("Hamma Fanlar", "Hamma Fanlar"),
     ...subjects,
@@ -361,34 +310,6 @@ export default function BooksTable({
     settableData(data);
     setCurrentPage(1);
   }, [data]);
-
-  let editBook = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    try {
-      const formData = new FormData();
-      formData.append("name", Book.name ?? "");
-      formData.append("subject_id", `${Book.subject_id}`);
-      if (Book.imageFile) formData.append("image", Book.imageFile);
-        // append flags
-        formData.append("fullBlock", Book.fullBlock ? "1" : "0");
-        formData.append("stepBlock", Book.stepBlock ? "1" : "0");
-      
-      const res = await axiosClient.put(`/book/${Book.id}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      toast.success("Book muvaffaqiyatli yaratildi");
-      await refetch();
-    } catch (error) {
-      console.error("Create Book error:", error);
-      toast.error("Xatolik yuz berdi");
-    } finally {
-      closeModal();
-    }
-  };
 
   const { isOpen: isDeleteModalOpen, openModal: openDeleteModal, closeModal: closeDeleteModal } = useModal();
   const [deletingBook, setDeletingBook] = useState<{ id: number; name: string } | null>(null);
@@ -544,7 +465,7 @@ export default function BooksTable({
                   }
 
                   {
-                    !order.stepBlock ?  <CheckCircleIcon className="inline-block w-5 h-5 mr-1 text-green-500 dark:text-green-400" /> : <CloseCircleIcon className="inline-block w-5 h-5 ml-1  text-red-500 dark:text-red-400" />
+                    order.stepBlock ?  <CheckCircleIcon className="inline-block w-5 h-5 mr-1 text-green-500 dark:text-green-400" /> : <CloseCircleIcon className="inline-block w-5 h-5 ml-1  text-red-500 dark:text-red-400" />
                   }
                 </TableCell>
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
@@ -590,115 +511,6 @@ export default function BooksTable({
           {tableData.length}
         </div>
       </div>
-
-      <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
-  <div className="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
-          <div className="px-2 pr-14">
-            <h4 className="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-              Kitobni o'zgartirish
-            </h4>
-            <p className="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-              Update Book with full details.
-            </p>
-          </div>
-          <form className="flex flex-col">
-            <div className="px-2 overflow-y-auto custom-scrollbar">
-              <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-                {/* <div>
-                  <MultiSelect
-                    label="Groups"
-                    options={multiOptions}
-                    onChange={(values) => setSelectedValues(values)}
-                  />
-                  <p className="sr-only">
-                    Selected Values: {selectedValues.join(", ")}
-                  </p>
-                </div> */}
-
-                <div>
-                  <Label>Subject </Label>
-                  <Select
-                    options={subjects}
-                    className="dark:bg-dark-900"
-                    defaultValue={
-                      Book.subject_id ? `${Book.subject_id ?? ""}` : undefined
-                    }
-                    onChange={(e) => {
-                      setBook({
-                        ...Book,
-                        subject_id: +e,
-                      });
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <Label>Name</Label>
-                  <Input
-                    type="text"
-                    value={Book.name}
-                    onChange={(e) =>
-                      setBook({
-                        ...Book,
-                        name: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-
-                <div>
-                  <Label>Image</Label>
-                  <FileInput
-                    onChange={handleFileChange}
-                    className="custom-class"
-                  />
-                </div>
-                  
-                </div>
-            </div>
-
-            {/* Ruhsatlar - placed separately from other properties */}
-            <div className="px-2 mt-4">
-              <Label>Ruhsatlar</Label>
-              <div className="flex flex-col gap-3 mt-2">
-                <div className="flex items-center">
-                  <Switch
-                    label="Testni ishlashga ruhsat berish"
-                    checked={!(Book.fullBlock ?? false)}
-                    onChange={(v) =>
-                      setBook({
-                        ...Book,
-                        fullBlock: !v,
-                      })
-                    }
-                  />
-                </div>
-                <div className="flex items-center">
-                  <Switch
-                    label="Ketma-ket ishlash"
-                    checked={!(Book.stepBlock ?? false)}
-                    onChange={(v) =>
-                      setBook({
-                        ...Book,
-                        stepBlock: !v,
-                      })
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-              <Button size="sm" variant="outline" onClick={closeModal}>
-                Yopish
-              </Button>
-              <Button size="sm" onClick={editBook}>
-                Saqlash
-              </Button>
-            </div>
-          </form>
-        </div>
-      </Modal>
 
       {/* Delete Confirmation Modal */}
       <ConfirmDeleteModal

@@ -160,6 +160,10 @@ export default function BooksPage() {
       const bookRes = await axiosClient.get(`/book/${bookId}`);
       const bookData = bookRes.data;
       
+      console.log('📚 Backend dan kelgan bookData:', bookData);
+      console.log('🔒 fullBlock:', bookData.fullBlock, 'typeof:', typeof bookData.fullBlock);
+      console.log('📝 stepBlock:', bookData.stepBlock, 'typeof:', typeof bookData.stepBlock);
+      
       // Backend'dan kelgan sections'ni format qilish
       const sections = (bookData.sections || []).map((s: any) => ({
         id: s.id,
@@ -177,6 +181,12 @@ export default function BooksPage() {
         stepBlock: bookData.stepBlock ?? false,
         sections: sections,
       });
+      
+      console.log('✅ State ga set qilindi:', {
+        fullBlock: bookData.fullBlock ?? false,
+        stepBlock: bookData.stepBlock ?? false,
+      });
+      
       setEditingBookId(bookId);
       openModal();
     } catch (error) {
@@ -419,11 +429,11 @@ export default function BooksPage() {
                 <div className="flex items-center">
                   <Switch
                     label="Ketma-ket ishlash"
-                    checked={!(Book.stepBlock ?? false)}
+                    checked={Book.stepBlock ?? false}
                     onChange={(v) =>
                       setBook({
                         ...Book,
-                        stepBlock: !v,
+                        stepBlock: v,
                       })
                     }
                   />
