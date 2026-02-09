@@ -28,6 +28,7 @@ export interface Book {
   subject? :any
   fullBlock?: boolean;
   stepBlock?: boolean;
+  passingPercentage?: number;
   sections?: Section[];
 }
 
@@ -61,6 +62,7 @@ export default function BooksPage() {
   // append flags
   formData.append('fullBlock', Book.fullBlock ? '1' : '0');
   formData.append('stepBlock', Book.stepBlock ? '1' : '0');
+  formData.append('passingPercentage', String(Book.passingPercentage ?? 60));
 
       let bookId = editingBookId;
 
@@ -115,6 +117,7 @@ export default function BooksPage() {
   let emptyBook: Book = {
     fullBlock: false,
     stepBlock: false,
+    passingPercentage: 60,
     sections: [],
   };
   let [Book, setBook] = useState<Book>(emptyBook);
@@ -179,6 +182,7 @@ export default function BooksPage() {
         image: bookData.image,
         fullBlock: bookData.fullBlock ?? false,
         stepBlock: bookData.stepBlock ?? false,
+        passingPercentage: bookData.passingPercentage ?? 60,
         sections: sections,
       });
       
@@ -359,6 +363,26 @@ export default function BooksPage() {
                   />
                 </div>
 
+                <div>
+                  <Label>O'tish foizi (%)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={Book.passingPercentage ?? 60}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value) || 60;
+                      setBook({
+                        ...Book,
+                        passingPercentage: Math.min(Math.max(value, 0), 100),
+                      });
+                    }}
+                    placeholder="60"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Keyingi bo'limga o'tish uchun zarur foiz (default: 60%)
+                  </p>
+                </div>
                 
               </div>
 

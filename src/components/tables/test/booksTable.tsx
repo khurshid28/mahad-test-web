@@ -43,6 +43,7 @@ interface BookItemProps {
   subject_id?: number;
   fullBlock?: boolean;
   stepBlock?: boolean;
+  passingPercentage?: number;
   sections?: Array<{id: number; name: string}>;
 }
 // Define the table data using the interface
@@ -467,6 +468,10 @@ export default function BooksTable({
                   {
                     order.stepBlock ?  <CheckCircleIcon className="inline-block w-5 h-5 mr-1 text-green-500 dark:text-green-400" /> : <CloseCircleIcon className="inline-block w-5 h-5 ml-1  text-red-500 dark:text-red-400" />
                   }
+                  
+                  <span className="inline-block ml-2 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full">
+                    {order.passingPercentage ?? 60}%
+                  </span>
                 </TableCell>
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                   <div className="flex gap-2 flex-row items-center">
