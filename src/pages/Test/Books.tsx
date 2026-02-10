@@ -476,17 +476,13 @@ export default function BooksPage() {
               <div className="flex flex-col gap-3 mt-2">
                 <div className="flex items-center">
                   <Switch
-                    label="Testni ishlashga ruhsat berish"
+                    label="Yechishga ruhsat berish"
                     checked={!(Book.fullBlock ?? false)}
                     onChange={(v) => {
                       console.log('🚫 FullBlock Switch bosildi:', {
                         oldFullBlock: Book.fullBlock,
-                        'OLD ma\'no': Book.fullBlock ? '🚫 TEST YOPIQ' : '✅ TEST OCHIQ',
                         newFullBlock: !v,
-                        'NEW ma\'no': !v ? '🚫 TEST YOPIQ' : '✅ TEST OCHIQ',
-                        checked_before: !(Book.fullBlock ?? false),
-                        checked_will_be: v,
-                        'Switch holati': v ? 'ON qilindi' : 'OFF qilindi',
+                        'Switch holati': v ? 'ON (ruhsat bor)' : 'OFF (bloklangan)',
                       });
                       setBook({
                         ...Book,
@@ -497,18 +493,16 @@ export default function BooksPage() {
                 </div>
                 <div className="flex items-center">
                   <Switch
-                    label="Ketma-ket ishlash"
-                    checked={Book.stepBlock ?? false}
+                    label={!(Book.stepBlock ?? false) ? "Istalgan tartibda ishlash" : "Istalgan tartibda ishlash (Ketma-ket ishlash majburiy)"}
+                    checked={!(Book.stepBlock ?? false)}
                     onChange={(v) => {
                       console.log('🔄 StepBlock Switch bosildi:', {
                         oldValue: Book.stepBlock,
-                        newValue: v,
-                        checked_before: Book.stepBlock ?? false,
-                        checked_will_be: v,
+                        newValue: !v,
                       });
                       setBook({
                         ...Book,
-                        stepBlock: v,
+                        stepBlock: !v,
                       });
                     }}
                   />

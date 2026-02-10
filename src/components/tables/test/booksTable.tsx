@@ -462,11 +462,11 @@ export default function BooksTable({
                  
 
                   {
-                    !order.fullBlock ?  <CheckCircleIcon className="inline-block w-5 h-5 mr-1 text-green-500 dark:text-green-400" /> : <CloseCircleIcon className="inline-block w-5 h-5 ml-1  text-red-500 dark:text-red-400" />
+                    !order.fullBlock ?  <CheckCircleIcon className="inline-block w-6 h-6 mr-1 text-green-500 dark:text-green-400" /> : <CloseCircleIcon className="inline-block w-6 h-6 ml-1  text-orange-500 dark:text-orange-400" />
                   }
 
                   {
-                    order.stepBlock ?  <CheckCircleIcon className="inline-block w-5 h-5 mr-1 text-green-500 dark:text-green-400" /> : <CloseCircleIcon className="inline-block w-5 h-5 ml-1  text-red-500 dark:text-red-400" />
+                    !order.stepBlock ?  <CheckCircleIcon className="inline-block w-6 h-6 mr-1 text-green-500 dark:text-green-400" /> : <CloseCircleIcon className="inline-block w-6 h-6 ml-1  text-orange-500 dark:text-orange-400" />
                   }
                   
                   <span className="inline-block ml-2 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full">
