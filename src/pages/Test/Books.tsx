@@ -94,6 +94,11 @@ export default function BooksPage() {
         });
         console.log('✅ Frontend - Backend javob:', res.data);
         console.log('🔍 StepBlock holati - Backend response:', res.data.stepBlock);
+        console.log('🔍 FullBlock holati - Backend response:', res.data.fullBlock);
+        console.log('📊 Yozuv:', {
+          'fullBlock (database)': res.data.fullBlock,
+          'fullBlock ma\'nosi': res.data.fullBlock ? '🚫 TEST YOPIQ (studentlar ishlay olmaydi)' : '✅ TEST OCHIQ (studentlar ishlashi mumkin)',
+        });
         toast.success('Kitob muvaffaqiyatli yangilandi');
       } else {
         // Yangi yaratish
@@ -186,7 +191,8 @@ export default function BooksPage() {
       
       console.log('📚 Backend dan kelgan bookData:', bookData);
       console.log('🔒 fullBlock:', bookData.fullBlock, 'typeof:', typeof bookData.fullBlock);
-      console.log('📝 stepBlock:', bookData.stepBlock, 'typeof:', typeof bookData.stepBlock);
+      console.log('� fullBlock ma\'nosi:', bookData.fullBlock ? '🚫 TEST YOPIQ' : '✅ TEST OCHIQ');
+      console.log('�📝 stepBlock:', bookData.stepBlock, 'typeof:', typeof bookData.stepBlock);
       
       // Backend'dan kelgan sections'ni format qilish
       const sections = (bookData.sections || []).map((s: any) => ({
@@ -470,14 +476,17 @@ export default function BooksPage() {
               <div className="flex flex-col gap-3 mt-2">
                 <div className="flex items-center">
                   <Switch
-                    label="Testni ishlashga ruhsat berish"
+                    label="Testni ishlashga ruhsat berish (ON = ochiq, OFF = yopiq)"
                     checked={!(Book.fullBlock ?? false)}
                     onChange={(v) => {
                       console.log('🚫 FullBlock Switch bosildi:', {
                         oldFullBlock: Book.fullBlock,
+                        'OLD ma\'no': Book.fullBlock ? '🚫 TEST YOPIQ' : '✅ TEST OCHIQ',
                         newFullBlock: !v,
+                        'NEW ma\'no': !v ? '🚫 TEST YOPIQ' : '✅ TEST OCHIQ',
                         checked_before: !(Book.fullBlock ?? false),
                         checked_will_be: v,
+                        'Switch holati': v ? 'ON qilindi' : 'OFF qilindi',
                       });
                       setBook({
                         ...Book,
