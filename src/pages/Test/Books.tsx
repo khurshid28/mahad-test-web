@@ -74,7 +74,14 @@ export default function BooksPage() {
         passingPercentage: Book.passingPercentage,
         passingPercentage_string: String(Book.passingPercentage ?? 60),
         editingBookId: editingBookId,
+        '🔍 BOOK STATE:': Book,
       });
+
+      // FormData ni ham log qilish
+      console.log('📦 FormData ichidagi qiymatlar:');
+      for (let [key, value] of formData.entries()) {
+        console.log(`  ${key}:`, value);
+      }
 
       let bookId = editingBookId;
 
@@ -85,6 +92,8 @@ export default function BooksPage() {
             'Content-Type': 'multipart/form-data',
           },
         });
+        console.log('✅ Frontend - Backend javob:', res.data);
+        console.log('🔍 StepBlock holati - Backend response:', res.data.stepBlock);
         toast.success('Kitob muvaffaqiyatli yangilandi');
       } else {
         // Yangi yaratish
@@ -187,7 +196,7 @@ export default function BooksPage() {
         isNew: false
       }));
       
-      setBook({
+      const newBookState = {
         id: bookData.id,
         name: bookData.name,
         subject_id: bookData.subject_id,
@@ -196,12 +205,10 @@ export default function BooksPage() {
         stepBlock: bookData.stepBlock ?? false,
         passingPercentage: bookData.passingPercentage ?? 60,
         sections: sections,
-      });
+      };
       
-      console.log('✅ State ga set qilindi:', {
-        fullBlock: bookData.fullBlock ?? false,
-        stepBlock: bookData.stepBlock ?? false,
-      });
+      console.log('✅ State ga set qilinmoqda:', newBookState);
+      setBook(newBookState);
       
       setEditingBookId(bookId);
       openModal();
@@ -384,10 +391,21 @@ export default function BooksPage() {
                     value={Book.passingPercentage ?? 60}
                     onChange={(e) => {
                       const value = parseInt(e.target.value) || 60;
-                      setBook({
+                      const newBook = {
                         ...Book,
                         passingPercentage: Math.min(Math.max(value, 0), 100),
+                      };
+                      console.log('🔢 PassingPercentage o\'zgarishdan oldin:', {
+                        oldValue: Book.passingPercentage,
+                        oldStepBlock: Book.stepBlock,
+                        oldFullBlock: Book.fullBlock,
                       });
+                      console.log('🔢 PassingPercentage o\'zgarishdan keyin:', {
+                        newValue: newBook.passingPercentage,
+                        newStepBlock: newBook.stepBlock,
+                        newFullBlock: newBook.fullBlock,
+                      });
+                      setBook(newBook);
                     }}
                     placeholder="60"
                   />
@@ -454,24 +472,36 @@ export default function BooksPage() {
                   <Switch
                     label="Testni ishlashga ruhsat berish"
                     checked={!(Book.fullBlock ?? false)}
-                    onChange={(v) =>
+                    onChange={(v) => {
+                      console.log('🚫 FullBlock Switch bosildi:', {
+                        oldFullBlock: Book.fullBlock,
+                        newFullBlock: !v,
+                        checked_before: !(Book.fullBlock ?? false),
+                        checked_will_be: v,
+                      });
                       setBook({
                         ...Book,
                         fullBlock: !v,
-                      })
-                    }
+                      });
+                    }}
                   />
                 </div>
                 <div className="flex items-center">
                   <Switch
                     label="Ketma-ket ishlash"
                     checked={Book.stepBlock ?? false}
-                    onChange={(v) =>
+                    onChange={(v) => {
+                      console.log('🔄 StepBlock Switch bosildi:', {
+                        oldValue: Book.stepBlock,
+                        newValue: v,
+                        checked_before: Book.stepBlock ?? false,
+                        checked_will_be: v,
+                      });
                       setBook({
                         ...Book,
                         stepBlock: v,
-                      })
-                    }
+                      });
+                    }}
                   />
                 </div>
               </div>
