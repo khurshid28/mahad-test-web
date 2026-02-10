@@ -12,6 +12,7 @@ import Button from "../../ui/button/Button";
 import { ArrowRightIcon, DownloadIcon } from "../../../icons";
 import Select from "../../form/Select";
 import Pagination from "../../ui/pagination/Pagination";
+import Input from "../../form/input/InputField";
 
 import bookImage from "../../../../public/images/product/book.png"
 
@@ -203,6 +204,37 @@ export default function RatesTable({ data, groups, refetch }: {
     setoptionValue(value);
   };
   
+  // Get test counts for each student
+  const getTestCounts = (results: any[]) => {
+    if (!results || results.length === 0) {
+      return { special: 0, regular: 0 };
+    }
+
+    const bookIds = new Set<number>();
+    let specialTests = 0;
+
+    for (const r of results) {
+      try {
+        if (r.type === "SPECIAL") {
+          specialTests++;
+        } else if (r.type !== "RANDOM") {
+          // Oddiy testlar - kitob ID ni olish
+          const bookId = r.test?.section?.book_id;
+          if (bookId) {
+            bookIds.add(bookId);
+          }
+        }
+      } catch (e) {
+        console.error('Error counting tests:', e);
+      }
+    }
+
+    return {
+      special: specialTests,
+      regular: bookIds.size, // Unique kitoblar soni
+    };
+  };
+  
   // Pationation
   
   const [currentPage, setCurrentPage] = useState(1);
@@ -265,12 +297,12 @@ export default function RatesTable({ data, groups, refetch }: {
             <span>Ko'rsatish</span>
           </div>
           <div className="flex flex-row items-center gap-2">
-            <input
+            <Input
               type="text"
               placeholder="Student qidirish..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-dark-900 text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-blue-400"
+              className="min-w-[200px]"
             />
           </div>
           <div className="flex flex-row items-center gap-2 text-theme-sm font-medium text-gray-500 text-start  dark:text-gray-400">
@@ -297,7 +329,7 @@ export default function RatesTable({ data, groups, refetch }: {
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400 "
               >
-                Tugatilgan
+                Statistika
               </TableCell>
               <TableCell
                 isHeader
@@ -323,7 +355,9 @@ export default function RatesTable({ data, groups, refetch }: {
 
           {/* Table Body */}
           <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
-            {currentItems.map((order,index) => (
+            {currentItems.map((order,index) => {
+              const stats = getTestCounts(order.results ?? []);
+              return (
               <TableRow key={index}>
                 <TableCell className="px-5 py-4 sm:px-6 text-start">
                   <div className="flex items-center gap-3">
@@ -345,8 +379,17 @@ export default function RatesTable({ data, groups, refetch }: {
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400">
-                  {order.results?.length ?? 0}
+                <TableCell className="px-4 py-3 text-center">
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/20">
+                      <span className="text-sm">📘</span>
+                      <span className="text-xs font-medium text-blue-600 dark:text-blue-400">{stats.regular}</span>
+                    </div>
+                    <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-orange-50 dark:bg-orange-900/20">
+                      <span className="text-sm">⭐</span>
+                      <span className="text-xs font-medium text-orange-600 dark:text-orange-400">{stats.special}</span>
+                    </div>
+                  </div>
                 </TableCell>
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                   {order.group?.name}
@@ -371,7 +414,8 @@ export default function RatesTable({ data, groups, refetch }: {
                   {Number((order.rate ?? 0).toFixed(2))} %
                 </TableCell>
               </TableRow>
-            ))}
+              );
+            })}
           </TableBody>
         </Table>
       </div>

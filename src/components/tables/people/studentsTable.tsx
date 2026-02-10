@@ -561,6 +561,7 @@ export default function StudentsTable({ data, groups, refetch, onEdit, onDelete 
 }) {
 
   const [tableData, settableData] = useState<StudentItemProps[]>(data);
+  const [searchQuery, setSearchQuery] = useState("");
   const { isOpen, openModal, closeModal } = useModal();
   const { isOpen: isDeleteConfirmOpen, openModal: openDeleteConfirmModal, closeModal: closeDeleteConfirmModal } = useModal();
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
@@ -638,8 +639,19 @@ export default function StudentsTable({ data, groups, refetch, onEdit, onDelete 
 
   useEffect(() => {
     setCurrentPage(1);
-    settableData(data);
-  }, [optionValue, data]);
+    let filteredData = data;
+    
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filteredData = filteredData.filter((item) => 
+        item.name?.toLowerCase().includes(query) || 
+        item.phone?.toLowerCase().includes(query)
+      );
+    }
+    
+    settableData(filteredData);
+  }, [optionValue, data, searchQuery]);
 
 
 
@@ -689,7 +701,7 @@ export default function StudentsTable({ data, groups, refetch, onEdit, onDelete 
 
      
       <div className="max-w-full overflow-x-auto">
-        <div className="px-5 py-3  flex flex-row justify-between items-center border-b border-gray-100 dark:border-white/5">
+        <div className="px-5 py-3 flex flex-col md:flex-row gap-3 justify-between items-start md:items-center border-b border-gray-100 dark:border-white/5">
           <div className="flex flex-row items-center gap-2 text-theme-sm font-medium text-gray-500 text-start  dark:text-gray-400">
           <Select
               options={options}
@@ -698,6 +710,15 @@ export default function StudentsTable({ data, groups, refetch, onEdit, onDelete 
               defaultValue="5"
             />
             <span>Ko'rsatish</span>
+          </div>
+          <div className="flex flex-row items-center gap-2">
+            <Input
+              type="text"
+              placeholder="Student qidirish..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="min-w-[200px]"
+            />
           </div>
           <div>
             {" "}
