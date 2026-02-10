@@ -456,10 +456,6 @@ export default function TestsPage() {
       toast.warn("Bo'limni tanlang");
       return;
     }
-    if (!Test.name || Test.name.trim() === "") {
-      toast.warn("Sarlavhani kiriting");
-      return;
-    }
     if (!quiz?.questions || quiz.questions.length === 0) {
       toast.warn("Fayl yuklang");
       return;
