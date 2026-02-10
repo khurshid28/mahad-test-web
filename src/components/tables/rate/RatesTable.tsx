@@ -207,18 +207,20 @@ export default function RatesTable({ data, groups, refetch }: {
   // Get test counts for each student
   const getTestCounts = (results: any[]) => {
     if (!results || results.length === 0) {
-      return { special: 0, regular: 0 };
+      return { books: 0, regularTests: 0, special: 0 };
     }
 
     const bookIds = new Set<number>();
     let specialTests = 0;
+    let regularTests = 0;
 
     for (const r of results) {
       try {
         if (r.type === "SPECIAL") {
           specialTests++;
         } else if (r.type !== "RANDOM") {
-          // Oddiy testlar - kitob ID ni olish
+          // Oddiy testlar
+          regularTests++;
           const bookId = r.test?.section?.book_id;
           if (bookId) {
             bookIds.add(bookId);
@@ -230,8 +232,9 @@ export default function RatesTable({ data, groups, refetch }: {
     }
 
     return {
-      special: specialTests,
-      regular: bookIds.size, // Unique kitoblar soni
+      books: bookIds.size, // Unique kitoblar soni
+      regularTests: regularTests, // Jami oddiy testlar soni
+      special: specialTests, // Maxsus testlar soni
     };
   };
   
@@ -383,7 +386,9 @@ export default function RatesTable({ data, groups, refetch }: {
                   <div className="flex items-center justify-center gap-2">
                     <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/20">
                       <span className="text-sm">📘</span>
-                      <span className="text-xs font-medium text-blue-600 dark:text-blue-400">{stats.regular}</span>
+                      <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
+                        {stats.books}/{stats.regularTests}
+                      </span>
                     </div>
                     <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-orange-50 dark:bg-orange-900/20">
                       <span className="text-sm">⭐</span>
