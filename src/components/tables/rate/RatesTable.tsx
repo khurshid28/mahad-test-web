@@ -392,7 +392,9 @@ export default function RatesTable({ data, groups, refetch }: {
                     </div>
                     <div className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-orange-50 dark:bg-orange-900/20">
                       <span className="text-sm">⭐</span>
-                      <span className="text-xs font-medium text-orange-600 dark:text-orange-400">{stats.special}</span>
+                      <span className="text-xs font-medium text-orange-600 dark:text-orange-400">
+                        {stats.special > 0 ? `${stats.special}` : '0/0'}
+                      </span>
                     </div>
                   </div>
                 </TableCell>
