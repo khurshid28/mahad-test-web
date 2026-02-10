@@ -476,7 +476,7 @@ export default function BooksPage() {
               <div className="flex flex-col gap-3 mt-2">
                 <div className="flex items-center">
                   <Switch
-                    label="Testni ishlashga ruhsat berish (ON = ochiq, OFF = yopiq)"
+                    label="Testni ishlashga ruhsat berish"
                     checked={!(Book.fullBlock ?? false)}
                     onChange={(v) => {
                       console.log('🚫 FullBlock Switch bosildi:', {
