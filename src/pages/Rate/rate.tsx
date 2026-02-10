@@ -80,7 +80,7 @@ export default function RatePage() {
             }
           } else {
             // Oddiy testlar - kitob bo'yicha guruhlash
-            const bookId = result.test?.section?.book_id;
+            const bookId = (result.test as any)?.section?.book_id;
             const count = result.test?._count?.test_items;
             const solved = result.solved ?? 0;
             if (bookId && count && count > 0) {
