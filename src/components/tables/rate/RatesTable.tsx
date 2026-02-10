@@ -178,6 +178,7 @@ export default function RatesTable({ data, groups, refetch }: {
 }) {
 
   const [tableData, setTableData] = useState(data);
+  const [searchQuery, setSearchQuery] = useState("");
   const options = [
     { value: "5", label: "5" },
     { value: "10", label: "10" },
@@ -228,17 +229,24 @@ export default function RatesTable({ data, groups, refetch }: {
   
   useEffect(() => {
     setCurrentPage(1);
-    if (groupoptionValue == "Hamma guruh") {
-      setTableData(data)
-      
-    }else{
-      setTableData(data.filter((item)=>item.group?.id== +groupoptionValue));
+    let filteredData = data;
+    
+    // Filter by group
+    if (groupoptionValue != "Hamma guruh") {
+      filteredData = filteredData.filter((item)=>item.group?.id== +groupoptionValue);
     }
-  }, [optionValue,groupoptionValue]);
-  useEffect(() => {
-    setCurrentPage(1);
-    setTableData(data);
-  }, [data]);
+    
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filteredData = filteredData.filter((item) => 
+        item.name?.toLowerCase().includes(query) || 
+        item.phone?.toLowerCase().includes(query)
+      );
+    }
+    
+    setTableData(filteredData);
+  }, [optionValue, groupoptionValue, searchQuery, data]);
 
 
   return (
@@ -246,7 +254,7 @@ export default function RatesTable({ data, groups, refetch }: {
       <div className="max-w-full overflow-x-auto">
 
 
-      <div className="px-5 py-3  flex flex-row justify-between items-center border-b border-gray-100 dark:border-white/5">
+      <div className="px-5 py-3 flex flex-col md:flex-row gap-3 justify-between items-start md:items-center border-b border-gray-100 dark:border-white/5">
           <div className="flex flex-row items-center gap-2 text-theme-sm font-medium text-gray-500 text-start  dark:text-gray-400">
           <Select
               options={options}
@@ -255,6 +263,15 @@ export default function RatesTable({ data, groups, refetch }: {
               defaultValue="5"
             />
             <span>Ko'rsatish</span>
+          </div>
+          <div className="flex flex-row items-center gap-2">
+            <input
+              type="text"
+              placeholder="Student qidirish..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="px-3 py-2 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-dark-900 text-gray-700 dark:text-gray-300 text-sm focus:outline-none focus:border-blue-500 dark:focus:border-blue-400"
+            />
           </div>
           <div className="flex flex-row items-center gap-2 text-theme-sm font-medium text-gray-500 text-start  dark:text-gray-400">
             

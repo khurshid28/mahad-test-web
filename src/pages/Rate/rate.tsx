@@ -9,11 +9,25 @@ import { LoadSpinner } from "../../components/spinner/load-spinner";
 
 export default function RatePage() {
 
-
+  // Get user role from localStorage
+  const getUserRole = () => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        return user.role;
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  };
 
   let [group_options, set_group_options] = useState<HTMLOptionElement[]>([]);
   const fetchStudents = useCallback(() => {
-    return axiosClient.get('/student/rate').then(res => res.data);
+    const role = getUserRole();
+    const endpoint = role === 'ADMIN' ? '/admin/rate' : '/student/rate';
+    return axiosClient.get(endpoint).then(res => res.data);
   }, []);
 
 
@@ -42,8 +56,10 @@ export default function RatePage() {
   let sortedData = (list: RateItemProps[]): RateItemProps[] => {
     return list.map((e) => {
       if (e.results && e.results?.length > 0) {
-        let totalScore = 0;
-        let totalTests = 0;
+        // Kitoblar bo'yicha guruhlash
+        const bookScores = new Map<number, number[]>();
+        const specialScores: number[] = [];
+        const randomScores: number[] = [];
         
         for (let index = 0; index < e.results?.length; index++) {
           const result = e.results[index];
@@ -53,27 +69,56 @@ export default function RatePage() {
             const totalItems = ((result as any).answers as any[])?.length ?? 0;
             const solved = result.solved ?? 0;
             if (totalItems > 0) {
-              totalScore += (solved / totalItems);
-              totalTests++;
+              randomScores.push((solved / totalItems) * 100);
             }
           } else if (result.type === "SPECIAL") {
             // Maxsus testlar
             const totalItems = ((result as any).answers as any[])?.length ?? 0;
             const solved = result.solved ?? 0;
             if (totalItems > 0) {
-              totalScore += (solved / totalItems);
-              totalTests++;
+              specialScores.push((solved / totalItems) * 100);
             }
           } else {
-            // Oddiy testlar
-            const count = result.test?._count?.test_items ?? 1;
+            // Oddiy testlar - kitob bo'yicha guruhlash
+            const bookId = result.test?.section?.book_id;
+            const count = result.test?._count?.test_items;
             const solved = result.solved ?? 0;
-            totalScore += (solved / count);
-            totalTests++;
+            if (bookId && count && count > 0) {
+              if (!bookScores.has(bookId)) {
+                bookScores.set(bookId, []);
+              }
+              bookScores.get(bookId)!.push((solved / count) * 100);
+            }
           }
         }
 
-        e.rate = totalTests > 0 ? (totalScore * 100) / totalTests : 0;
+        // Har bir kitobning o'rtachasini hisoblash
+        const bookAverages: number[] = [];
+        bookScores.forEach((scores) => {
+          const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+          bookAverages.push(avg);
+        });
+
+        console.log('Student:', e.name);
+        console.log('Book scores:', Array.from(bookScores.entries()));
+        console.log('Book averages:', bookAverages);
+        console.log('Special scores:', specialScores);
+        console.log('Random scores:', randomScores);
+
+        // Barcha o'rtachalarni birlashtirish
+        const allAverages = [
+          ...bookAverages,
+          ...specialScores,
+          ...randomScores
+        ];
+
+        console.log('All averages:', allAverages);
+
+        e.rate = allAverages.length > 0 
+          ? allAverages.reduce((a, b) => a + b, 0) / allAverages.length 
+          : 0;
+          
+        console.log('Final rate:', e.rate);
       } else {
         e.rate = 0;
       }

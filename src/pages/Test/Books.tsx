@@ -64,6 +64,18 @@ export default function BooksPage() {
   formData.append('stepBlock', Book.stepBlock ? '1' : '0');
   formData.append('passingPercentage', String(Book.passingPercentage ?? 60));
 
+      console.log('📤 Frontend - Jo\'natilayotgan data:', {
+        name: Book.name,
+        subject_id: Book.subject_id,
+        fullBlock: Book.fullBlock,
+        fullBlock_string: Book.fullBlock ? '1' : '0',
+        stepBlock: Book.stepBlock,
+        stepBlock_string: Book.stepBlock ? '1' : '0',
+        passingPercentage: Book.passingPercentage,
+        passingPercentage_string: String(Book.passingPercentage ?? 60),
+        editingBookId: editingBookId,
+      });
+
       let bookId = editingBookId;
 
       if (editingBookId) {
