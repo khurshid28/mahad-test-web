@@ -185,42 +185,6 @@ const DeviceList = () => {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <div className="flex flex-wrap gap-4">
-          <div className="flex-1 min-w-[200px]">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Qurilma turi
-            </label>
-            <Select
-              options={[
-                { value: 'all', label: 'Hammasi' },
-                { value: 'ANDROID', label: 'Android' },
-                { value: 'IOS', label: 'iOS' },
-                { value: 'WEB', label: 'Web' },
-              ]}
-              onChange={handleDeviceTypeFilterChange}
-              className="dark:bg-dark-900"
-              defaultValue="all"
-            />
-          </div>
-          <div className="flex-1 min-w-[200px]">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Guruh
-            </label>
-            <Select
-              options={[
-                { value: 'all', label: 'Hammasi' },
-                ...uniqueGroups.map(g => ({ value: g.id.toString(), label: g.name || `Guruh #${g.id}` })),
-              ]}
-              onChange={handleGroupFilterChange}
-              className="dark:bg-dark-900"
-              defaultValue="all"
-            />
-          </div>
-        </div>
-      </div>
-
       {/* Table */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         {loading ? (
@@ -235,20 +199,50 @@ const DeviceList = () => {
           </div>
         ) : (
           <>
-            {/* Page size selector */}
-            <div className="px-5 py-3 flex flex-row items-center gap-2 text-theme-sm font-medium text-gray-500 text-start dark:text-gray-400 border-b border-gray-100 dark:border-white/5">
-              <Select
-                options={[
-                  { value: '10', label: '10' },
-                  { value: '20', label: '20' },
-                  { value: '50', label: '50' },
-                  { value: '100', label: '100' },
-                ]}
-                onChange={handlePageSizeChange}
-                className="dark:bg-dark-900"
-                defaultValue="20"
-              />
-              <span>Ko'rsatish</span>
+            {/* Page size selector and filters */}
+            <div className="px-5 py-3 flex flex-row items-center gap-4 text-theme-sm font-medium text-gray-500 text-start dark:text-gray-400 border-b border-gray-100 dark:border-white/5">
+              <div className="flex items-center gap-2">
+                <Select
+                  options={[
+                    { value: '10', label: '10' },
+                    { value: '20', label: '20' },
+                    { value: '50', label: '50' },
+                    { value: '100', label: '100' },
+                  ]}
+                  onChange={handlePageSizeChange}
+                  className="dark:bg-dark-900"
+                  defaultValue="20"
+                />
+                <span>Ko'rsatish</span>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600 dark:text-gray-400">Turi:</span>
+                <Select
+                  options={[
+                    { value: 'all', label: 'Hammasi' },
+                    { value: 'ANDROID', label: 'Android' },
+                    { value: 'IOS', label: 'iOS' },
+                    { value: 'WEB', label: 'Web' },
+                  ]}
+                  onChange={handleDeviceTypeFilterChange}
+                  className="dark:bg-dark-900"
+                  defaultValue="all"
+                />
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600 dark:text-gray-400">Guruh:</span>
+                <Select
+                  options={[
+                    { value: 'all', label: 'Hammasi' },
+                    ...uniqueGroups.map(g => ({ value: g.id.toString(), label: g.name || `Guruh #${g.id}` })),
+                  ]}
+                  onChange={handleGroupFilterChange}
+                  className="dark:bg-dark-900"
+                  defaultValue="all"
+                />
+              </div>
             </div>
 
             <div className="overflow-x-auto">
