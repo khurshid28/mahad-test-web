@@ -235,7 +235,7 @@ const DeviceList = () => {
                         <div className="text-xs text-gray-500 dark:text-gray-400">
                           {device.app_version ? `v${device.app_version}` : ''}
                         </div>
-                        <div className="text-xs text-gray-400 dark:text-gray-500 font-mono break-all" style={{ maxWidth: '200px' }}>
+                        <div className="text-xs text-blue-600 dark:text-blue-400 font-mono break-all" style={{ maxWidth: '200px' }}>
                           {device.device_identifier}
                         </div>
                       </td>
