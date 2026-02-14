@@ -200,7 +200,7 @@ const DeviceList = () => {
         ) : (
           <>
             {/* Page size selector and filters */}
-            <div className="px-5 py-3 flex flex-row items-center gap-4 text-theme-sm font-medium text-gray-500 text-start dark:text-gray-400 border-b border-gray-100 dark:border-white/5">
+            <div className="px-5 py-3 flex flex-wrap items-center gap-4 text-theme-sm font-medium text-gray-500 text-start dark:text-gray-400 border-b border-gray-100 dark:border-white/5">
               <div className="flex items-center gap-2">
                 <Select
                   options={[
@@ -216,7 +216,7 @@ const DeviceList = () => {
                 <span>Ko'rsatish</span>
               </div>
               
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 lg:ml-auto">
                 <span className="text-gray-600 dark:text-gray-400">Turi:</span>
                 <Select
                   options={[
