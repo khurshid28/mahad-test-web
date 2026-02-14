@@ -196,6 +196,9 @@ const DeviceList = () => {
                       Turi
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                      Identifikator
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                       IP Address
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
@@ -240,6 +243,11 @@ const DeviceList = () => {
                         <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getDeviceTypeBadgeColor(device.device_type)}`}>
                           {device.device_type}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-xs font-mono text-gray-700 dark:text-gray-300 max-w-xs truncate" title={device.device_identifier}>
+                          {device.device_identifier}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                         {device.ip_address || '-'}
