@@ -267,7 +267,7 @@ const DeviceList = () => {
                             ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400' 
                             : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                         }`}>
-                          {device.is_active ? 'Faol' : 'Faolsiz'}
+                          {device.is_active ? 'Faol' : 'Faol emas'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
