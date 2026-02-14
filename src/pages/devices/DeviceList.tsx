@@ -235,6 +235,9 @@ const DeviceList = () => {
                         <div className="text-xs text-gray-500 dark:text-gray-400">
                           {device.app_version ? `v${device.app_version}` : ''}
                         </div>
+                        <div className="text-xs text-gray-400 dark:text-gray-500 font-mono truncate" style={{ maxWidth: '200px' }} title={device.device_identifier}>
+                          {device.device_identifier}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getDeviceTypeBadgeColor(device.device_type)}`}>
