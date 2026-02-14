@@ -309,11 +309,11 @@ export default function TestsTable({
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                   {Moment(order.createdt).format("MMMM DD, yyyy")}
                 </TableCell>
-                <div>
-                  <span className="block text-center font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                <TableCell className="px-4 py-3 text-center text-gray-500 text-theme-sm dark:text-gray-400">
+                  <span className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
                     {order._count && order._count.test_items}
                   </span>
-                </div>
+                </TableCell>
 
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                   <Badge
