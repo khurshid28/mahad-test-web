@@ -3,6 +3,7 @@ import axios, {
   AxiosInstance,
   InternalAxiosRequestConfig,
 } from "axios";
+import { toast } from "react-toastify";
 
 const baseURL = import.meta.env.VITE_BASE_URL ?? "https://api.example.com";
 
@@ -28,10 +29,18 @@ axiosClient.interceptors.request.use(
 // 🔴 RESPONSE: 401 bo‘lsa tokenni o‘chir
 axiosClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
+  (error: AxiosError<any>) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("token"); // Tokenni o‘chir
-      window.location.href = "/signin"; // Foydalanuvchini login sahifasiga qaytar
+      // Show custom error message if available
+      const errorMessage = error.response?.data?.message || "Qurilma faol emas";
+      toast.error(errorMessage);
+      
+      localStorage.removeItem("token"); // Tokenni o'chir
+      
+      // Redirect after a short delay to show the toast
+      setTimeout(() => {
+        window.location.href = "/signin"; // Foydalanuvchini login sahifasiga qaytar
+      }, 1000);
     }
     return Promise.reject(error);
   }

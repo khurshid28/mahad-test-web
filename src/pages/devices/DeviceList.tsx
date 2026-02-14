@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { deviceService } from '../../service/device.service';
 import { toast } from 'react-toastify';
 import Select from '../../components/form/Select';
-import Input from '../../components/form/input/InputField';
-import { TrashBinIcon, CloseIcon, AlertIcon, CheckCircleIcon } from '../../icons';
+import { CloseIcon, CheckCircleIcon } from '../../icons';
 import { Modal } from '../../components/ui/modal';
+import Pagination from '../../components/common/Pagination';
 
 interface Device {
   id: number;
@@ -29,42 +29,24 @@ interface Device {
 const DeviceList = () => {
   const [devices, setDevices] = useState<Device[]>([]);
   const [loading, setLoading] = useState(false);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [limit] = useState(20);
-  const [totalPages, setTotalPages] = useState(0);
-
-  // Filters
-  const [roleFilter, setRoleFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [resetKey, setResetKey] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState('20');
 
   // Confirmation Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalAction, setModalAction] = useState<'activate' | 'deactivate' | 'delete' | null>(null);
+  const [modalAction, setModalAction] = useState<'activate' | 'deactivate' | null>(null);
   const [selectedDeviceId, setSelectedDeviceId] = useState<number | null>(null);
   const [selectedDeviceName, setSelectedDeviceName] = useState<string>('');
 
   useEffect(() => {
     fetchDevices();
-  }, [page]);
+  }, []);
 
   const fetchDevices = async () => {
     setLoading(true);
     try {
-      const params = {
-        page,
-        limit,
-        ...(roleFilter && { role: roleFilter }),
-        ...(statusFilter !== '' && { is_active: statusFilter }),
-        ...(searchQuery && { search: searchQuery }),
-      };
-
-      const response = await deviceService.getAllDevices(params);
+      const response = await deviceService.getAllDevices({});
       setDevices(response.data.devices);
-      setTotal(response.data.total);
-      setTotalPages(response.data.totalPages);
     } catch (error) {
       console.error('Error fetching devices:', error);
       toast.error('Qurilmalarni yuklashda xatolik');
@@ -73,24 +55,18 @@ const DeviceList = () => {
     }
   };
 
-  const handleFilter = () => {
-    setPage(1);
-    fetchDevices();
+  // Pagination logic
+  const maxPage = Math.ceil(devices.length / +pageSize);
+  const startIndex = (currentPage - 1) * +pageSize;
+  const endIndex = startIndex + +pageSize;
+  const currentDevices = devices.slice(startIndex, endIndex);
+
+  const handlePageSizeChange = (value: string) => {
+    setPageSize(value);
+    setCurrentPage(1); // Reset to first page when page size changes
   };
 
-  const handleReset = () => {
-    setRoleFilter('');
-    setStatusFilter('');
-    setSearchQuery('');
-    setPage(1);
-    setResetKey(prev => prev + 1);
-  };
-
-  useEffect(() => {
-    fetchDevices();
-  }, [page, roleFilter, statusFilter]);
-
-  const openConfirmModal = (deviceId: number, deviceName: string, action: 'activate' | 'deactivate' | 'delete') => {
+  const openConfirmModal = (deviceId: number, deviceName: string, action: 'activate' | 'deactivate') => {
     setSelectedDeviceId(deviceId);
     setSelectedDeviceName(deviceName);
     setModalAction(action);
@@ -114,14 +90,11 @@ const DeviceList = () => {
       } else if (modalAction === 'deactivate') {
         await deviceService.deactivateDevice(selectedDeviceId);
         toast.success('Qurilma faolsizlantirildi');
-      } else if (modalAction === 'delete') {
-        await deviceService.deleteDevice(selectedDeviceId);
-        toast.success('Qurilma o\'chirildi');
       }
       fetchDevices();
     } catch (error) {
       console.error(`Error ${modalAction}ing device:`, error);
-      toast.error(`Qurilmani ${modalAction === 'delete' ? 'o\'chirish' : modalAction === 'activate' ? 'faollashtirish' : 'faolsizlantirish'}da xatolik`);
+      toast.error(`Qurilmani ${modalAction === 'activate' ? 'faollashtirish' : 'faolsizlantirish'}da xatolik`);
     } finally {
       closeConfirmModal();
     }
@@ -169,101 +142,7 @@ const DeviceList = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Qurilmalar</h1>
         <div className="text-sm text-gray-500 dark:text-gray-400">
-          Jami: <span className="font-semibold text-gray-900 dark:text-white">{total}</span> ta qurilma
-        </div>
-      </div>
-
-      {/* Filter Section */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          {/* Role Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Rol bo'yicha
-            </label>
-            <Select
-              key={`role-${resetKey}`}
-              options={[
-                { value: '', label: 'Barchasi' },
-                { value: 'STUDENT', label: 'Student' },
-                { value: 'TEACHER', label: "O'qituvchi" },
-                { value: 'ADMIN', label: 'Admin' },
-              ]}
-              placeholder="Rolni tanlang"
-              defaultValue={roleFilter}
-              onChange={(value) => setRoleFilter(value)}
-            />
-          </div>
-
-          {/* Status Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Holat bo'yicha
-            </label>
-            <Select
-              key={`status-${resetKey}`}
-              options={[
-                { value: '', label: 'Barchasi' },
-                { value: 'true', label: 'Faol' },
-                { value: 'false', label: 'Faolsiz' },
-              ]}
-              placeholder="Holatni tanlang"
-              defaultValue={statusFilter}
-              onChange={(value) => setStatusFilter(value)}
-            />
-          </div>
-
-          {/* Device Type Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Qurilma turi
-            </label>
-            <Select
-              key={`type-${resetKey}`}
-              options={[
-                { value: '', label: 'Barchasi' },
-                { value: 'ANDROID', label: 'Android' },
-                { value: 'IOS', label: 'iOS' },
-                { value: 'WEB', label: 'Web' },
-              ]}
-              placeholder="Turni tanlang"
-              defaultValue=""
-              onChange={(value) => {
-                // Bu filterni backend qo'llab-quvvatlamasa, olib tashlash mumkin
-                setPage(1);
-              }}
-            />
-          </div>
-
-          {/* Search */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Qidirish
-            </label>
-            <Input
-              type="text"
-              placeholder="Ism yoki telefon raqam..."
-              value={searchQuery}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-3">
-          <button
-            onClick={handleFilter}
-            className="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg font-medium transition-colors duration-200 shadow-sm"
-          >
-            Qidirish
-          </button>
-          <button
-            onClick={handleReset}
-            className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg font-medium transition-colors duration-200 shadow-sm flex items-center gap-2"
-          >
-            <CloseIcon className="w-4 h-4" />
-            Tozalash
-          </button>
+          Jami: <span className="font-semibold text-gray-900 dark:text-white">{devices.length}</span> ta qurilma
         </div>
       </div>
 
@@ -278,12 +157,25 @@ const DeviceList = () => {
             <div className="text-gray-400 dark:text-gray-500 text-lg">
               Qurilmalar topilmadi
             </div>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
-              Filterni o'zgartiring yoki qayta urinib ko'ring
-            </p>
           </div>
         ) : (
           <>
+            {/* Page size selector */}
+            <div className="px-5 py-3 flex flex-row items-center gap-2 text-theme-sm font-medium text-gray-500 text-start dark:text-gray-400 border-b border-gray-100 dark:border-white/5">
+              <Select
+                options={[
+                  { value: '10', label: '10' },
+                  { value: '20', label: '20' },
+                  { value: '50', label: '50' },
+                  { value: '100', label: '100' },
+                ]}
+                onChange={handlePageSizeChange}
+                className="dark:bg-dark-900"
+                defaultValue="20"
+              />
+              <span>Ko'rsatish</span>
+            </div>
+
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead className="bg-gray-50 dark:bg-gray-900">
@@ -318,7 +210,7 @@ const DeviceList = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {devices.map((device) => (
+                  {currentDevices.map((device) => (
                     <tr key={device.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -376,14 +268,14 @@ const DeviceList = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center">
                           {device.is_active ? (
                             <button
                               onClick={() => openConfirmModal(device.id, device.device_name, 'deactivate')}
                               className="text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300 transition-colors flex items-center gap-1.5 group"
                               title="Faolsizlantirish"
                             >
-                              <CloseIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                              <CloseIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
                             </button>
                           ) : (
                             <button
@@ -391,16 +283,9 @@ const DeviceList = () => {
                               className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 transition-colors flex items-center gap-1.5 group"
                               title="Faollashtirish"
                             >
-                              <CheckCircleIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                              <CheckCircleIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
                             </button>
                           )}
-                          <button
-                            onClick={() => openConfirmModal(device.id, device.device_name, 'delete')}
-                            className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors flex items-center gap-1.5 group"
-                            title="O'chirish"
-                          >
-                            <TrashBinIcon className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                          </button>
                         </div>
                       </td>
                     </tr>
@@ -411,29 +296,14 @@ const DeviceList = () => {
 
             {/* Pagination */}
             <div className="px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-              <div className="text-sm text-gray-700 dark:text-gray-300 mb-3 sm:mb-0">
-                <span className="font-medium">{total}</span> ta qurilmadan{' '}
-                <span className="font-medium">{(page - 1) * limit + 1}</span>-
-                <span className="font-medium">{Math.min(page * limit, total)}</span> ko'rsatilmoqda
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-medium text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  Oldingi
-                </button>
-                <span className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {page} / {totalPages || 1}
-                </span>
-                <button
-                  onClick={() => setPage(p => p + 1)}
-                  disabled={page >= totalPages}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg font-medium text-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  Keyingi
-                </button>
+              <Pagination 
+                currentPage={currentPage} 
+                totalPages={maxPage} 
+                onPageChange={setCurrentPage} 
+                className="flex-1" 
+              />
+              <div className="text-sm text-gray-700 dark:text-gray-300 mt-3 sm:mt-0">
+                {(currentPage - 1) * +pageSize + 1} dan {Math.min(devices.length, currentPage * +pageSize)} gacha, {devices.length} ta
               </div>
             </div>
           </>
@@ -446,15 +316,11 @@ const DeviceList = () => {
           {/* Icon */}
           <div className="flex justify-center mb-4">
             <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-              modalAction === 'delete' 
-                ? 'bg-red-100 dark:bg-red-900/30' 
-                : modalAction === 'activate'
+              modalAction === 'activate'
                 ? 'bg-green-100 dark:bg-green-900/30'
                 : 'bg-orange-100 dark:bg-orange-900/30'
             }`}>
-              {modalAction === 'delete' ? (
-                <TrashBinIcon className="w-8 h-8 text-red-600 dark:text-red-400" />
-              ) : modalAction === 'activate' ? (
+              {modalAction === 'activate' ? (
                 <CheckCircleIcon className="w-8 h-8 text-green-600 dark:text-green-400" />
               ) : (
                 <CloseIcon className="w-8 h-8 text-orange-600 dark:text-orange-400" />
@@ -464,18 +330,14 @@ const DeviceList = () => {
 
           {/* Title */}
           <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-2">
-            {modalAction === 'delete' 
-              ? "Qurilmani o'chirish" 
-              : modalAction === 'activate'
+            {modalAction === 'activate'
               ? 'Qurilmani faollashtirish'
               : 'Qurilmani faolsizlantirish'}
           </h3>
 
           {/* Description */}
           <p className="text-center text-gray-600 dark:text-gray-400 mb-2">
-            {modalAction === 'delete' 
-              ? "Haqiqatan ham bu qurilmani butunlay o'chirmoqchimisiz?" 
-              : modalAction === 'activate'
+            {modalAction === 'activate'
               ? "Bu qurilmani faollashtirganingizda, boshqa barcha qurilmalar avtomatik faolsizlantiriladi."
               : 'Haqiqatan ham bu qurilmani faolsizlantirmoqchimisiz?'}
           </p>
@@ -489,14 +351,6 @@ const DeviceList = () => {
           </div>
 
           {/* Warning */}
-          {modalAction === 'delete' && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-6">
-              <p className="text-sm text-red-800 dark:text-red-400">
-                <strong>Diqqat:</strong> Bu amalni ortga qaytarib bo'lmaydi.
-              </p>
-            </div>
-          )}
-
           {modalAction === 'activate' && (
             <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 mb-6">
               <p className="text-sm text-green-800 dark:text-green-400">
@@ -516,14 +370,12 @@ const DeviceList = () => {
             <button
               onClick={handleConfirmAction}
               className={`flex-1 px-4 py-2.5 text-white rounded-lg font-medium transition-colors ${
-                modalAction === 'delete'
-                  ? 'bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600'
-                  : modalAction === 'activate'
+                modalAction === 'activate'
                   ? 'bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600'
                   : 'bg-orange-600 hover:bg-orange-700 dark:bg-orange-700 dark:hover:bg-orange-600'
               }`}
             >
-              {modalAction === 'delete' ? "O'chirish" : modalAction === 'activate' ? 'Faollashtirish' : 'Faolsizlantirish'}
+              {modalAction === 'activate' ? 'Faollashtirish' : 'Faolsizlantirish'}
             </button>
           </div>
         </div>
