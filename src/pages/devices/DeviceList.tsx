@@ -191,12 +191,6 @@ const DeviceList = () => {
           <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
           </div>
-        ) : filteredDevices.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="text-gray-400 dark:text-gray-500 text-lg">
-              Qurilmalar topilmadi
-            </div>
-          </div>
         ) : (
           <>
             {/* Page size selector and filters */}
@@ -245,7 +239,15 @@ const DeviceList = () => {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            {filteredDevices.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="text-gray-400 dark:text-gray-500 text-lg">
+                  Qurilmalar topilmadi
+                </div>
+              </div>
+            ) : (
+              <>
+              <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
@@ -386,9 +388,11 @@ const DeviceList = () => {
                 className="flex-1" 
               />
               <div className="text-sm text-gray-700 dark:text-gray-300 mt-3 sm:mt-0">
-                {(currentPage - 1) * +pageSize + 1} dan {Math.min(devices.length, currentPage * +pageSize)} gacha, {devices.length} ta
+                {(currentPage - 1) * +pageSize + 1} dan {Math.min(filteredDevices.length, currentPage * +pageSize)} gacha, {filteredDevices.length} ta
               </div>
             </div>
+            </>
+            )}
           </>
         )}
       </div>
