@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import Select from '../../components/form/Select';
 import { BoltIcon, TrashBinIcon, LockIcon } from '../../icons';
 import { Modal } from '../../components/ui/modal';
-import Pagination from '../../components/common/Pagination';
+import Pagination from '../../components/ui/pagination/Pagination';
 
 interface Device {
   id: number;
@@ -81,7 +81,7 @@ const DeviceList = () => {
   }, [devices, deviceTypeFilter, groupFilter]);
 
   // Pagination logic
-  const maxPage = Math.ceil(filteredDevices.length / +pageSize);
+  const maxPage = Math.max(1, Math.ceil(filteredDevices.length / +pageSize));
   const startIndex = (currentPage - 1) * +pageSize;
   const endIndex = startIndex + +pageSize;
   const currentDevices = filteredDevices.slice(startIndex, endIndex);
@@ -384,8 +384,7 @@ const DeviceList = () => {
               <Pagination 
                 currentPage={currentPage} 
                 totalPages={maxPage} 
-                onPageChange={setCurrentPage} 
-                className="flex-1" 
+                onPageChange={setCurrentPage}
               />
               <div className="text-sm text-gray-700 dark:text-gray-300 mt-3 sm:mt-0">
                 {(currentPage - 1) * +pageSize + 1} dan {Math.min(filteredDevices.length, currentPage * +pageSize)} gacha, {filteredDevices.length} ta
