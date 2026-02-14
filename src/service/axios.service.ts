@@ -32,15 +32,21 @@ axiosClient.interceptors.response.use(
   (error: AxiosError<any>) => {
     if (error.response?.status === 401) {
       // Show custom error message if available
-      const errorMessage = error.response?.data?.message || "Qurilma faol emas";
-      toast.error(errorMessage);
+      const errorMessage = error.response?.data?.message || "Ruxsat yo'q";
+      
+      // Custom message for device inactive
+      if (errorMessage === "Qurilma faol emas") {
+        toast.error("Qurilma faol emas. Boshqa qurilmadan kirilgan bo'lishi mumkin.");
+      } else {
+        toast.error(errorMessage);
+      }
       
       localStorage.removeItem("token"); // Tokenni o'chir
       
       // Redirect after a short delay to show the toast
       setTimeout(() => {
         window.location.href = "/signin"; // Foydalanuvchini login sahifasiga qaytar
-      }, 1000);
+      }, 1500);
     }
     return Promise.reject(error);
   }
