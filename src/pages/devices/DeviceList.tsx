@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { deviceService } from '../../service/device.service';
 import { toast } from 'react-toastify';
 import Select from '../../components/form/Select';
-import { CloseIcon, CheckCircleIcon, TrashBinIcon } from '../../icons';
+import { CheckCircleIcon, TrashBinIcon } from '../../icons';
 import { Modal } from '../../components/ui/modal';
 import Pagination from '../../components/common/Pagination';
 
@@ -272,23 +272,17 @@ const DeviceList = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <div className="flex items-center justify-center gap-3">
-                          {device.is_active ? (
-                            <button
-                              onClick={() => openConfirmModal(device.id, device.device_name, 'deactivate')}
-                              className="text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300 transition-colors flex items-center gap-1.5 group"
-                              title="Faolsizlantirish"
-                            >
-                              <CloseIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => openConfirmModal(device.id, device.device_name, 'activate')}
-                              className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 transition-colors flex items-center gap-1.5 group"
-                              title="Faollashtirish"
-                            >
-                              <CheckCircleIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                            </button>
-                          )}
+                          <button
+                            onClick={() => openConfirmModal(device.id, device.device_name, device.is_active ? 'deactivate' : 'activate')}
+                            className={`transition-colors flex items-center gap-1.5 group ${
+                              device.is_active
+                                ? 'text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300'
+                                : 'text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300'
+                            }`}
+                            title={device.is_active ? 'Faolsizlantirish' : 'Faollashtirish'}
+                          >
+                            <CheckCircleIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                          </button>
                           <button
                             onClick={() => openConfirmModal(device.id, device.device_name, 'delete')}
                             className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors flex items-center gap-1.5 group"
@@ -334,10 +328,12 @@ const DeviceList = () => {
             }`}>
               {modalAction === 'delete' ? (
                 <TrashBinIcon className="w-8 h-8 text-red-600 dark:text-red-400" />
-              ) : modalAction === 'activate' ? (
-                <CheckCircleIcon className="w-8 h-8 text-green-600 dark:text-green-400" />
               ) : (
-                <CloseIcon className="w-8 h-8 text-orange-600 dark:text-orange-400" />
+                <CheckCircleIcon className={`w-8 h-8 ${
+                  modalAction === 'activate' 
+                    ? 'text-green-600 dark:text-green-400' 
+                    : 'text-orange-600 dark:text-orange-400'
+                }`} />
               )}
             </div>
           </div>
