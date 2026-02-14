@@ -836,11 +836,6 @@ export default function TestsPage() {
             <Button size="sm" variant="outline" onClick={closePreviewModal}>
               Yopish
             </Button>
-            {editingTestId && (
-              <Button size="sm" variant="primary" onClick={handleSaveTest}>
-                Saqlash
-              </Button>
-            )}
           </div>
         </div>
       </Modal>
