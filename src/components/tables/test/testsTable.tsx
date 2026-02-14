@@ -50,8 +50,6 @@ interface TestProps {
   name: string;
   createdt: Date;
 
-  section: any;
-  section_id?: number;
   _count?: any;
   test_items?: any[];
 }
@@ -150,15 +148,8 @@ export default function TestsTable({
 
   useEffect(() => {
     setCurrentPage(1);
-
-    if (BookoptionValue == "Hamma kitoblar") {
-      settableData(data);
-    } else {
-      settableData(
-        data.filter((item) => item.section.book_id === +BookoptionValue)
-      );
-    }
-  }, [optionValue, BookoptionValue]);
+    settableData(data);
+  }, [optionValue, data]);
 
   const all_sections_options = [
     { value: "Section 1", label: "Section 1" },
@@ -238,13 +229,6 @@ export default function TestsTable({
             />
             <span>Ko'rsatish</span>
           </div>
-          <div className="flex flex-row items-center gap-2 text-theme-sm font-medium text-gray-500 text-start  dark:text-gray-400">
-            <Select
-              options={Book_options}
-              onChange={handleSelectBookChange}
-              className="dark:bg-dark-900"
-            />
-          </div>
         </div>
         <Table>
           {/* Table Header */}
@@ -254,7 +238,7 @@ export default function TestsTable({
                 isHeader
                 className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
               >
-                Bo'lim
+                Test nomi
               </TableCell>
               <TableCell
                 isHeader
@@ -289,32 +273,10 @@ export default function TestsTable({
           <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
             {currentItems.map((order, index) => (
               <TableRow key={index}>
-                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 flex flex-row gap-2">
-                  <div className="w-10 h-10 overflow-hidden rounded-sm ">
-                    <img
-                      width={40}
-                      height={40}
-                      src={
-                        order.section &&
-                        order.section.book &&
-                        order.section.book.image
-                          ? import.meta.env.VITE_STATIC_PATH +
-                            order.section.book.image
-                          : bookImage
-                      }
-                      alt={order.name}
-                    />
-                  </div>
-                  <div>
-                    <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                      {order.section &&
-                        order.section.book &&
-                        order.section.book.name}
-                    </span>
-                    <span className="block text-gray-500 text-theme-xs dark:text-gray-400">
-                      {order.section && order.section.name}
-                    </span>
-                  </div>
+                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                  <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                    {order.name || 'Nomsiz test'}
+                  </span>
                 </TableCell>
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                   {Moment(order.createdt).format("MMMM DD, yyyy")}
@@ -418,32 +380,7 @@ export default function TestsTable({
             <div className="px-2 overflow-y-auto custom-scrollbar">
               <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                 <div>
-                  <Label>Book</Label>
-                  <Select
-                    options={books}
-                    className="dark:bg-dark-900"
-                    defaultValue={`${Test.section}`}
-                    onChange={(e) => {
-                      setTest({
-                        ...Test,
-                        book_id: +e,
-                      });
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <Label>Section</Label>
-                  <Select
-                    options={all_sections_options}
-                    className="dark:bg-dark-900"
-                    defaultValue={`${Test.section}`}
-                    onChange={() => {}}
-                  />
-                </div>
-
-                <div>
-                  <Label>Name</Label>
+                  <Label>Test nomi</Label>
                   <Input
                     type="text"
                     value={Test.name}
@@ -457,7 +394,7 @@ export default function TestsTable({
                 </div>
 
                 <div>
-                  <Label>File</Label>
+                  <Label>Fayl</Label>
                   <FileInput
                     // onChange={handleFileChange}
                     className="custom-class"
