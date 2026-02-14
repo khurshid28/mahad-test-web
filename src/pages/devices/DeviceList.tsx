@@ -3,7 +3,8 @@ import { deviceService } from '../../service/device.service';
 import { toast } from 'react-toastify';
 import Select from '../../components/form/Select';
 import Input from '../../components/form/input/InputField';
-import { TrashBinIcon, CloseIcon } from '../../icons';
+import { TrashBinIcon, CloseIcon, AlertIcon } from '../../icons';
+import { Modal } from '../../components/ui/modal';
 
 interface Device {
   id: number;
@@ -38,6 +39,12 @@ const DeviceList = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [resetKey, setResetKey] = useState(0);
+
+  // Confirmation Modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalAction, setModalAction] = useState<'deactivate' | 'delete' | null>(null);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<number | null>(null);
+  const [selectedDeviceName, setSelectedDeviceName] = useState<string>('');
 
   useEffect(() => {
     fetchDevices();
@@ -83,29 +90,37 @@ const DeviceList = () => {
     fetchDevices();
   }, [page, roleFilter, statusFilter]);
 
-  const handleDeactivate = async (deviceId: number) => {
-    if (window.confirm('Haqiqatan ham bu qurilmani faolsizlantirmoqchimisiz?')) {
-      try {
-        await deviceService.deactivateDevice(deviceId);
-        toast.success('Qurilma faolsizlantirildi');
-        fetchDevices();
-      } catch (error) {
-        console.error('Error deactivating device:', error);
-        toast.error('Qurilmani faolsizlantirishda xatolik');
-      }
-    }
+  const openConfirmModal = (deviceId: number, deviceName: string, action: 'deactivate' | 'delete') => {
+    setSelectedDeviceId(deviceId);
+    setSelectedDeviceName(deviceName);
+    setModalAction(action);
+    setIsModalOpen(true);
   };
 
-  const handleDelete = async (deviceId: number) => {
-    if (window.confirm('Haqiqatan ham bu qurilmani o\'chirmoqchimisiz?')) {
-      try {
-        await deviceService.deleteDevice(deviceId);
+  const closeConfirmModal = () => {
+    setIsModalOpen(false);
+    setSelectedDeviceId(null);
+    setSelectedDeviceName('');
+    setModalAction(null);
+  };
+
+  const handleConfirmAction = async () => {
+    if (!selectedDeviceId || !modalAction) return;
+
+    try {
+      if (modalAction === 'deactivate') {
+        await deviceService.deactivateDevice(selectedDeviceId);
+        toast.success('Qurilma faolsizlantirildi');
+      } else if (modalAction === 'delete') {
+        await deviceService.deleteDevice(selectedDeviceId);
         toast.success('Qurilma o\'chirildi');
-        fetchDevices();
-      } catch (error) {
-        console.error('Error deleting device:', error);
-        toast.error('Qurilmani o\'chirishda xatolik');
       }
+      fetchDevices();
+    } catch (error) {
+      console.error(`Error ${modalAction}ing device:`, error);
+      toast.error(`Qurilmani ${modalAction === 'delete' ? 'o\'chirish' : 'faolsizlantirish'}da xatolik`);
+    } finally {
+      closeConfirmModal();
     }
   };
 
@@ -361,15 +376,16 @@ const DeviceList = () => {
                         <div className="flex items-center gap-2">
                           {device.is_active && (
                             <button
-                              onClick={() => handleDeactivate(device.id)}
-                              className="text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300 font-medium transition-colors"
+                              onClick={() => openConfirmModal(device.id, device.device_name, 'deactivate')}
+                              className="text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300 font-medium transition-colors flex items-center gap-1"
                               title="Faolsizlantirish"
                             >
+                              <CloseIcon className="w-4 h-4" />
                               Faolsizlantirish
                             </button>
                           )}
                           <button
-                            onClick={() => handleDelete(device.id)}
+                            onClick={() => openConfirmModal(device.id, device.device_name, 'delete')}
                             className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium transition-colors flex items-center gap-1"
                             title="O'chirish"
                           >
@@ -414,6 +430,75 @@ const DeviceList = () => {
           </>
         )}
       </div>
+
+      {/* Confirmation Modal */}
+      <Modal isOpen={isModalOpen} onClose={closeConfirmModal} className="max-w-md">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6">
+          {/* Icon */}
+          <div className="flex justify-center mb-4">
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
+              modalAction === 'delete' 
+                ? 'bg-red-100 dark:bg-red-900/30' 
+                : 'bg-orange-100 dark:bg-orange-900/30'
+            }`}>
+              {modalAction === 'delete' ? (
+                <TrashBinIcon className="w-8 h-8 text-red-600 dark:text-red-400" />
+              ) : (
+                <AlertIcon className="w-8 h-8 text-orange-600 dark:text-orange-400" />
+              )}
+            </div>
+          </div>
+
+          {/* Title */}
+          <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-2">
+            {modalAction === 'delete' ? "Qurilmani o'chirish" : 'Qurilmani faolsizlantirish'}
+          </h3>
+
+          {/* Description */}
+          <p className="text-center text-gray-600 dark:text-gray-400 mb-2">
+            {modalAction === 'delete' 
+              ? "Haqiqatan ham bu qurilmani butunlay o'chirmoqchimisiz?" 
+              : 'Haqiqatan ham bu qurilmani faolsizlantirmoqchimisiz?'}
+          </p>
+          
+          {/* Device Name */}
+          <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 mb-6">
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center">Qurilma:</p>
+            <p className="text-base font-semibold text-gray-900 dark:text-white text-center truncate">
+              {selectedDeviceName}
+            </p>
+          </div>
+
+          {/* Warning */}
+          {modalAction === 'delete' && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-6">
+              <p className="text-sm text-red-800 dark:text-red-400">
+                <strong>Diqqat:</strong> Bu amalni ortga qaytarib bo'lmaydi.
+              </p>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex gap-3">
+            <button
+              onClick={closeConfirmModal}
+              className="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg font-medium transition-colors"
+            >
+              Bekor qilish
+            </button>
+            <button
+              onClick={handleConfirmAction}
+              className={`flex-1 px-4 py-2.5 text-white rounded-lg font-medium transition-colors ${
+                modalAction === 'delete'
+                  ? 'bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600'
+                  : 'bg-orange-600 hover:bg-orange-700 dark:bg-orange-700 dark:hover:bg-orange-600'
+              }`}
+            >
+              {modalAction === 'delete' ? "O'chirish" : 'Faolsizlantirish'}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
