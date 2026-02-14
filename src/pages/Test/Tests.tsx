@@ -617,19 +617,18 @@ export default function TestsPage() {
                   </div>
                 </div>
               )}
-            </div>
-
-            <div className="px-2 mt-6 space-y-3">
-              <div className="flex items-center gap-3 lg:justify-end">
-                <Button size="sm" variant="outline" onClick={closeModal}>
-                  Bekor qilish
-                </Button>
-                <Button size="sm" onClick={createMoreTest}>
-                  Saqlash
-                </Button>
-              </div>
               
-              <div className="flex items-center gap-3 lg:justify-end">
+              <div className="flex items-center gap-3 mt-4">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="primary"
+                  onClick={openAddQuestionModal}
+                  className="flex items-center gap-2"
+                >
+                  <PlusIcon className="size-5 fill-white" />
+                  Savol qo'shish
+                </Button>
                 {quiz && (
                   <Button
                     type="button"
@@ -640,15 +639,16 @@ export default function TestsPage() {
                     Ko'rib chiqish va tahrirlash
                   </Button>
                 )}
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="primary"
-                  onClick={openAddQuestionModal}
-                  className="flex items-center gap-2"
-                >
-                  <PlusIcon className="size-5 fill-white" />
-                  Savol qo'shish
+              </div>
+            </div>
+
+            <div className="px-2 mt-6">
+              <div className="flex items-center gap-3 lg:justify-end">
+                <Button size="sm" variant="outline" onClick={closeModal}>
+                  Bekor qilish
+                </Button>
+                <Button size="sm" onClick={createMoreTest}>
+                  Saqlash
                 </Button>
               </div>
             </div>
