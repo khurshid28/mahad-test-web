@@ -303,7 +303,7 @@ export default function TestsPage() {
       
       // Test items ni quiz formatiga o'tkazish
       const questions = (items || []).map((item: any, index: number) => ({
-        number: index + 1,
+        number: item.number || index + 1,
         text: item.question,
         options: [
           { text: item.answer_A, isCorrect: item.answer === 'A' },
@@ -724,8 +724,8 @@ export default function TestsPage() {
           </div>
           
           <div className="px-2 overflow-y-auto custom-scrollbar max-h-[500px]">
-            {quiz?.questions.slice().reverse().map((q, qIdx) => {
-              const originalIndex = quiz.questions.length - 1 - qIdx;
+            {quiz?.questions.map((q, qIdx) => {
+              const originalIndex = qIdx;
               // Savol matnidan boshidagi raqam va nuqtani olib tashlash
               const cleanText = q.text.replace(/^\d+\.\s*/, '');
               const displayNumber = q.number; // Savolning asl raqamini ko'rsatish
