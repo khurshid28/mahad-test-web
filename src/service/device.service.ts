@@ -13,6 +13,12 @@ export const deviceService = {
   deactivateDevice: (id) => 
     axios.patch(`/device/${id}/deactivate`),
 
+  blockDevice: (id) => 
+    axios.patch(`/device/${id}/block`),
+
+  unblockDevice: (id) => 
+    axios.patch(`/device/${id}/unblock`),
+
   deleteDevice: (id) => 
     axios.delete(`/device/${id}`),
 };

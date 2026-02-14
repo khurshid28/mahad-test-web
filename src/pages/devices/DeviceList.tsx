@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { deviceService } from '../../service/device.service';
 import { toast } from 'react-toastify';
 import Select from '../../components/form/Select';
-import { BoltIcon, TrashBinIcon } from '../../icons';
+import { BoltIcon, TrashBinIcon, LockIcon } from '../../icons';
 import { Modal } from '../../components/ui/modal';
 import Pagination from '../../components/common/Pagination';
 
@@ -16,6 +16,7 @@ interface Device {
   ip_address?: string;
   user_agent?: string;
   is_active: boolean;
+  is_blocked: boolean;
   last_active: string;
   last_api_endpoint?: string;
   last_api_method?: string;
@@ -34,7 +35,7 @@ const DeviceList = () => {
 
   // Confirmation Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalAction, setModalAction] = useState<'activate' | 'deactivate' | 'delete' | null>(null);
+  const [modalAction, setModalAction] = useState<'activate' | 'deactivate' | 'delete' | 'block' | 'unblock' | null>(null);
   const [selectedDeviceId, setSelectedDeviceId] = useState<number | null>(null);
   const [selectedDeviceName, setSelectedDeviceName] = useState<string>('');
 
@@ -66,7 +67,7 @@ const DeviceList = () => {
     setCurrentPage(1); // Reset to first page when page size changes
   };
 
-  const openConfirmModal = (deviceId: number, deviceName: string, action: 'activate' | 'deactivate' | 'delete') => {
+  const openConfirmModal = (deviceId: number, deviceName: string, action: 'activate' | 'deactivate' | 'delete' | 'block' | 'unblock') => {
     setSelectedDeviceId(deviceId);
     setSelectedDeviceName(deviceName);
     setModalAction(action);
@@ -93,11 +94,21 @@ const DeviceList = () => {
       } else if (modalAction === 'delete') {
         await deviceService.deleteDevice(selectedDeviceId);
         toast.success('Qurilma o\'chirildi');
+      } else if (modalAction === 'block') {
+        await deviceService.blockDevice(selectedDeviceId);
+        toast.success('Qurilma bloklandi');
+      } else if (modalAction === 'unblock') {
+        await deviceService.unblockDevice(selectedDeviceId);
+        toast.success('Qurilma blokdan chiqarildi');
       }
       fetchDevices();
     } catch (error) {
       console.error(`Error ${modalAction}ing device:`, error);
-      toast.error(`Qurilmani ${modalAction === 'delete' ? 'o\'chirish' : modalAction === 'activate' ? 'faollashtirish' : 'faolsizlantirish'}da xatolik`);
+      const actionText = modalAction === 'delete' ? 'o\'chirish' : 
+                         modalAction === 'activate' ? 'faollashtirish' : 
+                         modalAction === 'deactivate' ? 'faolsizlantirish' :
+                         modalAction === 'block' ? 'bloklash' : 'blokdan chiqarish';
+      toast.error(`Qurilmani ${actionText}da xatolik`);
     } finally {
       closeConfirmModal();
     }
@@ -266,11 +277,13 @@ const DeviceList = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                          device.is_active 
+                          device.is_blocked
+                            ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'
+                            : device.is_active 
                             ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400' 
                             : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                         }`}>
-                          {device.is_active ? 'Faol' : 'Faol emas'}
+                          {device.is_blocked ? 'Bloklangan' : device.is_active ? 'Faol' : 'Faol emas'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -285,6 +298,17 @@ const DeviceList = () => {
                             title={device.is_active ? 'Faolsizlantirish' : 'Faollashtirish'}
                           >
                             <BoltIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                          </button>
+                          <button
+                            onClick={() => openConfirmModal(device.id, device.device_name, device.is_blocked ? 'unblock' : 'block')}
+                            className={`transition-colors flex items-center gap-1.5 group ${
+                              device.is_blocked
+                                ? 'text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300'
+                                : 'text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300'
+                            }`}
+                            title={device.is_blocked ? 'Blokdan chiqarish' : 'Bloklash'}
+                          >
+                            <LockIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
                           </button>
                           <button
                             onClick={() => openConfirmModal(device.id, device.device_name, 'delete')}
@@ -327,10 +351,20 @@ const DeviceList = () => {
                 ? 'bg-red-100 dark:bg-red-900/30'
                 : modalAction === 'activate'
                 ? 'bg-green-100 dark:bg-green-900/30'
+                : modalAction === 'block'
+                ? 'bg-red-100 dark:bg-red-900/30'
+                : modalAction === 'unblock'
+                ? 'bg-blue-100 dark:bg-blue-900/30'
                 : 'bg-orange-100 dark:bg-orange-900/30'
             }`}>
               {modalAction === 'delete' ? (
                 <TrashBinIcon className="w-8 h-8 text-red-600 dark:text-red-400" />
+              ) : modalAction === 'block' || modalAction === 'unblock' ? (
+                <LockIcon className={`w-8 h-8 ${
+                  modalAction === 'unblock'
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-red-600 dark:text-red-400'
+                }`} />
               ) : (
                 <BoltIcon className={`w-8 h-8 ${
                   modalAction === 'activate' 
@@ -347,6 +381,10 @@ const DeviceList = () => {
               ? "Qurilmani o'chirish"
               : modalAction === 'activate'
               ? 'Qurilmani faollashtirish'
+              : modalAction === 'block'
+              ? 'Qurilmani bloklash'
+              : modalAction === 'unblock'
+              ? 'Qurilmani blokdan chiqarish'
               : 'Qurilmani faolsizlantirish'}
           </h3>
 
@@ -356,6 +394,10 @@ const DeviceList = () => {
               ? "Haqiqatan ham bu qurilmani butunlay o'chirmoqchimisiz?"
               : modalAction === 'activate'
               ? "Bu qurilmani faollashtirganingizda, boshqa barcha qurilmalar avtomatik faolsizlantiriladi."
+              : modalAction === 'block'
+              ? 'Haqiqatan ham bu qurilmani bloklashni xohlaysizmi? Bloklangan qurilmadan login qilish mumkin bo\'lmaydi.'
+              : modalAction === 'unblock'
+              ? 'Haqiqatan ham bu qurilmani blokdan chiqarmoqchimisiz?'
               : 'Haqiqatan ham bu qurilmani faolsizlantirmoqchimisiz?'}
           </p>
           
@@ -384,6 +426,14 @@ const DeviceList = () => {
             </div>
           )}
 
+          {modalAction === 'block' && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-6">
+              <p className="text-sm text-red-800 dark:text-red-400">
+                <strong>Diqqat:</strong> Bloklangan qurilmadan login qilish va API so'rovlar yuborish mumkin bo'lmaydi.
+              </p>
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex gap-3">
             <button
@@ -395,14 +445,24 @@ const DeviceList = () => {
             <button
               onClick={handleConfirmAction}
               className={`flex-1 px-4 py-2.5 text-white rounded-lg font-medium transition-colors ${
-                modalAction === 'delete'
+                modalAction === 'delete' || modalAction === 'block'
                   ? 'bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600'
                   : modalAction === 'activate'
                   ? 'bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600'
+                  : modalAction === 'unblock'
+                  ? 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600'
                   : 'bg-orange-600 hover:bg-orange-700 dark:bg-orange-700 dark:hover:bg-orange-600'
               }`}
             >
-              {modalAction === 'delete' ? "O'chirish" : modalAction === 'activate' ? 'Faollashtirish' : 'Faolsizlantirish'}
+              {modalAction === 'delete' 
+                ? "O'chirish" 
+                : modalAction === 'activate' 
+                ? 'Faollashtirish' 
+                : modalAction === 'block'
+                ? 'Bloklash'
+                : modalAction === 'unblock'
+                ? 'Blokdan chiqarish'
+                : 'Faolsizlantirish'}
             </button>
           </div>
         </div>
