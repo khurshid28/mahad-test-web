@@ -595,20 +595,6 @@ export default function TestsPage() {
                 </div>
 
                 <div>
-                  <Label>Sarlavha</Label>
-                  <Input
-                    type="text"
-                    value={Test.name || ''}
-                    onChange={(e) =>
-                      setTest({
-                        ...Test,
-                        name: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-
-                <div>
                   <Label>Fayl orqali qo'shish</Label>
                   <FileInput
                     onChange={handleFileChange}
@@ -678,9 +664,9 @@ export default function TestsPage() {
             </p>
           </div>
 
-          {/* Kitob, Bo'lim, Sarlavha */}
+          {/* Kitob, Bo'lim */}
           {editingTestId && (
-            <div className="px-2 mb-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div className="px-2 mb-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
               <div>
                 <Label>Kitob</Label>
                 <Select
@@ -718,20 +704,6 @@ export default function TestsPage() {
                       section_id: +e,
                     });
                   }}
-                />
-              </div>
-
-              <div>
-                <Label>Sarlavha</Label>
-                <Input
-                  type="text"
-                  value={Test.name || ''}
-                  onChange={(e) =>
-                    setTest({
-                      ...Test,
-                      name: e.target.value,
-                    })
-                  }
                 />
               </div>
             </div>
