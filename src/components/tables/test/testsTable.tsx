@@ -49,7 +49,15 @@ interface TestProps {
   id: number;
   name: string;
   createdt: Date;
-
+  section?: {
+    id: number;
+    name: string;
+    book?: {
+      id: number;
+      name: string;
+      image?: string;
+    };
+  };
   _count?: any;
   test_items?: any[];
 }
@@ -271,12 +279,32 @@ export default function TestsTable({
 
           {/* Table Body */}
           <TableBody className="divide-y divide-gray-100 dark:divide-white/5">
-            {currentItems.map((order, index) => (
+            {currentItems.map((order: any, index) => (
               <TableRow key={index}>
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                  <span className="block font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                    {order.name || 'Nomsiz test'}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    {order.section?.book?.image ? (
+                      <img 
+                        src={import.meta.env.VITE_STATIC_PATH + order.section.book.image} 
+                        alt={order.section?.book?.name || 'Book'} 
+                        className="w-10 h-10 rounded object-cover"
+                      />
+                    ) : (
+                      <img 
+                        src={bookImage} 
+                        alt="Book" 
+                        className="w-10 h-10 rounded object-cover"
+                      />
+                    )}
+                    <div className="flex flex-col">
+                      <span className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
+                        {order.section?.book?.name || 'Kitob'}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {order.section?.name || 'Bo\'lim'}
+                      </span>
+                    </div>
+                  </div>
                 </TableCell>
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                   {Moment(order.createdt).format("MMMM DD, yyyy")}
