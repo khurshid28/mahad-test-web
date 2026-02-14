@@ -23,6 +23,10 @@ interface Device {
   user?: {
     name?: string;
     phone: string;
+    group?: {
+      id: number;
+      name: string;
+    };
   };
 }
 
@@ -31,6 +35,10 @@ const DeviceList = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState('20');
+  
+  // Filters
+  const [deviceTypeFilter, setDeviceTypeFilter] = useState<string>('all');
+  const [groupFilter, setGroupFilter] = useState<string>('all');
 
   // Confirmation Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -55,15 +63,42 @@ const DeviceList = () => {
     }
   };
 
+  // Get unique groups from devices
+  const uniqueGroups = React.useMemo(() => {
+    const groups = devices
+      .map(d => d.user?.group)
+      .filter((g, i, arr) => g && arr.findIndex(item => item?.id === g.id) === i) as { id: number; name: string }[];
+    return groups;
+  }, [devices]);
+
+  // Apply filters
+  const filteredDevices = React.useMemo(() => {
+    return devices.filter(device => {
+      const matchesDeviceType = deviceTypeFilter === 'all' || device.device_type === deviceTypeFilter;
+      const matchesGroup = groupFilter === 'all' || device.user?.group?.id === parseInt(groupFilter);
+      return matchesDeviceType && matchesGroup;
+    });
+  }, [devices, deviceTypeFilter, groupFilter]);
+
   // Pagination logic
-  const maxPage = Math.ceil(devices.length / +pageSize);
+  const maxPage = Math.ceil(filteredDevices.length / +pageSize);
   const startIndex = (currentPage - 1) * +pageSize;
   const endIndex = startIndex + +pageSize;
-  const currentDevices = devices.slice(startIndex, endIndex);
+  const currentDevices = filteredDevices.slice(startIndex, endIndex);
 
   const handlePageSizeChange = (value: string) => {
     setPageSize(value);
     setCurrentPage(1); // Reset to first page when page size changes
+  };
+
+  const handleDeviceTypeFilterChange = (value: string) => {
+    setDeviceTypeFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handleGroupFilterChange = (value: string) => {
+    setGroupFilter(value);
+    setCurrentPage(1);
   };
 
   const openConfirmModal = (deviceId: number, deviceName: string, action: 'activate' | 'deactivate' | 'delete' | 'block' | 'unblock') => {
@@ -146,7 +181,43 @@ const DeviceList = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Qurilmalar</h1>
         <div className="text-sm text-gray-500 dark:text-gray-400">
-          Jami: <span className="font-semibold text-gray-900 dark:text-white">{devices.length}</span> ta qurilma
+          Jami: <span className="font-semibold text-gray-900 dark:text-white">{filteredDevices.length}</span> ta qurilma
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+        <div className="flex flex-wrap gap-4">
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Qurilma turi
+            </label>
+            <Select
+              options={[
+                { value: 'all', label: 'Hammasi' },
+                { value: 'ANDROID', label: 'Android' },
+                { value: 'IOS', label: 'iOS' },
+                { value: 'WEB', label: 'Web' },
+              ]}
+              onChange={handleDeviceTypeFilterChange}
+              className="dark:bg-dark-900"
+              defaultValue="all"
+            />
+          </div>
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Guruh
+            </label>
+            <Select
+              options={[
+                { value: 'all', label: 'Hammasi' },
+                ...uniqueGroups.map(g => ({ value: g.id.toString(), label: g.name || `Guruh #${g.id}` })),
+              ]}
+              onChange={handleGroupFilterChange}
+              className="dark:bg-dark-900"
+              defaultValue="all"
+            />
+          </div>
         </div>
       </div>
 
@@ -156,7 +227,7 @@ const DeviceList = () => {
           <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
           </div>
-        ) : devices.length === 0 ? (
+        ) : filteredDevices.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-gray-400 dark:text-gray-500 text-lg">
               Qurilmalar topilmadi
@@ -220,6 +291,11 @@ const DeviceList = () => {
                         <div className="text-sm text-gray-500 dark:text-gray-400">
                           {device.user?.phone || '-'}
                         </div>
+                        {device.user?.group && (
+                          <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                            {device.user.group.name}
+                          </div>
+                        )}
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900 dark:text-gray-100 truncate" style={{ maxWidth: '200px' }} title={device.device_name}>
