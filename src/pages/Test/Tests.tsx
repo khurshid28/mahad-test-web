@@ -190,18 +190,19 @@ export default function TestsPage() {
   };
 
   const handleAddQuestion = () => {
-    if (!quiz) return;
+    // Agar quiz yo'q bo'lsa, yangi quiz yaratish
+    const currentQuiz = quiz || { title: '', questions: [] };
     
     // Yangi savolni qo'shish
-    const questionNumber = quiz.questions.length + 1;
+    const questionNumber = currentQuiz.questions.length + 1;
     const questionToAdd = {
       number: questionNumber,
       text: newQuestion.text,
       options: newQuestion.options
     };
     
-    const updatedQuestions = [...quiz.questions, questionToAdd];
-    setQuiz({ ...quiz, questions: updatedQuestions });
+    const updatedQuestions = [...currentQuiz.questions, questionToAdd];
+    setQuiz({ ...currentQuiz, questions: updatedQuestions });
     
     // Yangi qo'shilgan savolni tahrirlash rejimiga o'tkazish
     setEditingQuestion(updatedQuestions.length - 1);
