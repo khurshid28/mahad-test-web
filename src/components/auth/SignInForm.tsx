@@ -8,6 +8,42 @@ import Button from "../ui/button/Button";
 import axiosClient from "../../service/axios.service";
 import { toast } from "react-toastify";
 
+// Helper function to get device info
+const getDeviceInfo = () => {
+  const ua = navigator.userAgent;
+  
+  // Browser detection
+  let browser = 'Unknown';
+  if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Chrome';
+  else if (ua.includes('Safari') && !ua.includes('Chrome')) browser = 'Safari';
+  else if (ua.includes('Firefox')) browser = 'Firefox';
+  else if (ua.includes('Edg')) browser = 'Edge';
+  
+  // OS detection
+  let os = 'Unknown';
+  if (ua.includes('Windows NT 10.0')) os = 'Windows 10/11';
+  else if (ua.includes('Windows')) os = 'Windows';
+  else if (ua.includes('Mac OS X')) os = 'macOS';
+  else if (ua.includes('Linux')) os = 'Linux';
+  
+  const device_name = `${browser} - ${os}`;
+  
+  // Get or generate device identifier
+  let device_identifier = localStorage.getItem('device_uuid');
+  if (!device_identifier) {
+    device_identifier = crypto.randomUUID();
+    localStorage.setItem('device_uuid', device_identifier);
+  }
+  
+  return {
+    device_name,
+    device_type: 'WEB',
+    device_identifier,
+    user_agent: ua,
+    app_version: '1.0.0', // You can get this from package.json or env
+  };
+};
+
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [login, setLogin] = useState("");
@@ -19,7 +55,12 @@ export default function SignInForm() {
     e.preventDefault();
 
     try {
-      const res = await axiosClient.post('/auth/login', { login, password });
+      const deviceInfo = getDeviceInfo();
+      const res = await axiosClient.post('/auth/login', { 
+        login, 
+        password,
+        device: deviceInfo
+      });
 
       if (!(res.data.user && res.data.user.role == "ADMIN")) {
         throw new Error("Login yoki parol noto‘g‘ri : " + JSON.stringify(res.data.user),);
@@ -32,8 +73,19 @@ export default function SignInForm() {
       navigate('/');
       toast.success('Kirish muvaffaqiyatli');
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
+      
+      // Handle 426 Upgrade Required
+      if (error.response?.status === 426) {
+        const message = error.response?.data?.message || "Iltimos, sahifani yangilang";
+        toast.error(message);
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+        return;
+      }
+      
       toast.error('Login yoki parol noto‘g‘ri');
 
     }

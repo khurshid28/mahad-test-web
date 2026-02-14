@@ -21,6 +21,7 @@ import RatePage from "./pages/Rate/rate";
 import TeachersPage from "./pages/People/Teachers";
 import StudentsPage from "./pages/People/Students";
 import GroupsPage from "./pages/People/Groups";
+import DeviceList from "./pages/devices/DeviceList";
 import SubjectsPage from "./pages/Test/Subjects";
 import BooksPage from "./pages/Test/Books";
 import SectionsPage from "./pages/Test/Sections";
@@ -48,6 +49,8 @@ export default function App() {
              <Route path="/groups" element={< GroupsPage />} />
              <Route path="/students" element={<StudentsPage />} />
 
+             {/* Devices Page */}
+             <Route path="/devices" element={<DeviceList />} />
 
 
             {/* People Page */}
