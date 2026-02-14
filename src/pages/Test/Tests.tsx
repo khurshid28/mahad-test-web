@@ -615,38 +615,42 @@ export default function TestsPage() {
                       }
                     </p>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={openPreviewModal}
-                      className="mt-2"
-                    >
-                      Ko'rib chiqish va tahrirlash
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="primary"
-                      onClick={openAddQuestionModal}
-                      className="mt-2 flex items-center gap-2"
-                    >
-                      <PlusIcon className="size-5 fill-white" />
-                      Savol qo'shish
-                    </Button>
-                  </div>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center gap-3 px-2 mt-6 lg:justify-end">
-              <Button size="sm" variant="outline" onClick={closeModal}>
-                Bekor qilish
-              </Button>
-              <Button size="sm" onClick={createMoreTest}>
-                Saqlash
-              </Button>
+            <div className="px-2 mt-6 space-y-3">
+              <div className="flex items-center gap-3 lg:justify-end">
+                <Button size="sm" variant="outline" onClick={closeModal}>
+                  Bekor qilish
+                </Button>
+                <Button size="sm" onClick={createMoreTest}>
+                  Saqlash
+                </Button>
+              </div>
+              
+              <div className="flex items-center gap-3 lg:justify-end">
+                {quiz && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={openPreviewModal}
+                  >
+                    Ko'rib chiqish va tahrirlash
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="primary"
+                  onClick={openAddQuestionModal}
+                  className="flex items-center gap-2"
+                >
+                  <PlusIcon className="size-5 fill-white" />
+                  Savol qo'shish
+                </Button>
+              </div>
             </div>
           </form>
         </div>
