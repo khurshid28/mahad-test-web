@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { deviceService } from '../../service/device.service';
 import { toast } from 'react-toastify';
 import Select from '../../components/form/Select';
-import { CheckCircleIcon, TrashBinIcon } from '../../icons';
+import { BoltIcon, TrashBinIcon } from '../../icons';
 import { Modal } from '../../components/ui/modal';
 import Pagination from '../../components/common/Pagination';
 
@@ -281,7 +281,7 @@ const DeviceList = () => {
                             }`}
                             title={device.is_active ? 'Faolsizlantirish' : 'Faollashtirish'}
                           >
-                            <CheckCircleIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                            <BoltIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
                           </button>
                           <button
                             onClick={() => openConfirmModal(device.id, device.device_name, 'delete')}
@@ -329,7 +329,7 @@ const DeviceList = () => {
               {modalAction === 'delete' ? (
                 <TrashBinIcon className="w-8 h-8 text-red-600 dark:text-red-400" />
               ) : (
-                <CheckCircleIcon className={`w-8 h-8 ${
+                <BoltIcon className={`w-8 h-8 ${
                   modalAction === 'activate' 
                     ? 'text-green-600 dark:text-green-400' 
                     : 'text-orange-600 dark:text-orange-400'
