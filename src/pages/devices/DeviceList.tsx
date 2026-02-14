@@ -8,8 +8,7 @@ import Pagination from '../../components/common/Pagination';
 
 interface Device {
   id: number;
-  user_id: number;
-  role: 'ADMIN' | 'STUDENT' | 'TEACHER';
+  student_id: number;
   device_name: string;
   device_type: 'ANDROID' | 'IOS' | 'WEB';
   device_identifier: string;
@@ -133,15 +132,6 @@ const DeviceList = () => {
     });
   };
 
-  const getRoleBadgeColor = (role: string) => {
-    switch (role) {
-      case 'ADMIN': return 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400';
-      case 'TEACHER': return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400';
-      case 'STUDENT': return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400';
-      default: return 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300';
-    }
-  };
-
   const getDeviceTypeBadgeColor = (type: string) => {
     switch (type) {
       case 'ANDROID': return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400';
@@ -195,10 +185,7 @@ const DeviceList = () => {
                 <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                      Foydalanuvchi
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                      Rol
+                      Studentlar
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                       Qurilma
@@ -233,11 +220,6 @@ const DeviceList = () => {
                         <div className="text-sm text-gray-500 dark:text-gray-400">
                           {device.user?.phone || '-'}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getRoleBadgeColor(device.role)}`}>
-                          {device.role === 'STUDENT' ? 'Student' : device.role === 'TEACHER' ? "O'qituvchi" : 'Admin'}
-                        </span>
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900 dark:text-gray-100 truncate" style={{ maxWidth: '200px' }} title={device.device_name}>
