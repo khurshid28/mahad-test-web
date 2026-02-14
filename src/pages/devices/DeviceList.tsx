@@ -196,9 +196,6 @@ const DeviceList = () => {
                       Turi
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                      Identifikator
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                       IP Address
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
@@ -232,7 +229,7 @@ const DeviceList = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900 dark:text-gray-100 max-w-xs truncate">
+                        <div className="text-sm text-gray-900 dark:text-gray-100 truncate" style={{ maxWidth: '200px' }} title={device.device_name}>
                           {device.device_name}
                         </div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -243,11 +240,6 @@ const DeviceList = () => {
                         <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getDeviceTypeBadgeColor(device.device_type)}`}>
                           {device.device_type}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-xs font-mono text-gray-700 dark:text-gray-300 max-w-xs truncate" title={device.device_identifier}>
-                          {device.device_identifier}
-                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                         {device.ip_address || '-'}
