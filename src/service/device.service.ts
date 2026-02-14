@@ -7,6 +7,9 @@ export const deviceService = {
   getUserDevices: (userId, role) => 
     axios.get(`/device/user/${userId}/${role}`),
 
+  activateDevice: (id) => 
+    axios.patch(`/device/${id}/activate`),
+
   deactivateDevice: (id) => 
     axios.patch(`/device/${id}/deactivate`),
 
