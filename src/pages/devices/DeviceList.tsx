@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { deviceService } from '../../service/device.service';
 import { toast } from 'react-toastify';
 import Select from '../../components/form/Select';
-import { CloseIcon, CheckCircleIcon } from '../../icons';
+import { CloseIcon, CheckCircleIcon, TrashBinIcon } from '../../icons';
 import { Modal } from '../../components/ui/modal';
 import Pagination from '../../components/common/Pagination';
 
@@ -34,7 +34,7 @@ const DeviceList = () => {
 
   // Confirmation Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalAction, setModalAction] = useState<'activate' | 'deactivate' | null>(null);
+  const [modalAction, setModalAction] = useState<'activate' | 'deactivate' | 'delete' | null>(null);
   const [selectedDeviceId, setSelectedDeviceId] = useState<number | null>(null);
   const [selectedDeviceName, setSelectedDeviceName] = useState<string>('');
 
@@ -66,7 +66,7 @@ const DeviceList = () => {
     setCurrentPage(1); // Reset to first page when page size changes
   };
 
-  const openConfirmModal = (deviceId: number, deviceName: string, action: 'activate' | 'deactivate') => {
+  const openConfirmModal = (deviceId: number, deviceName: string, action: 'activate' | 'deactivate' | 'delete') => {
     setSelectedDeviceId(deviceId);
     setSelectedDeviceName(deviceName);
     setModalAction(action);
@@ -90,11 +90,14 @@ const DeviceList = () => {
       } else if (modalAction === 'deactivate') {
         await deviceService.deactivateDevice(selectedDeviceId);
         toast.success('Qurilma faolsizlantirildi');
+      } else if (modalAction === 'delete') {
+        await deviceService.deleteDevice(selectedDeviceId);
+        toast.success('Qurilma o\'chirildi');
       }
       fetchDevices();
     } catch (error) {
       console.error(`Error ${modalAction}ing device:`, error);
-      toast.error(`Qurilmani ${modalAction === 'activate' ? 'faollashtirish' : 'faolsizlantirish'}da xatolik`);
+      toast.error(`Qurilmani ${modalAction === 'delete' ? 'o\'chirish' : modalAction === 'activate' ? 'faollashtirish' : 'faolsizlantirish'}da xatolik`);
     } finally {
       closeConfirmModal();
     }
@@ -268,7 +271,7 @@ const DeviceList = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <div className="flex items-center justify-center">
+                        <div className="flex items-center justify-center gap-3">
                           {device.is_active ? (
                             <button
                               onClick={() => openConfirmModal(device.id, device.device_name, 'deactivate')}
@@ -286,6 +289,13 @@ const DeviceList = () => {
                               <CheckCircleIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
                             </button>
                           )}
+                          <button
+                            onClick={() => openConfirmModal(device.id, device.device_name, 'delete')}
+                            className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors flex items-center gap-1.5 group"
+                            title="O'chirish"
+                          >
+                            <TrashBinIcon className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -316,11 +326,15 @@ const DeviceList = () => {
           {/* Icon */}
           <div className="flex justify-center mb-4">
             <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-              modalAction === 'activate'
+              modalAction === 'delete'
+                ? 'bg-red-100 dark:bg-red-900/30'
+                : modalAction === 'activate'
                 ? 'bg-green-100 dark:bg-green-900/30'
                 : 'bg-orange-100 dark:bg-orange-900/30'
             }`}>
-              {modalAction === 'activate' ? (
+              {modalAction === 'delete' ? (
+                <TrashBinIcon className="w-8 h-8 text-red-600 dark:text-red-400" />
+              ) : modalAction === 'activate' ? (
                 <CheckCircleIcon className="w-8 h-8 text-green-600 dark:text-green-400" />
               ) : (
                 <CloseIcon className="w-8 h-8 text-orange-600 dark:text-orange-400" />
@@ -330,14 +344,18 @@ const DeviceList = () => {
 
           {/* Title */}
           <h3 className="text-xl font-bold text-center text-gray-900 dark:text-white mb-2">
-            {modalAction === 'activate'
+            {modalAction === 'delete'
+              ? "Qurilmani o'chirish"
+              : modalAction === 'activate'
               ? 'Qurilmani faollashtirish'
               : 'Qurilmani faolsizlantirish'}
           </h3>
 
           {/* Description */}
           <p className="text-center text-gray-600 dark:text-gray-400 mb-2">
-            {modalAction === 'activate'
+            {modalAction === 'delete'
+              ? "Haqiqatan ham bu qurilmani butunlay o'chirmoqchimisiz?"
+              : modalAction === 'activate'
               ? "Bu qurilmani faollashtirganingizda, boshqa barcha qurilmalar avtomatik faolsizlantiriladi."
               : 'Haqiqatan ham bu qurilmani faolsizlantirmoqchimisiz?'}
           </p>
@@ -351,6 +369,14 @@ const DeviceList = () => {
           </div>
 
           {/* Warning */}
+          {modalAction === 'delete' && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-6">
+              <p className="text-sm text-red-800 dark:text-red-400">
+                <strong>Diqqat:</strong> Bu amalni ortga qaytarib bo'lmaydi.
+              </p>
+            </div>
+          )}
+
           {modalAction === 'activate' && (
             <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 mb-6">
               <p className="text-sm text-green-800 dark:text-green-400">
@@ -370,12 +396,14 @@ const DeviceList = () => {
             <button
               onClick={handleConfirmAction}
               className={`flex-1 px-4 py-2.5 text-white rounded-lg font-medium transition-colors ${
-                modalAction === 'activate'
+                modalAction === 'delete'
+                  ? 'bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600'
+                  : modalAction === 'activate'
                   ? 'bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600'
                   : 'bg-orange-600 hover:bg-orange-700 dark:bg-orange-700 dark:hover:bg-orange-600'
               }`}
             >
-              {modalAction === 'activate' ? 'Faollashtirish' : 'Faolsizlantirish'}
+              {modalAction === 'delete' ? "O'chirish" : modalAction === 'activate' ? 'Faollashtirish' : 'Faolsizlantirish'}
             </button>
           </div>
         </div>
