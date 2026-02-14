@@ -228,14 +228,14 @@ const DeviceList = () => {
                           {device.role === 'STUDENT' ? 'Student' : device.role === 'TEACHER' ? "O'qituvchi" : 'Admin'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4">
                         <div className="text-sm text-gray-900 dark:text-gray-100 truncate" style={{ maxWidth: '200px' }} title={device.device_name}>
                           {device.device_name}
                         </div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">
                           {device.app_version ? `v${device.app_version}` : ''}
                         </div>
-                        <div className="text-xs text-gray-400 dark:text-gray-500 font-mono truncate" style={{ maxWidth: '200px' }} title={device.device_identifier}>
+                        <div className="text-xs text-gray-400 dark:text-gray-500 font-mono break-all" style={{ maxWidth: '200px' }}>
                           {device.device_identifier}
                         </div>
                       </td>
