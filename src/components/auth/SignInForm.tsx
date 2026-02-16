@@ -31,7 +31,17 @@ const getDeviceInfo = () => {
   // Get or generate device identifier
   let device_identifier = localStorage.getItem('device_uuid');
   if (!device_identifier) {
-    device_identifier = crypto.randomUUID();
+    // Use crypto.randomUUID if available, otherwise fallback
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      device_identifier = crypto.randomUUID();
+    } else {
+      // Fallback UUID generation
+      device_identifier = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
     localStorage.setItem('device_uuid', device_identifier);
   }
   
