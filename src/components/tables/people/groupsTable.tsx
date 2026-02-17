@@ -270,7 +270,7 @@ export default function GroupsTable({
                           {order.timeMinutes && order.timeMinutes > 0
                             ? `${order.timeMinutes}s / Har bir savol uchun`
                             : order.fullTime && order.fullTime > 0
-                            ? `${order.fullTime}s / To'liq test uchun`
+                            ? `${order.fullTime} daqiqa / To'liq test uchun`
                             : ""}
                         </span>
                       </>
