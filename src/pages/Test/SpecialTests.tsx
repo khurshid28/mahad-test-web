@@ -514,9 +514,11 @@ export default function SpecialTestsPage() {
         question_count: questionCount,
         questions: [], // Will be populated after generation or kept empty for editing
         status: editingTest?.status || "pending",
-        ...(timePerQuestion > 0 && { time_per_question: timePerQuestion }),
-        ...(totalTime > 0 && timePerQuestion === 0 && { total_time: totalTime * 60 }), // Convert minutes to seconds
-        ...(timePerQuestion > 0 && { force_next_question: forceNextQuestion }),
+        // Time configuration - ensure one field is set and the other is null
+        ...(timePerQuestion > 0 
+          ? { time_per_question: timePerQuestion, total_time: null, force_next_question: forceNextQuestion } 
+          : { time_per_question: null, total_time: totalTime > 0 ? totalTime * 60 : null, force_next_question: false }
+        ),
       };
 
       console.log('🟢 Test data:', testData);
